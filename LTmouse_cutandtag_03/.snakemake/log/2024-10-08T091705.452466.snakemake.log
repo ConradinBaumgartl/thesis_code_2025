@@ -1,0 +1,903 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job                        count    min threads    max threads
+-----------------------  -------  -------------  -------------
+SEACR                         28              1              1
+all                            1              1              1
+bam_convert                   10              1              1
+bam_coverage_ALL              28              1              1
+bam_coverage_bedgraph         28              1              1
+bam_coverage_rawnumbers       28              1              1
+bam_sort_name                 10              1              1
+bowtie_align                   3              1              1
+filter_bam                    23              1              1
+fixmates                      10              1              1
+insert_size_metrics           28              1              1
+mark_duplicates               12              1              1
+size_bam                      28              1              1
+sort_fixmates                 10              1              1
+total                        247              1              1
+
+Select jobs to execute...
+
+[Tue Oct  8 09:17:07 2024]
+rule filter_bam:
+    input: data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-2_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_2-2-2_liver.FILT.bam.bai
+    jobid: 72
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-2_liver.FILT.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  8 09:17:07 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv/K27ac_2-12-1_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv/K27ac_2-12-1_liver.ALL.bam, data/alignment/cmv/K27ac_2-12-1_liver.ALL.bam.bai
+    jobid: 201
+    reason: Updated input files: data/alignment/cmv/K27ac_2-12-1_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv, sample=K27ac_2-12-1_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  8 09:17:07 2024]
+rule filter_bam:
+    input: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.bam.bai
+    jobid: 135
+    reason: Updated input files: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  8 09:17:08 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-6-3_liver.sam
+    output: data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam
+    jobid: 32
+    reason: Missing output files: data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  8 09:17:09 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.sam
+    output: data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam
+    jobid: 34
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam; Updated input files: data/alignment/cmv/K27ac_2-2-1_liver.sam
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  8 09:17:10 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam
+    jobid: 4
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  8 09:17:11 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv/K27ac_9-12-2_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv/K27ac_9-12-2_liver.ALL.bam, data/alignment/cmv/K27ac_9-12-2_liver.ALL.bam.bai
+    jobid: 229
+    reason: Updated input files: data/alignment/cmv/K27ac_9-12-2_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  8 09:17:13 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam
+    jobid: 8
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam; Updated input files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 09:45:20 2024]
+Finished job 135.
+1 of 247 steps (0.4%) done
+Select jobs to execute...
+
+[Tue Oct  8 09:45:21 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-2-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-2-3_liver.log, data/alignment/cmv/K27ac_9-2-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-2-3_liver.log
+    jobid: 19
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam, data/alignment/cmv/K27ac_9-2-3_liver.sam
+    wildcards: sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 09:46:51 2024]
+Finished job 201.
+2 of 247 steps (1%) done
+Removing temporary output data/alignment/cmv/K27ac_2-12-1_liver.fixmate.sorted.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 09:46:52 2024]
+rule filter_bam:
+    input: data/alignment/cmv/K27ac_2-12-1_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_2-12-1_liver.FILT.bam, data/alignment/cmv/K27ac_2-12-1_liver.FILT.bam.bai
+    jobid: 205
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-1_liver.FILT.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-12-1_liver.ALL.bam
+    wildcards: genome=cmv, sample=K27ac_2-12-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 09:53:48 2024]
+Finished job 229.
+3 of 247 steps (1%) done
+Removing temporary output data/alignment/cmv/K27ac_9-12-2_liver.fixmate.sorted.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 09:53:49 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-12-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-12-3_liver.log, data/alignment/cmv/K27ac_2-12-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-12-3_liver.log
+    jobid: 25
+    reason: Forced execution
+    wildcards: sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 09:57:42 2024]
+Finished job 72.
+4 of 247 steps (2%) done
+Select jobs to execute...
+
+[Tue Oct  8 09:57:42 2024]
+rule size_bam:
+    input: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.bam.bai, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam.bai
+    jobid: 80
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 09:59:10 2024]
+Finished job 205.
+5 of 247 steps (2%) done
+Select jobs to execute...
+
+[Tue Oct  8 09:59:10 2024]
+rule size_bam:
+    input: data/alignment/cmv/K27ac_2-2-2_liver.ALL.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.bam
+    output: data/alignment/cmv/K27ac_2-2-2_liver.SIZE.bam, data/alignment/cmv/K27ac_2-2-2_liver.SIZE.bam.bai, data/alignment/cmv/K27ac_2-2-2_liver.FILT.SIZE.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.SIZE.bam.bai
+    jobid: 171
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-2_liver.SIZE.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.SIZE.bam
+    wildcards: genome=cmv, sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 09:59:39 2024]
+Finished job 171.
+6 of 247 steps (2%) done
+Select jobs to execute...
+
+[Tue Oct  8 09:59:40 2024]
+rule bam_coverage_rawnumbers:
+    input: data/alignment/cmv/K27ac_2-2-2_liver.ALL.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.bam, data/alignment/cmv/K27ac_2-2-2_liver.SIZE.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_2-2-2_liver.ALL.nreads, data/alignment/cmv/K27ac_2-2-2_liver.FILT.nreads, data/alignment/cmv/K27ac_2-2-2_liver.SIZE.nreads, data/alignment/cmv/K27ac_2-2-2_liver.FILT.SIZE.nreads
+    jobid: 165
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-2_liver.ALL.nreads; Input files updated by another job: data/alignment/cmv/K27ac_2-2-2_liver.SIZE.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.SIZE.bam
+    wildcards: genome=cmv, sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 10:00:09 2024]
+Finished job 165.
+7 of 247 steps (3%) done
+Select jobs to execute...
+
+[Tue Oct  8 10:00:10 2024]
+rule size_bam:
+    input: data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.SIZE.bam.bai, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.bam.bai
+    jobid: 143
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 11:49:50 2024]
+Finished job 32.
+8 of 247 steps (3%) done
+Removing temporary output data/alignment/cmv/K27ac_2-6-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 11:49:51 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam
+    output: data/alignment/cmv/K27ac_2-6-3_liver.n_sorted.bam
+    jobid: 148
+    reason: Missing output files: data/alignment/cmv/K27ac_2-6-3_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 12:09:48 2024]
+Finished job 34.
+9 of 247 steps (4%) done
+Removing temporary output data/alignment/cmv/K27ac_2-2-1_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 12:09:49 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam
+    output: data/alignment/cmv/K27ac_2-2-1_liver.n_sorted.bam
+    jobid: 162
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-1_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 12:45:07 2024]
+Finished job 19.
+10 of 247 steps (4%) done
+Select jobs to execute...
+
+[Tue Oct  8 12:45:08 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam
+    jobid: 18
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 13:28:11 2024]
+Finished job 148.
+11 of 247 steps (4%) done
+Select jobs to execute...
+
+[Tue Oct  8 13:28:12 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam
+    jobid: 39
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-2-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 13:45:00 2024]
+Finished job 4.
+12 of 247 steps (5%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 13:45:03 2024]
+rule fixmates:
+    input: data/alignment/cmv/K27ac_2-6-3_liver.n_sorted.bam
+    output: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.tmp
+    jobid: 147
+    reason: Missing output files: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.tmp; Input files updated by another job: data/alignment/cmv/K27ac_2-6-3_liver.n_sorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 13:56:37 2024]
+Finished job 25.
+13 of 247 steps (5%) done
+Select jobs to execute...
+
+[Tue Oct  8 13:56:37 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam
+    jobid: 24
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 13:59:10 2024]
+Finished job 162.
+14 of 247 steps (6%) done
+Select jobs to execute...
+
+[Tue Oct  8 13:59:10 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-12-3_liver.sam
+    output: data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam
+    jobid: 42
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-12-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 14:25:51 2024]
+Finished job 8.
+15 of 247 steps (6%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 14:25:52 2024]
+rule fixmates:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.n_sorted.bam
+    output: data/alignment/cmv/K27ac_2-2-1_liver.fixmate.tmp
+    jobid: 161
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-1_liver.fixmate.tmp; Input files updated by another job: data/alignment/cmv/K27ac_2-2-1_liver.n_sorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 14:26:20 2024]
+Finished job 147.
+16 of 247 steps (6%) done
+Removing temporary output data/alignment/cmv/K27ac_2-6-3_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 14:26:22 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.tmp
+    output: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.sorted.tmp
+    jobid: 146
+    reason: Missing output files: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.sorted.tmp; Input files updated by another job: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.tmp
+    wildcards: genome=cmv, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 15:14:00 2024]
+Finished job 161.
+17 of 247 steps (7%) done
+Removing temporary output data/alignment/cmv/K27ac_2-2-1_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 15:14:02 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.fixmate.tmp
+    output: data/alignment/cmv/K27ac_2-2-1_liver.fixmate.sorted.tmp
+    jobid: 160
+    reason: Input files updated by another job: data/alignment/cmv/K27ac_2-2-1_liver.fixmate.tmp
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 15:56:18 2024]
+Finished job 146.
+18 of 247 steps (7%) done
+Removing temporary output data/alignment/cmv/K27ac_2-6-3_liver.fixmate.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 15:56:19 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv/K27ac_2-6-3_liver.ALL.bam, data/alignment/cmv/K27ac_2-6-3_liver.ALL.bam.bai
+    jobid: 145
+    reason: Missing output files: data/alignment/cmv/K27ac_2-6-3_liver.ALL.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-6-3_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 16:42:18 2024]
+Finished job 160.
+19 of 247 steps (8%) done
+Removing temporary output data/alignment/cmv/K27ac_2-2-1_liver.fixmate.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 16:42:19 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv/K27ac_2-2-1_liver.ALL.bam, data/alignment/cmv/K27ac_2-2-1_liver.ALL.bam.bai
+    jobid: 159
+    reason: Input files updated by another job: data/alignment/cmv/K27ac_2-2-1_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 16:43:45 2024]
+Finished job 39.
+20 of 247 steps (8%) done
+Removing temporary output data/alignment/cmv/K27ac_9-2-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 16:43:47 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.n_sorted.bam
+    jobid: 64
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 17:02:19 2024]
+Finished job 145.
+21 of 247 steps (9%) done
+Removing temporary output data/alignment/cmv/K27ac_2-6-3_liver.fixmate.sorted.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 17:02:20 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.n_sorted.bam
+    jobid: 50
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 17:18:56 2024]
+Finished job 42.
+22 of 247 steps (9%) done
+Removing temporary output data/alignment/cmv/K27ac_2-12-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 17:18:56 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam
+    output: data/alignment/cmv/K27ac_2-12-3_liver.n_sorted.bam
+    jobid: 218
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-3_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 17:36:47 2024]
+Finished job 18.
+23 of 247 steps (9%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 17:36:51 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.n_sorted.bam
+    jobid: 99
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 17:58:32 2024]
+Finished job 159.
+24 of 247 steps (10%) done
+Removing temporary output data/alignment/cmv/K27ac_2-2-1_liver.fixmate.sorted.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 17:58:33 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam
+    output: data/alignment/cmv/K27ac_9-2-3_liver.n_sorted.bam
+    jobid: 197
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-3_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 18:28:00 2024]
+Finished job 218.
+25 of 247 steps (10%) done
+Select jobs to execute...
+
+[Tue Oct  8 18:28:00 2024]
+rule fixmates:
+    input: data/alignment/cmv/K27ac_2-12-3_liver.n_sorted.bam
+    output: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.tmp
+    jobid: 217
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.tmp; Input files updated by another job: data/alignment/cmv/K27ac_2-12-3_liver.n_sorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 18:39:27 2024]
+Finished job 64.
+26 of 247 steps (11%) done
+Select jobs to execute...
+
+[Tue Oct  8 18:39:27 2024]
+rule fixmates:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.n_sorted.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.tmp
+    jobid: 63
+    reason: Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-1_liver.n_sorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 18:42:47 2024]
+Finished job 24.
+27 of 247 steps (11%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  8 18:42:49 2024]
+rule bam_sort_name:
+    input: data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.n_sorted.bam
+    jobid: 120
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.n_sorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 18:57:31 2024]
+Finished job 50.
+28 of 247 steps (11%) done
+Select jobs to execute...
+
+[Tue Oct  8 18:57:32 2024]
+rule fixmates:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.n_sorted.bam
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.tmp
+    jobid: 49
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.tmp; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-6-3_liver.n_sorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 19:06:05 2024]
+Finished job 217.
+29 of 247 steps (12%) done
+Removing temporary output data/alignment/cmv/K27ac_2-12-3_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 19:06:06 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.tmp
+    output: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.sorted.tmp
+    jobid: 216
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.sorted.tmp; Input files updated by another job: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.tmp
+    wildcards: genome=cmv, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 19:07:38 2024]
+Finished job 197.
+30 of 247 steps (12%) done
+Select jobs to execute...
+
+[Tue Oct  8 19:07:38 2024]
+rule fixmates:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.n_sorted.bam
+    output: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.tmp
+    jobid: 196
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.tmp; Input files updated by another job: data/alignment/cmv/K27ac_9-2-3_liver.n_sorted.bam
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 19:23:06 2024]
+Finished job 99.
+31 of 247 steps (13%) done
+Select jobs to execute...
+
+[Tue Oct  8 19:23:06 2024]
+rule fixmates:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.n_sorted.bam
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.tmp
+    jobid: 98
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.tmp; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-3_liver.n_sorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 19:42:44 2024]
+Finished job 196.
+32 of 247 steps (13%) done
+Removing temporary output data/alignment/cmv/K27ac_9-2-3_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 19:42:45 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.tmp
+    output: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.sorted.tmp
+    jobid: 195
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.sorted.tmp; Input files updated by another job: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.tmp
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 19:52:52 2024]
+Finished job 63.
+33 of 247 steps (13%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-1_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 19:52:54 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.tmp
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.sorted.tmp
+    jobid: 62
+    reason: Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.tmp
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 19:58:50 2024]
+Finished job 143.
+34 of 247 steps (14%) done
+Select jobs to execute...
+
+[Tue Oct  8 19:58:52 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.H, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.H, data/alignment/cmv_mouse/K27ac_9-12-3_liver.SIZE.H, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.H, data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.histogram, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.histogram, data/alignment/cmv_mouse/K27ac_9-12-3_liver.SIZE.histogram, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.histogram
+    jobid: 255
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.histogram; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 20:04:26 2024]
+Finished job 49.
+35 of 247 steps (14%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-6-3_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 20:04:27 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.tmp
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.sorted.tmp
+    jobid: 48
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.sorted.tmp; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.tmp
+    wildcards: genome=cmv_mouse, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 20:25:43 2024]
+Finished job 98.
+36 of 247 steps (15%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-3_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 20:25:44 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.tmp
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.sorted.tmp
+    jobid: 97
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.sorted.tmp; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.tmp
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 20:39:00 2024]
+Finished job 216.
+37 of 247 steps (15%) done
+Removing temporary output data/alignment/cmv/K27ac_2-12-3_liver.fixmate.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 20:39:02 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv/K27ac_2-12-3_liver.ALL.bam, data/alignment/cmv/K27ac_2-12-3_liver.ALL.bam.bai
+    jobid: 215
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-3_liver.ALL.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-12-3_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 20:47:41 2024]
+Finished job 120.
+38 of 247 steps (15%) done
+Select jobs to execute...
+
+[Tue Oct  8 20:47:42 2024]
+rule fixmates:
+    input: data/alignment/cmv_mouse/K27ac_2-12-3_liver.n_sorted.bam
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.fixmate.tmp
+    jobid: 119
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.fixmate.tmp; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-12-3_liver.n_sorted.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 20:51:10 2024]
+Finished job 80.
+39 of 247 steps (16%) done
+Select jobs to execute...
+
+[Tue Oct  8 20:51:10 2024]
+rule bam_coverage_rawnumbers:
+    input: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.nreads, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.nreads, data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.nreads, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.nreads
+    jobid: 74
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.nreads; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 20:53:14 2024]
+Finished job 74.
+40 of 247 steps (16%) done
+Select jobs to execute...
+
+[Tue Oct  8 20:53:15 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bedgraph
+    jobid: 307
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bedgraph; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 21:06:52 2024]
+Finished job 195.
+41 of 247 steps (17%) done
+Removing temporary output data/alignment/cmv/K27ac_9-2-3_liver.fixmate.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 21:06:53 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv/K27ac_9-2-3_liver.ALL.bam, data/alignment/cmv/K27ac_9-2-3_liver.ALL.bam.bai
+    jobid: 194
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-3_liver.ALL.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-2-3_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 21:50:21 2024]
+Finished job 48.
+42 of 247 steps (17%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 21:50:21 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bam.bai
+    jobid: 47
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv_mouse, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 21:50:29 2024]
+Finished job 119.
+43 of 247 steps (17%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-3_liver.n_sorted.bam.
+Select jobs to execute...
+
+[Tue Oct  8 21:50:30 2024]
+rule sort_fixmates:
+    input: data/alignment/cmv_mouse/K27ac_2-12-3_liver.fixmate.tmp
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.fixmate.sorted.tmp
+    jobid: 118
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.fixmate.sorted.tmp; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-12-3_liver.fixmate.tmp
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 21:53:27 2024]
+Finished job 62.
+44 of 247 steps (18%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 21:53:28 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bam.bai
+    jobid: 61
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:00:23 2024]
+Finished job 97.
+45 of 247 steps (18%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 22:00:24 2024]
+rule mark_duplicates:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.sorted.tmp
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bam.bai
+    jobid: 96
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.sorted.tmp
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:00:49 2024]
+Finished job 215.
+46 of 247 steps (19%) done
+Removing temporary output data/alignment/cmv/K27ac_2-12-3_liver.fixmate.sorted.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 22:00:50 2024]
+rule filter_bam:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_9-12-3_liver.FILT.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.bam.bai
+    jobid: 240
+    reason: Updated input files: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bam
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:22:32 2024]
+Finished job 194.
+47 of 247 steps (19%) done
+Removing temporary output data/alignment/cmv/K27ac_9-2-3_liver.fixmate.sorted.tmp.
+Select jobs to execute...
+
+[Tue Oct  8 22:22:34 2024]
+rule filter_bam:
+    input: data/alignment/cmv/K27ac_9-12-2_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_9-12-2_liver.FILT.bam, data/alignment/cmv/K27ac_9-12-2_liver.FILT.bam.bai
+    jobid: 233
+    reason: Input files updated by another job: data/alignment/cmv/K27ac_9-12-2_liver.ALL.bam
+    wildcards: genome=cmv, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:23:34 2024]
+Finished job 307.
+48 of 247 steps (19%) done
+Select jobs to execute...
+
+[Tue Oct  8 22:23:35 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.H, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.H, data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.H, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.H, data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.histogram, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.histogram, data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.histogram, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.histogram
+    jobid: 246
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.histogram; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:30:48 2024]
+Finished job 240.
+49 of 247 steps (20%) done
+Select jobs to execute...
+
+[Tue Oct  8 22:30:49 2024]
+rule size_bam:
+    input: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-2_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.SIZE.bam.bai, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.SIZE.bam.bai
+    jobid: 136
+    reason: Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:39:02 2024]
+Finished job 233.
+50 of 247 steps (20%) done
+Select jobs to execute...
+
+[Tue Oct  8 22:39:02 2024]
+rule size_bam:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.bam
+    output: data/alignment/cmv/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.bam.bai, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bam.bai
+    jobid: 241
+    reason: Input files updated by another job: data/alignment/cmv/K27ac_9-12-3_liver.FILT.bam
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:39:30 2024]
+Finished job 241.
+51 of 247 steps (21%) done
+Select jobs to execute...
+
+[Tue Oct  8 22:39:31 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.bam, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_9-12-3_liver.ALL.H, data/alignment/cmv/K27ac_9-12-3_liver.FILT.H, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.H, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.H, data/alignment/cmv/K27ac_9-12-3_liver.ALL.histogram, data/alignment/cmv/K27ac_9-12-3_liver.FILT.histogram, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.histogram, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.histogram
+    jobid: 269
+    reason: Input files updated by another job: data/alignment/cmv/K27ac_9-12-3_liver.FILT.bam, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:40:34 2024]
+Finished job 269.
+52 of 247 steps (21%) done
+Select jobs to execute...
+
+[Tue Oct  8 22:40:35 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bedgraph
+    jobid: 353
+    reason: Input files updated by another job: data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bam
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:41:57 2024]
+Finished job 353.
+53 of 247 steps (21%) done
+Select jobs to execute...
+
+[Tue Oct  8 22:41:57 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_9-12-3_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 352
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-3_liver.ALL.SEACR.stringent.bed; Input files updated by another job: data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bedgraph, data/alignment/cmv/K27ac_9-12-3_liver.ALL.bedgraph
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  8 22:55:21 2024]
+Finished job 47.
+54 of 247 steps (22%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-6-3_liver.fixmate.sorted.tmp.
+[Tue Oct  8 22:59:17 2024]
+Finished job 96.
+55 of 247 steps (22%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-3_liver.fixmate.sorted.tmp.
+[Tue Oct  8 23:03:13 2024]
+Finished job 61.
+56 of 247 steps (23%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.sorted.tmp.
+[Tue Oct  8 23:10:56 2024]
+Finished job 118.
+57 of 247 steps (23%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-3_liver.fixmate.tmp.
+[Tue Oct  8 23:18:17 2024]
+Finished job 255.
+58 of 247 steps (23%) done
+[Tue Oct  8 23:54:42 2024]
+Finished job 246.
+59 of 247 steps (24%) done
+[Wed Oct  9 00:02:53 2024]
+Finished job 136.
+60 of 247 steps (24%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2024-10-08T091705.452466.snakemake.log

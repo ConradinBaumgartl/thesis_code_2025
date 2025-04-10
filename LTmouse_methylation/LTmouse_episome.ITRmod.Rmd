@@ -1,0 +1,278 @@
+
+# Why
+
+Dirk has mentioned the point that people have seen (i) ITRs being hypermethlyted by bisulfite sequencing and (ii) removing CpGs from the ITRs has resulted in less innate immune response.
+
+I do not see particularly high methylations through nanopore sequencing, but I have not looked in detail. Here I want to look in detail.
+
+# Plan
+
+Align all reads to _only_ the ITR first. The ITR sequence I am using is the sequence as it appears on our production plasmids, once the left handed ITR (itr01_left) and once the right hand one (itr01_right).
+
+As another step I could align to different subparts of the ITR, to get an idea about the recombination process.
+
+Addendum:
+Figuring out which part of the ITR is still present after recombination is not as easy as it seems. I can not align to the short fragments of the ITRs (D-sequence, B-loop, etc) because the reference sequence is too small in that case. I think the thing that might work is using all nanopore reads as a reference and aligning the ITR sub-parts to the reference as queries? I will try that in a different file: *LTmouse_episome.ITRalign.Rmd*
+
+
+# Alignment full ITR
+
+```{bash}
+reference=genomes/itr.01.fasta
+
+dorado aligner $reference data/reb/LTmouse.LengthFiltered.bam \
+  --emit-summary \
+  -t 16 \
+  --output-dir data/aligned.ITR/
+  
+dorado demux data/aligned.ITR/ --no-classify -o data/aligned.ITR/demux/ -t 16
+
+```
+
+
+## Renaming
+
+```{bash}
+declare -A barcode_dict=(
+  ["barcode01"]="2_2_1"
+  ["barcode02"]="2_2_2"
+  ["barcode03"]="2_2_3"
+  ["barcode04"]="2_2_4"
+  ["barcode05"]="9_2_1"
+  ["barcode06"]="9_2_2"
+  ["barcode07"]="9_2_3"
+  ["barcode08"]="9_2_4"
+  ["barcode09"]="2_6_1"
+  ["barcode10"]="2_6_2"
+  ["barcode11"]="2_6_3"
+  ["barcode12"]="2_6_4"
+  ["barcode13"]="9_6_1"
+  ["barcode14"]="9_6_2"
+  ["barcode15"]="9_6_3"
+  ["barcode16"]="9_6_4"
+  ["barcode17"]="2_12_1"
+  ["barcode18"]="2_12_2"
+  ["barcode19"]="2_12_3"
+  ["barcode20"]="2_12_4"
+  ["barcode21"]="9_12_1"
+  ["barcode22"]="9_12_2"
+  ["barcode23"]="9_12_3"
+  ["barcode24"]="9_12_4"
+)
+for key in ${!barcode_dict[@]}
+do
+  infile=data/aligned.ITR/demux/SQK-NBD114-24_${key}.bam
+  outfile=data/aligned.ITR/demux/${barcode_dict[$key]}.unfiltered.bam
+  mv $infile $outfile
+  samtools index $outfile
+done
+samtools index data/aligned.ITR/demux/unclassified.bam
+```
+
+## Processing 
+
+* Remove unmapped reads and supp alignments
+
+* get stats
+
+* tabulate modification data
+
+```{bash}
+
+for file in data/aligned.ITR/demux/*.unfiltered.bam
+do
+  # remove unmapped and supp
+  samtools view -@ 12 -b -F 2308 $file > ${file/unfiltered/filt}
+  samtools index ${file/unfiltered/filt}
+  rm $file ${file/.bam/.bam.bai}
+  
+  # stats
+  samtools idxstats -@ 8 ${file/unfiltered/filt} > ${file/unfiltered.bam/filt.nreads}
+  
+  # combine the calls for 5mC and 5hmC because bisulfite sequencing can also not differentiate between the 2
+  modbam2bed \
+    --aggregate \
+    --combine \
+    --cpg \
+    --extended \
+    -t 16 \
+    $reference ${file/unfiltered/filt} > ${file/unfiltered.bam/filt.modbed}
+done
+
+```
+
+
+## methylation
+
+
+### plots
+
+Only look at AAV9 because AAV2 often does not have any alignment.
+
+As in the other experiments where I use the methlytation information from dorado and modbam2bed, I heavily rely on the score characteristic. I end up filtering all CpGs with a score of below 800. In my data the score is most affected by filtered reads, that are filtered because of their low confidence CpG call.
+
+```{r}
+library(tidyverse)
+
+df_itrs <- lapply(list.files("data/aligned.ITR/demux/", pattern = "9.*\\.modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned.ITR/demux/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1])
+  return(tmp)
+}) %>% bind_rows() %>% 
+  separate(name, c("capsid", "weeks", "replicate")) %>% 
+  select(-c("x1", "x2", "x3")) %>% 
+  dplyr::filter(capsid != "unclassified") %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+df_itrs %>% head()
+
+df_itrs %>% 
+  group_by(chr, replicate, capsid, weeks, strand) %>% 
+  summarise(n = n())
+
+df_itrs %>% 
+  group_by(chr, start, capsid, weeks) %>% 
+  summarise(coverage = mean(total_coverage)) %>% 
+  ggplot(aes(x=coverage)) +
+  geom_histogram(binwidth=1)
+```
+
+There are 16 CpGs respectively in both ITR sequences. From every replicate I get data for all of them on both strands.
+
+
+In the data below I can see that there is basically no alignment to the D-sequence (probably removed during recombination). This is not the best way of doing the alignment but it is the one I can do the easiest. I do not think that separating the references into all different combinations of possible ITRs will change much about the picture.
+
+
+```{r}
+df_itrs %>% dplyr::filter(score > 800) %>% unite("Sample", c(chr, weeks, replicate)) %>% count(Sample)
+
+  
+df_itrs %>%
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=weeks, y=perc_modified)) +
+  geom_boxplot() +
+  facet_wrap(~chr)
+
+df_itrs %>%
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=weeks, y=perc_modified)) +
+  geom_boxplot() +
+  ggtitle("Low methylation on ITR")
+
+df_itrs %>% dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=start, y=total_coverage, color=replicate)) +
+  geom_point() +
+  facet_grid(weeks~chr) +
+  ggtitle("coverage differences")
+
+df_itrs %>% 
+  ggplot(aes(x=start, y=perc_modified, color=replicate)) +
+  geom_line() +
+  facet_grid(weeks~chr) +
+  ggtitle("no score filtering")
+
+df_itrs %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=start, y=perc_modified, color=replicate)) +
+  geom_line() +
+  facet_grid(weeks~chr) +
+  ggtitle("with score filtering")
+```
+
+ITR methylation more or less mirrors the methylation I have on the rest of the transgene. Very low levels that slowly increase towards the later timepoints. The variation is probably attributable to coverage differences.
+
+
+
+### also add R9 meteore data and EM-seq data
+
+```{r}
+library(MetBrewer)
+
+meteore_ITR <- read_csv("~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/scripts/meteore_ONT_plot_thesis.csv") %>% 
+  dplyr::filter(annotation == "ITR")
+
+EMseq_ITR <- read_csv("~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/results/CpG_MD.csv")
+
+EMseq_bg <- EMseq_ITR %>% 
+  dplyr::filter(chr == "Lambda_NEB") %>% 
+  pull(fraction) %>% mean()
+
+ONT_background <- 6
+
+EMseq_ITR_annotated <- EMseq_ITR%>% 
+  dplyr::filter(chr == "AAV_genome", treatment == "R") %>% 
+  mutate(annotation = NA) %>% 
+  mutate(annotation = ifelse(genome == "CMV" & start > 2000 & start < 2140 & is.na(annotation), "ITR", annotation)) %>% 
+  mutate(annotation = ifelse(genome == "LP1" & start > 2000 & start < 2140 & is.na(annotation), "ITR", annotation)) %>% 
+  mutate(annotation = ifelse(genome == "GFAP" & start > 2000 & start < 2140 & is.na(annotation), "ITR", annotation)) %>% 
+  mutate(annotation = ifelse(genome == "CMV" & start > 5900 & start < 6040 & is.na(annotation), "ITR", annotation)) %>% 
+  mutate(annotation = ifelse(genome == "LP1" & start > 6070 & start < 6210 & is.na(annotation), "ITR", annotation)) %>% 
+  mutate(annotation = ifelse(genome == "GFAP" & start > 5510 & start < 5650 & is.na(annotation), "ITR", annotation)) %>% 
+  drop_na()
+
+
+r9r10 <-bind_rows(
+  meteore_ITR %>% 
+    select(AAV, start, replicate, tool, Methylation) %>% 
+    mutate(chemistry = "R9", weeks = "2 weeks p.i.", capsid = "8") %>% 
+    group_by(AAV, start, chemistry, weeks, capsid) %>% 
+    summarise(Methylation = median(Methylation)) %>% 
+    mutate(background = ONT_background),
+  EMseq_ITR_annotated %>% 
+    mutate(AAV = genome, tool = "EM-seq", Methylation = fraction, replicate = mouse, weeks = "2 weeks p.i.", capsid = "8") %>% 
+    select(AAV, start, replicate, tool, Methylation, weeks, capsid) %>% 
+    mutate(chemistry = "EM-seq", background = EMseq_bg),
+  df_itrs %>%
+    dplyr::filter(score > 800) %>% 
+    mutate(AAV = "CMV", Methylation = perc_modified, tool="dorado") %>% 
+    select(AAV, start, replicate, tool, Methylation, weeks, capsid) %>% 
+    mutate(chemistry = "R10", background = ONT_background)
+) %>% 
+  mutate(
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    chemistry = factor(chemistry, levels = c("EM-seq", "R9", "R10")),
+    logFC = log2(Methylation / background))
+```
+
+### Plot with all data together
+
+```{r}
+library(ggpubr)
+
+f <- function(y){
+    c(label=length(y), y=median(y))}
+
+
+r10 <- r9r10 %>% 
+  dplyr::filter(chemistry == "R10") %>% 
+  ggplot(aes(x=weeks, y=Methylation, fill=AAV)) +
+  geom_boxplot() +
+  geom_jitter(position = position_jitterdodge(jitter.height = %>% %>%  0, jitter.width = .1)) +
+  ylab("methylation %") +
+  stat_compare_means(comparisons = list(c("2 weeks p.i.", "6 weeks p.i."), c("2 weeks p.i.", "12 weeks p.i."))) + 
+  scale_fill_met_d("Juarez") +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle= 45, hjust = 1))
+ggsave("plots/ITRmethylation/R10.allweeks.png", width = 6, height = 4, dpi = 200, plot=r10)
+ggsave("plots/ITRmethylation/R10.allweeks.svg", width = 6, height = 4, dpi = 200, plot=r10)
+
+emseqr9r10 <- r9r10 %>% 
+  dplyr::filter(weeks == "2 weeks p.i.") %>% 
+  ggplot(aes(x=chemistry, y=logFC, fill=AAV)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot() +
+  geom_jitter(position = position_jitterdodge(jitter.height = 0, jitter.width = .1)) +
+  stat_summary(fun.data=f, geom = "text", position = position_dodge(.9), vjust=-10) +
+  ylab("logFC methylation against negative control") +
+  scale_fill_met_d("Juarez") +
+  theme_bw() +
+  theme(text = element_text(size = 15))
+ggsave("plots/ITRmethylation/EMseq.R9.R10.2weeks.png", width = 6, height = 4, dpi = 200, plot = emseqr9r10)
+ggsave("plots/ITRmethylation/EMseq.R9.R10.2weeks.svg", width = 6, height = 4, dpi = 200, plot = emseqr9r10)
+
+
+ggarrange(r10, emseqr9r10, nrow=1, widths = c(6, 4))
+ggsave("plots/ITRmethylation/figure.png", width = 10, height = 5, dpi = 300)
+ggsave("plots/ITRmethylation/figure.svg", width = 10, height = 5, dpi = 300)
+
+```

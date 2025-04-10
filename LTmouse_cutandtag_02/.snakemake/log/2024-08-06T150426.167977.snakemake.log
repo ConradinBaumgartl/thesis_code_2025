@@ -1,0 +1,70 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 2
+Rules claiming more threads will be scaled down.
+Job stats:
+job                        count    min threads    max threads
+-----------------------  -------  -------------  -------------
+all                            1              1              1
+bam_convert                    8              1              1
+bam_coverage_ALL               8              1              1
+bam_coverage_rawnumbers        8              1              1
+bam_sort_name                  8              1              1
+bamqc_ALL                      8              1              1
+bowtie_align                   4              1              1
+fastqc                         1              1              1
+filter_bam                     8              1              1
+fixmates                       8              1              1
+mark_duplicates                8              1              1
+multiqc                        1              1              1
+size_bam                       8              1              1
+sort_fixmates                  8              1              1
+total                         87              1              1
+
+Select jobs to execute...
+
+[Tue Aug  6 15:04:27 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_961_liver_R1.fastq.gz, data/raw_data/K27ac_961_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_961_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_961_liver.log, data/alignment/cmv/K27ac_961_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_961_liver.log
+    jobid: 28
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.sam, data/alignment/cmv_mouse/K27ac_961_liver.sam
+    wildcards: sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Aug  6 15:04:27 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_962_liver_R1.fastq.gz, data/raw_data/K27ac_962_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_962_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_962_liver.log, data/alignment/cmv/K27ac_962_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_962_liver.log
+    jobid: 37
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.sam, data/alignment/cmv/K27ac_962_liver.sam
+    wildcards: sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+Terminating processes on user request, this might take some time.
+[Tue Aug  6 15:08:22 2024]
+[Tue Aug  6 15:08:22 2024]
+Error in rule bowtie_align:
+    jobid: 28
+    input: data/raw_data/K27ac_961_liver_R1.fastq.gz, data/raw_data/K27ac_961_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_961_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_961_liver.log, data/alignment/cmv/K27ac_961_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_961_liver.log
+    shell:
+        
+        bowtie2 --sensitive-local --no-mixed --no-discordant -p 4 -x ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.bowtie2 -1 data/raw_data/K27ac_961_liver_R1.fastq.gz -2 data/raw_data/K27ac_961_liver_R2.fastq.gz -S data/alignment/cmv_mouse/K27ac_961_liver.sam &> data/alignment/cmv_mouse/bowtie2_logs/K27ac_961_liver.log
+        bowtie2 --sensitive-local --no-mixed --no-discordant -p 4 -x ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04.bowtie2 -1 data/raw_data/K27ac_961_liver_R1.fastq.gz -2 data/raw_data/K27ac_961_liver_R2.fastq.gz -S data/alignment/cmv/K27ac_961_liver.sam &> data/alignment/cmv/bowtie2_logs/K27ac_961_liver.log
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error in rule bowtie_align:
+    jobid: 37
+    input: data/raw_data/K27ac_962_liver_R1.fastq.gz, data/raw_data/K27ac_962_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_962_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_962_liver.log, data/alignment/cmv/K27ac_962_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_962_liver.log
+    shell:
+        
+        bowtie2 --sensitive-local --no-mixed --no-discordant -p 4 -x ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.bowtie2 -1 data/raw_data/K27ac_962_liver_R1.fastq.gz -2 data/raw_data/K27ac_962_liver_R2.fastq.gz -S data/alignment/cmv_mouse/K27ac_962_liver.sam &> data/alignment/cmv_mouse/bowtie2_logs/K27ac_962_liver.log
+        bowtie2 --sensitive-local --no-mixed --no-discordant -p 4 -x ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04.bowtie2 -1 data/raw_data/K27ac_962_liver_R1.fastq.gz -2 data/raw_data/K27ac_962_liver_R2.fastq.gz -S data/alignment/cmv/K27ac_962_liver.sam &> data/alignment/cmv/bowtie2_logs/K27ac_962_liver.log
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Cancelling snakemake on user request.

@@ -1,0 +1,12 @@
+>A
+tggccactccctctctgcgcgctcgctcgctcactgaggc
+>D
+AGGAACCCCTAGTGATGGAGT
+>C-loop
+CGCCCGGGCAAAGCCCGGGCG
+>B-loop
+CGGGCGACCAAAGGTCGCCCG
+>flank_stuffer
+ggtaagccgctggcaagcggtgaagtgcctctggatgtcgctccacaagg
+>flank_cmv
+gacattgattattgactagttattaatagtaatcaattacggggtcatta

@@ -1,0 +1,157 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count    min threads    max threads
+---------------------  -------  -------------  -------------
+SEACR                        8              1              1
+all                          1              1              1
+bam_coverage_bedgraph        8              1              1
+total                       17              1              1
+
+Select jobs to execute...
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.bedgraph
+    jobid: 97
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.bedgraph
+    jobid: 99
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.bedgraph
+    jobid: 101
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.bedgraph
+    jobid: 103
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.bam, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_261_liver.ALL.bedgraph, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.bedgraph
+    jobid: 105
+    reason: Missing output files: data/alignment/cmv/K27ac_261_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.bam, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_262_liver.ALL.bedgraph, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.bedgraph
+    jobid: 107
+    reason: Missing output files: data/alignment/cmv/K27ac_262_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.bam, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_961_liver.ALL.bedgraph, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.bedgraph
+    jobid: 109
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:40 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.bam, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_962_liver.ALL.bedgraph, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.bedgraph
+    jobid: 111
+    reason: Missing output files: data/alignment/cmv/K27ac_962_liver.FILT.SIZE.bedgraph; Set of input files has changed since last execution; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:45 2024]
+Finished job 105.
+1 of 17 steps (6%) done
+Select jobs to execute...
+
+[Wed Sep  4 11:46:45 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.bedgraph, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_261_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 104
+    reason: Missing output files: data/alignment/cmv/K27ac_261_liver.ALL.SEACR.stringent.bed; Input files updated by another job: data/alignment/cmv/K27ac_261_liver.ALL.bedgraph, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.bedgraph
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:45 2024]
+Finished job 107.
+2 of 17 steps (12%) done
+Select jobs to execute...
+
+[Wed Sep  4 11:46:45 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.bedgraph, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_262_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 106
+    reason: Missing output files: data/alignment/cmv/K27ac_262_liver.ALL.SEACR.stringent.bed; Input files updated by another job: data/alignment/cmv/K27ac_262_liver.FILT.SIZE.bedgraph, data/alignment/cmv/K27ac_262_liver.ALL.bedgraph
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:46 2024]
+Finished job 111.
+3 of 17 steps (18%) done
+Select jobs to execute...
+
+[Wed Sep  4 11:46:46 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.bedgraph, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_962_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 110
+    reason: Missing output files: data/alignment/cmv/K27ac_962_liver.ALL.SEACR.stringent.bed; Input files updated by another job: data/alignment/cmv/K27ac_962_liver.FILT.SIZE.bedgraph, data/alignment/cmv/K27ac_962_liver.ALL.bedgraph
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 11:46:46 2024]
+Finished job 109.
+4 of 17 steps (24%) done
+Select jobs to execute...
+
+[Wed Sep  4 11:46:46 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.bedgraph, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_961_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 108
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.ALL.SEACR.stringent.bed; Input files updated by another job: data/alignment/cmv/K27ac_961_liver.ALL.bedgraph, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.bedgraph
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Wed Sep  4 13:27:56 2024]
+Finished job 99.
+5 of 17 steps (29%) done
+[Wed Sep  4 13:31:10 2024]
+Finished job 101.
+6 of 17 steps (35%) done
+[Wed Sep  4 13:40:35 2024]
+Finished job 97.
+7 of 17 steps (41%) done
+[Wed Sep  4 13:42:28 2024]
+Finished job 103.
+8 of 17 steps (47%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2024-09-04T114639.000477.snakemake.log

@@ -1,0 +1,44 @@
+```{r}
+library(tidyverse)
+```
+
+```{r}
+pl <- read_delim("coverage.csv") %>% 
+  gather(-c(genome, replicate), value="value", key="feature") %>% 
+  mutate(replicate = as.character(replicate))
+
+pl %>% 
+  mutate(
+    feature = factor(feature, levels = c("number_reads", "mapped_bases", "mean coverage")),
+    value = ifelse(feature == "mapped_bases", value / 1e6, value)
+    ) %>% 
+  ggplot(aes(x=genome, y=value, label = round(value, 1))) +
+  geom_bar(stat="summary", width=.5) +
+  geom_point() +
+  geom_text(position=position_dodge(.9), vjust = 1.5) +
+  facet_wrap(~feature, scales = "free") +
+  theme_bw() +
+  theme(text = element_text(size =15))
+ggsave("coverage.meteore.thesis.png", width = 8, height = 4)
+ggsave("coverage.meteore.thesis.svg", width = 8, height = 4)
+
+
+```
+
+
+
+```{r}
+read_ONT_summary <- function(path){
+  f <- read_delim(path) %>% 
+    select(read_id, sequence_length_template, mean_qscore_template, barcode_arrangement)
+  return(f)
+}
+
+
+sum_run2 <- read_ONT_summary("data/raw_data/run2/20221221_1904_MN37870_FAV82147_3bdca4d0/sequencing_summary_FAV82147_4b510c30.txt")
+
+sum_run2 %>% 
+  ggplot(aes(x=sequence_length_template)) +
+  geom_histogram(binwidth = 1) +
+  xlim(0, 10000)
+```

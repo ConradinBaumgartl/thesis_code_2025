@@ -1,0 +1,146 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 12
+Rules claiming more threads will be scaled down.
+Job stats:
+job                        count    min threads    max threads
+-----------------------  -------  -------------  -------------
+SEACR                         28              1              1
+all                            1              1              1
+bam_convert                   28              1              1
+bam_coverage_ALL              28              1              1
+bam_coverage_bedgraph         28              1              1
+bam_coverage_rawnumbers       28              1              1
+bam_sort_name                 28              1              1
+bowtie_align                  14              1              1
+filter_bam                    28              1              1
+fixmates                      28              1              1
+insert_size_metrics           28              1              1
+mark_duplicates               28              1              1
+size_bam                      28              1              1
+sort_fixmates                 28              1              1
+total                        351              1              1
+
+Select jobs to execute...
+
+[Wed Oct  2 13:58:21 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-12-2_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-2_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-12-2_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-12-2_liver.log, data/alignment/cmv/K27ac_9-12-2_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-12-2_liver.log
+    jobid: 29
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-2_liver.sam, data/alignment/cmv/K27ac_9-12-2_liver.sam
+    wildcards: sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:22 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-12-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-12-3_liver.log, data/alignment/cmv/K27ac_9-12-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-12-3_liver.log
+    jobid: 31
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-3_liver.sam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam
+    wildcards: sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:22 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-6-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-6-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-6-3_liver.log, data/alignment/cmv/K27ac_2-6-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-6-3_liver.log
+    jobid: 5
+    reason: Missing output files: data/alignment/cmv/K27ac_2-6-3_liver.sam, data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam
+    wildcards: sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:22 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-6-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-6-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-6-3_liver.log, data/alignment/cmv/K27ac_9-6-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-6-3_liver.log
+    jobid: 7
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam, data/alignment/cmv/K27ac_9-6-3_liver.sam
+    wildcards: sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:23 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-2-1_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-1_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-2-1_liver.log, data/alignment/cmv/K27ac_2-2-1_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-2-1_liver.log
+    jobid: 9
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam, data/alignment/cmv/K27ac_2-2-1_liver.sam
+    wildcards: sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:29 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-2-2_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-2_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-2-2_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-2-2_liver.log, data/alignment/cmv/K27ac_2-2-2_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-2-2_liver.log
+    jobid: 11
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-2_liver.sam, data/alignment/cmv/K27ac_2-2-2_liver.sam
+    wildcards: sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:30 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-2-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-2-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-2-3_liver.log, data/alignment/cmv/K27ac_2-2-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-2-3_liver.log
+    jobid: 13
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-3_liver.sam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.sam
+    wildcards: sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:31 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-2-1_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-1_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-2-1_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-2-1_liver.log, data/alignment/cmv/K27ac_9-2-1_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-2-1_liver.log
+    jobid: 15
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-1_liver.sam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.sam
+    wildcards: sample=K27ac_9-2-1_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:31 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-12-1_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-1_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-12-1_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-12-1_liver.log, data/alignment/cmv/K27ac_2-12-1_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-12-1_liver.log
+    jobid: 21
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-1_liver.sam, data/alignment/cmv_mouse/K27ac_2-12-1_liver.sam
+    wildcards: sample=K27ac_2-12-1_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:32 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-12-2_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-2_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-12-2_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-12-2_liver.log, data/alignment/cmv/K27ac_2-12-2_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-12-2_liver.log
+    jobid: 23
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-2_liver.sam, data/alignment/cmv_mouse/K27ac_2-12-2_liver.sam
+    wildcards: sample=K27ac_2-12-2_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:33 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-12-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-12-3_liver.log, data/alignment/cmv/K27ac_2-12-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-12-3_liver.log
+    jobid: 25
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam, data/alignment/cmv/K27ac_2-12-3_liver.sam
+    wildcards: sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 13:58:34 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-12-1_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-1_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-12-1_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-12-1_liver.log, data/alignment/cmv/K27ac_9-12-1_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-12-1_liver.log
+    jobid: 27
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-1_liver.sam, data/alignment/cmv_mouse/K27ac_9-12-1_liver.sam
+    wildcards: sample=K27ac_9-12-1_liver
+    resources: tmpdir=/tmp
+
+Terminating processes on user request, this might take some time.
+Cancelling snakemake on user request.

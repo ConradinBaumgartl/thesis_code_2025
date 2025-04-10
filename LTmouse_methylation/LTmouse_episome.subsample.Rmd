@@ -1,0 +1,303 @@
+# Subsample
+
+It is hard to discern differences between the AAV2 and AAV9 samples because they have vastly different numbers of aligned reads. Subsample them all to a similar amount of reads.
+
+## reference
+```{bash}
+reference=genomes/pPl04.linearized.fasta
+```
+
+## Pooled to AAV2 level (30 reads)
+
+The lowest number of reads is 30 for the AAV2 mice after 12 weeks.
+
+```{bash}
+# do the subsampling 5 times; the number is also the seed for random sampling at the same time
+for i in {1..10}
+do
+  for file in data/aligned_pooled/*.complete.nreads
+  do
+    bname=$(basename $file)
+    nreads=$(awk '{ if($1 == "pPl04_linearized") print $3 }' $file)
+    sample_perc=$(bc -l <<< "30/"${nreads})
+    
+    inbam=${file/.nreads/.bam}
+    outbam=data/aligned_pooled/subsampled/${bname/.nreads/}.${i}.bam
+    
+    samtools view -b -s ${i}${sample_perc} $inbam > $outbam
+    samtools index $outbam
+    samtools idxstats $outbam> ${outbam/.bam/.nreads}
+    
+    
+    modbam2bed \
+      --aggregate \
+      --combine \
+      --cpg \
+      --extended \
+      -t 16 \
+      $reference $outbam > ${outbam/.bam/.modbed}
+  done
+done
+
+```
+
+### number of reads info
+
+```{r}
+nreads <- lapply(list.files("data/aligned_pooled/subsampled/", pattern = ".10.nreads"), function(x){
+  name <- str_split(x, "\\.")[[1]][1]
+  subsample_rep <- str_split(x, "\\.")[[1]][3]
+  tmp <- read_delim(paste0("data/aligned_pooled/subsampled/", x), col_names = c("chr", "size", "reads", "umapped_reads")) %>% 
+    mutate(sample = name, subrep = subsample_rep)
+  return(tmp)
+}) %>% bind_rows() %>% 
+  filter(sample != "unclassified", chr == "pPl04_linearized") %>% 
+  separate(sample, c("AAV", "weeks")) %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."),  weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+nreads %>% 
+  ggplot(aes(x=AAV, y=reads, fill=AAV, label=reads)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  geom_text(vjust = -0.1) +
+  facet_wrap(~weeks)
+
+
+```
+
+
+### alignment info
+
+
+```{bash}
+aln_bases_out='data/aligned_pooled/subsampled/aligned_bases.csv'
+touch $aln_bases_out
+for file in data/aligned_pooled/subsampled/*.bam
+do
+  samtools stats $file | grep ^RL > ${file/.bam/.hist}
+  alnbases=$(samtools stats $file | grep "bases mapped (cigar):" | awk '{print $5}')
+  f=$(basename $file)
+  echo ${alnbases},${f/.bam/} >> $aln_bases_out
+done
+```
+
+
+```{r}
+path <- "data/aligned_pooled/subsampled/"
+hist <- lapply(list.files(path, pattern=".10.hist"), function(file){
+  tmp <- read_delim(paste0(path, file), col_names = c("field", "length", "count"))
+  
+  read_counts <- c()
+  counts <- pull(tmp, count)
+  lengths <- pull(tmp, length)
+  for (i in seq(nrow(tmp))){
+    for (j in seq(counts[i])){
+      read_counts <- append(read_counts, lengths[i])
+    }
+  }
+  
+  out <- tibble(read_counts) %>% 
+    mutate(sample = str_split(file, "\\.")[[1]][1], subrep = str_split(file, "\\.")[[1]][3]) %>% 
+    separate(sample, c("capsid", "weeks")) %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+    dplyr::filter(capsid != "unclassified")
+  return(out)
+}) %>% bind_rows()
+
+hist %>% 
+  ggplot(aes(x=read_counts, fill=capsid)) +
+  geom_histogram(binwidth=100) +
+  facet_grid(capsid~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+hist %>% 
+  ggplot(aes(x=read_counts, fill=capsid)) +
+  geom_density() +
+  facet_grid(capsid~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+```
+
+
+
+```{r}
+cov <- read_csv("data/aligned_pooled/subsampled/aligned_bases.csv", col_names = c("aligned_bases", "sample")) %>% 
+  separate(sample, c("sample", "x1", "subreplicate"), "\\.") %>% 
+  separate(sample, c("capsid", "weeks")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    coverage = aligned_bases / 4133
+    ) %>% 
+  dplyr::filter(capsid != "unclassified", subreplicate == "10")
+
+
+cov %>% 
+  ggplot(aes(x=capsid, y=coverage, fill=capsid, label=round(coverage, 1))) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  geom_text(vjust = -0.1)
+  ggtitle("subsampled coverage")
+
+```
+
+
+## Only AAV9 all replicates to AAV9-12weeks level (50 reads)
+
+```{bash}
+# do the subsampling 5 times; the number is also the seed for random sampling at the same time
+for i in {1..10}
+do
+  for file in data/aligned_demux/9*.nreads
+  do
+    bname=$(basename $file)
+    nreads=$(awk '{ if($1 == "pPl04_linearized") print $3 }' $file)
+    sample_perc=$(bc -l <<< "50/"${nreads})
+    
+    inbam=${file/.nreads/.bam}
+    outbam=data/aligned_demux/aav9_subsampled/${bname/.nreads/}.${i}.bam
+    
+    samtools view -b -s ${i}${sample_perc} $inbam > $outbam
+    samtools index $outbam
+    samtools idxstats $outbam> ${outbam/.bam/.nreads}
+    
+    modbam2bed \
+      --aggregate \
+      --combine \
+      --cpg \
+      --extended \
+      -t 16 \
+      $reference $outbam > ${outbam/.bam/.modbed}
+  done
+done
+```
+
+## Only AAV9 pooled to AAV9-12weeks levels (300 reads)
+
+```{bash}
+# do the subsampling 5 times; the number is also the seed for random sampling at the same time
+for i in {1..10}
+do
+  for file in data/aligned_pooled/9_*.complete.nreads
+  do
+    bname=$(basename $file)
+    nreads=$(awk '{ if($1 == "pPl04_linearized") print $3 }' $file)
+    sample_perc=$(bc -l <<< "300/"${nreads})
+    
+    inbam=${file/.nreads/.bam}
+    outbam=data/aligned_pooled/aav9_subsampled/${bname/.nreads/}.${i}.bam
+    
+    samtools view -b -s ${i}${sample_perc} $inbam > $outbam
+    samtools index $outbam
+    samtools idxstats $outbam> ${outbam/.bam/.nreads}
+    
+    modbam2bed \
+      --aggregate \
+      --combine \
+      --cpg \
+      --extended \
+      -t 16 \
+      $reference $outbam > ${outbam/.bam/.modbed}
+  done
+done
+```
+
+### number of reads info
+
+```{r}
+nreads <- lapply(list.files("data/aligned_pooled/aav9_subsampled/", pattern = ".2.nreads"), function(x){
+  name <- str_split(x, "\\.")[[1]][1]
+  subsample_rep <- str_split(x, "\\.")[[1]][3]
+  tmp <- read_delim(paste0("data/aligned_pooled/aav9_subsampled/", x), col_names = c("chr", "size", "reads", "umapped_reads")) %>% 
+    mutate(sample = name, subrep = subsample_rep)
+  return(tmp)
+}) %>% bind_rows() %>% 
+  filter(sample != "unclassified", chr == "pPl04_linearized") %>% 
+  separate(sample, c("AAV", "weeks")) %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."),  weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+nreads %>% 
+  ggplot(aes(x=AAV, y=reads, fill=AAV, label=reads)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  scale_fill_manual(values = c("#e28743")) +
+  geom_text(vjust = -0.1) +
+  facet_wrap(~weeks)
+
+
+```
+### alignment info
+
+
+```{bash}
+aln_bases_out='data/aligned_pooled/aav9_subsampled/aligned_bases.csv'
+touch $aln_bases_out
+for file in data/aligned_pooled/aav9_subsampled/*.bam
+do
+  samtools stats $file | grep ^RL > ${file/.bam/.hist}
+  alnbases=$(samtools stats $file | grep "bases mapped (cigar):" | awk '{print $5}')
+  f=$(basename $file)
+  echo ${alnbases},${f/.bam/} >> $aln_bases_out
+done
+```
+
+
+```{r}
+path <- "data/aligned_pooled/aav9_subsampled/"
+hist <- lapply(list.files(path, pattern=".2.hist"), function(file){
+  tmp <- read_delim(paste0(path, file), col_names = c("field", "length", "count"))
+  
+  read_counts <- c()
+  counts <- pull(tmp, count)
+  lengths <- pull(tmp, length)
+  for (i in seq(nrow(tmp))){
+    for (j in seq(counts[i])){
+      read_counts <- append(read_counts, lengths[i])
+    }
+  }
+  
+  out <- tibble(read_counts) %>% 
+    mutate(sample = str_split(file, "\\.")[[1]][1], subrep = str_split(file, "\\.")[[1]][3]) %>% 
+    separate(sample, c("capsid", "weeks")) %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+    dplyr::filter(capsid != "unclassified")
+  return(out)
+}) %>% bind_rows()
+
+hist %>% 
+  ggplot(aes(x=read_counts, fill=capsid)) +
+  geom_histogram(binwidth=100) +
+  facet_grid(capsid~weeks) +
+  scale_fill_manual(values = c("#e28743"))
+
+hist %>% 
+  ggplot(aes(x=read_counts, fill=capsid)) +
+  geom_density() +
+  facet_grid(capsid~weeks) +
+  scale_fill_manual(values = c("#e28743"))
+
+```
+
+
+
+```{r}
+cov <- read_csv("data/aligned_pooled/aav9_subsampled/aligned_bases.csv", col_names = c("aligned_bases", "sample")) %>% 
+  separate(sample, c("sample", "x1", "subreplicate"), "\\.") %>% 
+  separate(sample, c("capsid", "weeks")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    coverage = aligned_bases / 4133
+    ) %>% 
+  dplyr::filter(capsid != "unclassified", subreplicate == "2")
+
+
+cov %>% 
+  ggplot(aes(x=capsid, y=coverage, fill=capsid, label=round(coverage, 1))) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(~weeks) +
+  scale_fill_manual(values = c("#e28743")) +
+  geom_text(vjust = -0.1)
+  ggtitle("subsampled coverage")
+
+```

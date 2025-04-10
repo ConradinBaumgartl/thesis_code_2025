@@ -1,0 +1,103 @@
+```{r}
+library(tidyverse)
+```
+
+
+Read the perCG-combstrand files from the METEORE pipeline and convert them to bedgraph files.
+
+Only keep the Methlyation calls for the CpGs of samples that are aligned to their "correct" genome.
+
+```{r}
+guppy <- lapply(list.files("~/sds-hd/sd21j005/conradin//METEORE/guppy_results/", pattern = "_guppy-freq-perCG-combStrand"), function(x){
+  read_tsv(paste0("~/sds-hd/sd21j005/conradin/METEORE/guppy_results/", x)) %>% 
+    mutate(sample = strsplit(x, "_guppy-freq-perCG-combStrand.tsv")[[1]])
+}) %>% bind_rows() %>% 
+  separate(Chr, c("aligned_prom", "aligned_genomedescr")) %>% 
+  separate(sample, c("tissue", "promoter", "replicate")) %>% 
+  dplyr::filter(aligned_prom == promoter) %>% 
+  unite("Chr", c(aligned_prom, aligned_genomedescr)) %>%
+  mutate(Methylation = Methylation * 100)
+
+
+for (target in c("liver", "met", "nat")){
+  for (replicate_n in c("01", "02")){
+    guppy %>% 
+      filter(replicate == replicate_n, tissue == target) %>% 
+      select(Chr, Pos_start, Pos_end, Methylation) %>% 
+      write_delim(paste0("../results/guppy/METEORE_guppy_", target, "_",  replicate_n, ".bedgraph"), col_names = FALSE)
+  }
+}
+```
+
+
+```{r}
+deepsignal <- lapply(
+  list.files("~/sds-hd/sd21j005/conradin/METEORE/deepsignal_results/", pattern = "_deepsignal-freq-perCG-combStrand.tsv", recursive = F),
+  function(x){
+    tmp_df <- read_delim(paste0("~/sds-hd/sd21j005/conradin/METEORE/deepsignal_results/", x)) %>% 
+      type.convert(as.is = TRUE) %>% 
+      mutate(sample = strsplit(x, split = "_deepsignal-freq-perCG-combStrand.tsv")[[1]])
+    return(tmp_df)
+  }) %>% bind_rows() %>%
+  separate(Chr, c("aligned_prom", "aligned_genomedescr")) %>% 
+  separate(sample, c("tissue", "promoter", "replicate")) %>% 
+  dplyr::filter(aligned_prom == promoter) %>% 
+  unite("Chr", c(aligned_prom, aligned_genomedescr)) %>%mutate(Methylation = Methylation * 100)
+
+for (target in c("liver", "met", "nat")){
+  for (replicate_n in c("01", "02")){
+    deepsignal %>% 
+      filter(replicate == replicate_n, tissue == target) %>% 
+      select(Chr, Pos_start, Pos_end, Methylation) %>% 
+      write_delim(paste0("../results/deepsignal/METEORE_deepsignal_", target, "_",  replicate_n, ".bedgraph"), col_names = FALSE)
+  }
+}
+```
+
+
+
+```{r}
+megalodon <- lapply(list.dirs("~/sds-hd/sd21j005/conradin/METEORE/megalodon_results_single/", recursive = F), function(x){
+  sample_name=basename(x)
+  read_tsv(paste0(x, "/", sample_name, "_megalodon-freq-perCG-combStrand.tsv")) %>%
+    mutate(sample = sample_name)
+}) %>% bind_rows() %>% 
+  separate(Chr, c("aligned_prom", "aligned_genomedescr")) %>% 
+  separate(sample, c("tissue", "promoter", "replicate")) %>% 
+  dplyr::filter(aligned_prom == promoter) %>% 
+  unite("Chr", c(aligned_prom, aligned_genomedescr))
+
+for (target in c("liver", "met", "nat")){
+  for (replicate_n in c("01", "02")){
+    megalodon %>% 
+      filter(replicate == replicate_n, tissue == target) %>% 
+      select(Chr, Pos_start, Pos_end, Methylation) %>% 
+      write_delim(paste0("../results/megalodon/METEORE_megalodon_", target, "_",  replicate_n, ".bedgraph"), col_names = FALSE)
+  }
+}
+```
+
+
+```{r}
+nanopolish <- lapply(
+  list.files(path = "~/sds-hd/sd21j005/conradin/METEORE/nanopolish_results/", pattern = "combStrand"),
+  function(x){
+    read_tsv(paste0("~/sds-hd/sd21j005/conradin//METEORE/nanopolish_results/", x)) %>% 
+      mutate(sample = strsplit(basename(x), "_nanopolish-freq-perCG-combStrand.tsv")[[1]])
+  }) %>% bind_rows %>%
+  separate(Chr, c("aligned_prom", "aligned_genomedescr")) %>% 
+  separate(sample, c("tissue", "promoter", "replicate")) %>% 
+  dplyr::filter(aligned_prom == promoter) %>% 
+  unite("Chr", c(aligned_prom, aligned_genomedescr)) %>% 
+  mutate(Methylation = Methylation * 100)
+
+for (target in c("liver", "met", "nat")){
+  for (replicate_n in c("01", "02")){
+    nanopolish %>% 
+      filter(replicate == replicate_n, tissue == target) %>% 
+      select(Chr, Pos_start, Pos_end, Methylation) %>% 
+      write_delim(paste0("../results/nanopolish/METEORE_nanopolish_", target, "_",  replicate_n, ".bedgraph"), col_names = FALSE)
+  }
+}
+```
+

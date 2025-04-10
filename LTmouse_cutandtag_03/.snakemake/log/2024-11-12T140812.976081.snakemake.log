@@ -1,0 +1,218 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 16
+Rules claiming more threads will be scaled down.
+Job stats:
+job                      count    min threads    max threads
+---------------------  -------  -------------  -------------
+all                          1              1              1
+bam_coverage_bedgraph       16              1              1
+total                       17              1              1
+
+Select jobs to execute...
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-3_liver.FILT.SIZE.bedgraph
+    jobid: 91
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-6-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-6-3_liver.FILT.SIZE.bedgraph
+    jobid: 1
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-1_liver.FILT.SIZE.bedgraph
+    jobid: 46
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.ALL.bam, data/alignment/cmv/K27ac_9-2-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_9-2-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-2-3_liver.FILT.SIZE.bedgraph
+    jobid: 183
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-3_liver.ALL.bedgraph
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_2-12-2_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-12-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-12-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-2_liver.FILT.SIZE.bedgraph
+    jobid: 82
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-2_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_9-12-2_liver.ALL.bam, data/alignment/cmv/K27ac_9-12-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_9-12-2_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-2_liver.FILT.SIZE.bedgraph
+    jobid: 223
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-2_liver.ALL.bedgraph
+    wildcards: genome=cmv, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-2_liver.FILT.SIZE.bedgraph
+    jobid: 28
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_2-12-1_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-12-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-12-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-1_liver.FILT.SIZE.bedgraph
+    jobid: 73
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-1_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-3_liver.FILT.SIZE.bedgraph
+    jobid: 118
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-1_liver.FILT.SIZE.bedgraph
+    jobid: 19
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-2-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-3_liver.FILT.SIZE.bedgraph
+    jobid: 64
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.SIZE.bedgraph
+    jobid: 109
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.ALL.bam, data/alignment/cmv/K27ac_2-2-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_2-2-1_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-2-1_liver.FILT.SIZE.bedgraph
+    jobid: 143
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-1_liver.ALL.bedgraph
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_9-12-1_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-12-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-1_liver.FILT.SIZE.bedgraph
+    jobid: 100
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-1_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_9-6-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-6-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-6-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-6-3_liver.FILT.SIZE.bedgraph
+    jobid: 10
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-6-3_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:14 2024]
+rule bam_coverage_bedgraph:
+    input: data/alignment/cmv_mouse/K27ac_9-2-2_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-2-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-2-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-2_liver.FILT.SIZE.bedgraph
+    jobid: 55
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-2_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 14:08:33 2024]
+Finished job 183.
+1 of 17 steps (6%) done
+[Tue Nov 12 14:08:37 2024]
+Finished job 223.
+2 of 17 steps (12%) done
+[Tue Nov 12 14:08:38 2024]
+Finished job 143.
+3 of 17 steps (18%) done
+[Tue Nov 12 16:38:11 2024]
+Finished job 73.
+4 of 17 steps (24%) done
+[Tue Nov 12 16:47:22 2024]
+Finished job 82.
+5 of 17 steps (29%) done
+[Tue Nov 12 16:48:48 2024]
+Finished job 10.
+6 of 17 steps (35%) done
+[Tue Nov 12 16:50:58 2024]
+Finished job 109.
+7 of 17 steps (41%) done
+[Tue Nov 12 17:18:23 2024]
+Finished job 55.
+8 of 17 steps (47%) done
+[Tue Nov 12 17:23:49 2024]
+Finished job 46.
+9 of 17 steps (53%) done
+[Tue Nov 12 17:25:35 2024]
+Finished job 118.
+10 of 17 steps (59%) done
+[Tue Nov 12 17:27:46 2024]
+Finished job 64.
+11 of 17 steps (65%) done
+[Tue Nov 12 17:28:10 2024]
+Finished job 91.
+12 of 17 steps (71%) done
+[Tue Nov 12 17:28:11 2024]
+Finished job 28.
+13 of 17 steps (76%) done
+[Tue Nov 12 17:29:04 2024]
+Finished job 100.
+14 of 17 steps (82%) done
+[Tue Nov 12 17:30:27 2024]
+Finished job 1.
+15 of 17 steps (88%) done
+[Tue Nov 12 17:31:35 2024]
+Finished job 19.
+16 of 17 steps (94%) done
+Select jobs to execute...
+
+[Tue Nov 12 17:31:35 2024]
+localrule all:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-6-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-6-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-6-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-2-1_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-2-2_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-2-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-2-1_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-2-2_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-2-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-12-1_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-12-2_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-12-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-1_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-2_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-3_liver.ALL.bedgraph
+    jobid: 0
+    reason: Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-6-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_2-12-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-2-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-1_liver.ALL.bedgraph, data/alignment/cmv/K27ac_2-2-1_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bedgraph
+    resources: tmpdir=/tmp
+
+[Tue Nov 12 17:31:35 2024]
+Finished job 0.
+17 of 17 steps (100%) done
+Complete log: .snakemake/log/2024-11-12T140812.976081.snakemake.log

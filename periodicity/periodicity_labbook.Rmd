@@ -1,0 +1,2556 @@
+# premise
+
+## Di-nucleotide periodicity
+
+Periodically repeating patterns in DNA have been known for 50+ years. Tandem repeats are characterized by a short motif of up to 60 nucleotides being repeated several times right after each other. When I am writing about periodicity here I am not referring to tandem repeats, tandemly arrayed genes, or transposons. Here, I am referring to di-nucleotide repeats such as they have been originally discovered in SV40 and eukaryotic genomic DNA by Trifonov in 1980. He proposed that the shape of the DNA helix is dependent on the stacked basepairs, hence the same basestack appearing on the same side of the helix can introduce a bend. I had previously found periodicity on Adenovirus genomes (dsDNA), which is very likely to affect the shape of the genome inside of the capsid. Out of curiosity I also checked the ssDNA AAV genomes.
+
+There is a strong periodicity of dinucleotide YY in all 13 AAV serotypes. Individually YY seems to repeat every 7.5 times along the genome, but when combining all distances of all AAV genomes together, the 15 bp periodicity prevails and the 7.5 fizzles out.
+
+The research on DNA periodicity has been exclusively been restricted to dsDNA helices. There is nothing know about what such a periodicity might mean for ssDNA. Maybe it is only important in the lysogenic cycle of the virus, where it persists as dsDNA? Maybe it aids or hampers the formation of chromatin on it? Maybe there is a function of this periodicity in ssDNA that is not known. Does it help the ssDNA compact like an accordion? Is it a specifically enhanced binding affinity for ssDNA binding proteins, that are necessary for viral replication? There is evidence that a specific sequence at the cap 3'-end is enhancing viral replication, termed protein X. However, it is disputed if it is actually a protein (see . Might be non-coding RNA or a cis-acting factor.
+
+## Hypotheses
+
+The dependoparvovirus periodicity at 15bp is far removed from other periodicities around 10bp. This is really really interesting. The main difference of dependoparvovirus from the other sequences I have analyzed is its dependent or quasi-virophage nature. It needs another virus to enter into its own lytic cycle. Maybe dependoparvoviruses have evolved this different periodicity because (i) AAV is known to package different DNA and (ii) during co-infection there is presumably a lot of other nucleic acids floating around that are also looking to be packaged. Maybe the different periodicity acts as a signal of AAV DNA to be preferentially packaged. Maybe an additional packaging signal complementing the one from the ITRs?
+
+It would be really interesting to look at other dependent viruses or so called virophages.
+
+## Capsid DNA interactions
+
+There is evidence of the genome interacting with the capsid.
+
+In many structures of filled capsids, there is a distinct density in a binding pocket located near the threefold axis attributable to dAMP (sometimes only purine nucleotides), sometimes a dAMP+dCMP dinucleotide. This binding pocket is filled regardless of the packaged genome ( wt, GFP, luciferase ). It is dependent on the pH, not being resolved when the pH is lowered (endosome), thus it may have implications for the stabilisation of the capsid.
+
+## Calculation of dinucleotide periodicity
+
+The calculation is simple in theory.
+
+1. Get the indices of the dinuc of interest along the genome(s)
+
+2. Calculate a distance matrix from all indices
+
+2.a. This can result in a very large matrix for large genomes. Therefore i split larger genomes into 10kb pieces.
+
+2.b. Only retain distances under a threshold, e.g. 100. The larger distances are not interesting.
+
+3. Calculate a Histogram from the distances
+
+4. Smooth the histogram by calculating the mean of a 3bp window across it. The overarching periodicity in coding sequences is based on 3bp and the RNY repeat. I am taking this step to remove this influence.
+
+5. To make the resulting lines comparable to each other and enhance signals that are far from the mean, I subtract a background window of either 7 or 10 from the smoothed line.
+
+6. To check this line for periodicity in a mathematical way, I employ welch's method, which calculates a smoothed periodogram for the signal in order to minimize noise. A periodogram utilizes a fast-fourier-transform to describe and measures the impact a certain frequency has in explaining the data. A frequency is easily turned into its respective period.
+
+# Computational part
+
+## Dinucleotide periodicity in other viruses
+
+I know there is a periodicity in AAV and in Adenoviruses. Is this something we can find in all viruses? Maybe there is a correlation of some viruses with others. Where is the periodicity stronger? What makes for a strong periodicity?
+
+### Dinucleotide frequencies
+
+### Periodicity
+
+#### Fourier
+
+See scripts/Periodicity.Rmd
+
+I have written different versions of Sebastian's script.
+
+#### Sine curve fitting
+
+I have found this to be a better option than Fourier for periodicity estimation. See scripts/Periodicity2_sinecurve.Rmd
+
+### MD simulations
+
+to be done by Erik Poppleton
+
+## ASGCT 2024 recommendations
+
+### Helicase
+
+Both Gernot and Lauriel Earley suggested the Helicase interaction of viral DNA to be facilitated with the periodicity. 
+
+Maybe there is also a difference between different helicase families and the underlying periodicity. Most viral helicases are in the SF3 superfamily. The Rep helicases stand out through them posessing an origin binding domain, capable of terminal resolution (Zarate-perez, 2012). Another thing is that usually helicases are multimeric (hexameric) and form a ring. However there are examples of monomeric and dimeric helicases aswell.
+
+## Dinucleotide periodicity enrichment in AAV productions
+
+### Teng Kidney and Muscle
+
+During AAV shuffling you produce a plethora of AAV sequences that may contain the dinucleotide pattern differently pronounced (unterschiedlich starke Ausprägung) and they might get enriched during AAV packaging and maybe also selection. It was Felix' idea to check existing datasets if that is the case.
+
+To this end I can use Teng's vast collection of sequencing data, in particular from the kidney/muscle study.
+
+The file m64368e_220905_134654.hifi_reads with barcode ACCAGAAGA contains the sequenced plasmid library used to create viral particles several times. Here I look at a library that was done for screening in muscle and in kidney. It contains the shuffled cap genes of serotypes 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, rh10, rh74, and Po1.
+
+The viral particles (particles 0) for muscle are in file m64368e_221220_104920.hifi_reads with barcode TATGAAAGA. These were injected into monkeys and cap sequences were rescued from the muscle.
+
+The viral particles that were generated from the muscle-rescued capsids are in m64368e_221014_124659.hifi_reads with barcode GAATACAGA (particles 1).
+
+Another part of the _same_ particles 0 library was sequenced and injected into NHPs for kidney selection under the same file (m64368e_221220_104920.hifi_reads) with barcode ACCAGAAGA
+
+### Distance histograms and Periodogram
+
+The data was generated with the shuffling_enrichment_periodicity.Rmd.
+
+First, it takes a long time to analyse the dinucleotide pattern in the all sequences, and second, they are all different numbers of sequences anyways. I decided to subsample every file 5 times at 500 reads each. This was done after removing identical duplicates. Getting duplicates after virus generation is somewhat expected and vouches for that sequence's ability to package, but I wanted to get a general idea of the sequences present in the different samples and the different steps. The fact that 5 times sampling 500 sequences gets me close to the same result everytime is very reassuring.
+
+The parental sequences are the complete sequences of the parental sequences from above. The parental_cap500 sequences are the cap sequences from the 13 used serotypes, repeated 40 times to get to 480 total sequences, and thus comparable to the 500 sampled sequences.
+
+```{r}
+library(tidyverse)
+
+hist_master <- read_csv("../shuffling_enrichment_teng/hist_master.csv") %>% 
+  mutate(replicate = as.character(replicate))
+
+period_master <- read_csv("../shuffling_enrichment_teng/period_master.csv") %>% 
+  mutate(
+    replicate = as.character(replicate),
+    period_round = round(period, 1)) %>% 
+  group_by(dinucleotide, step, replicate, period_round) %>% 
+  summarise(spec_round = mean(spec))
+
+ggplot(hist_master, aes(x=distance, y=norm_counts, unit = replicate, color = step)) +
+  geom_line(lwd=.5, alpha=1) +
+  xlim(0, 50) +
+  facet_wrap(~dinucleotide, scales="free_y") +
+  scale_color_brewer(palette = "Set1")
+
+ggplot(period_master, aes(x=period_round, y=spec_round, color=step, unit=replicate)) +
+  geom_line(lwd=1, alpha=.5) +
+  xlim(0, 50) +
+  facet_wrap(~dinucleotide, scales = "free_y") +
+  scale_color_brewer(palette = "Set1")
+```
+This computation is based on both orientations of the used sequences, hence YY can be interpreted as the YY/RR periodicity. They are inherently complementary: a YY dinucleotide is an RR on the complementary strand.
+
+It is interesting to see that the YY/RR periodicity is on the same level for the parental cap sequences and for the plasmid library. Upon the first production periodicity increases which is mainly to be attributed to the increased peak size at ~30 and ~43 distance in the distance histogram. This periodicity is however lost again when the cap sequences are resuced from muscle tissue and produced again, possibly because then there are different selection pressures that push the capsids back to the parental level. A well producing capsid is not necessarily a well transducing one and vice versa. There are multiple examples of well transducing vectors that do not produce well at all (7mte?? retina, inner ear).
+
+This would be an example for the genomic sequence indeed having an impact on packaging, however my 96-well productions show something different indeed. Maybe this is only visible near packaging capacity?
+
+It is unclear whether the capsid or the genome is the reason for its increased finding.
+
+This is also only an example from a single production.
+
+### Extended shuffling experiment
+
+In my second TAC meeting on 1.9.2023, Benedigt Brors suggested a sort of library and see which sequences package best in AAV capsids. This is a great idea. Here is the plan:
+
+
+#### Shuffled caps only packaging selection
+
+One the one hand, similar to what I did with Teng's shuffled libraries, I want to shuffle a lot of AAV serotypes and select mainly for well packaging cap sequences and look at the dinucleotide periodicities in the sequences that accumulate. 
+
+1. shuffle sequences from cap genes and ligate into ITR/REP containing acceptor plasmid to create a plasmid library
+
+2. PacBio sequencing of the shuffled cap genes (ShLibrary_input)
+
+3. Production with dual infection of plasmid library with AdH
+
+4. Purify the virus
+
+5. rescue cap gene from the purified virus and re-ligate it into the acceptor plasmid
+
+6. sequence the packaged library sequences (PLib_P1)
+
+Repeat once steps 3-6 to get PLib_P2
+
+
+#### Shuffled caps packaging and transduction selection
+
+On the other hand, we I want to use the same library from step 1 and 2 from above and do the following:
+
+3. Production with dual infection of plasmid library with AdH
+
+4. Purify the virus
+
+5. Rescue cap from part of the virus library and sequence (TLib_P1)
+
+6. Transduce hard to transduce cells (MEF?)
+
+7. rescue the cap and re-ligate it into the acceptor plasmid and sequence (TLib_T1)
+
+Repeat once steps 3-7 to get TLib_P2 and TLib_T2
+
+#### Random sequences
+
+The 2 approaches I have sketched above are limited in their applicability to DNA periodicity. Sure, in Teng's library it looks like the periodicity increases after production and is lost again upon transduction. It is however not discernible if this is because of the periodicity of the transgene or the nature of the cap gene it encodes. Even though I believe it is a bit of both, potential reviewers might be more skeptical.
+
+Felix's idea is the randomization of an inert piece of DNA, preferrably 4.8kb and its amplification in an error-prone PCR in order to introduce as many mutations as possible.
+
+To do this, we first need to re-establish the error-prone PCR in the lab. I would start with Taq polymerase and the supplied buffer and incrementally increase the Mg and Mn concentration.
+
+0. Set the correct conditions for a really erroneous amplification that still works and gives DNA of the correct length
+
+1. Amplify a 4.8 kb stretch off of lambda DNA with extensive error-prone PCR
+
+2. Ligate into acceptor plasmids (only ITR) and PacBio sequencing of the library (ErrLibrary_Input)
+
+3. produce the virus with a triple transfection and normal AAV2 rep/cap
+
+4. purifiy the virus
+
+5. rescue from purified virus and ligate into acceptor plasmid -> sequence (ELib_P1)
+
+Repeat steps 3-5 to get ELib_P2
+
+# Experimental part
+
+## Dinucleotide containing vectors
+
+To test what effect the dinucleotide pattern might have on AAV packaged DNA, I created different stuffer DNAs in a vector expressing GFP from a CMV with a stuffer with a kanamycin resistance sequence.
+
+### Design
+
+I used the jupyter notebook Kana_period.ipynb to modify a stuffer sequence inside of a vector genome to have a certain periodicity. It iterates through existing YY dinucleotides and _sometimes_ changes the dinucleotide 15bp away to another YY. This is looped a couple of times through the sequence, both for YY and RR.
+
+There is a major drawback for this method; there is no way of knowing if that is actually the nature of the pattern that is can measure. It is what I had initially observed, but in hindsight I should have concentrated on creating an anticorrelation of YY and RR and additionally maybe SS and WW. Even better would have been to use a part of inert wildtype genome, and then step-wise removing existing YY dinucleotides. There you have to trouble of possible recombination happening between the WH and your transgene, which might revert some of the inert AAV parts back to being functional, which then could turn to more rep or cap being expressed and thus the titer being affected.
+
+The final sequences are in *projects/period/scripts/old.autocorrelation_dinucs/sequences*
+
+There are 3 different genomes now all expressing GFP from CMV:
+
+* One control genome with a stuffer containing kanamycin resistance; GFPKana (K)
+
+* One genome only having the YY periodicity; GFPYY (YY, Y)
+
+* One genome having both YY and RR periodicity; GFPYYRR (RRYY, RR, R)
+
+The modified stuffer DNA was ordered as a G-block and cloned into the GFPKana plasmid.
+
+#### update on wt fragment
+
+The WT dual transfection can not be compared to the triple transfection with recombinant genomes. Therefore I decided to combine fragments of the AAV2 rep (~300 bp) and AAV2 cap (~1400 bp), both of which do not contain any full coding sequences, or promoter regions. Combined these 2 fragments are about 1800 bps (same length as the stuffer sequences above).
+
+*Problem*
+
+The problem with the WT fragment from above is that it contains a part of the X-gene from AAV. The X-gene has a described function in increased AAV genome replication. Other studies have doubted its existence. The study from Ogden et al. has shown that a start codon mutation of proteinX has no negative effect on packaging, hinting at it not being a functional protein. It might still be possible that there is a non-coding RNA in the region, but a search for non-coding RNA of AAV has revealed nothing. I will create a WT fragment without the proposed X gene in it.
+
+## Dinuc vectors New Design
+
+I want to ultilize the entire 4.8 kb packaging limit. Maybe the interior pressure of the DNA against the luminal side of the capsid is integral.
+
+### Lambda fragment
+
+I have designed primers to amplify a 2.6kb fragment of lambda DNA. This is to be the new negative control. It's nice to see a recognized control DNA and also a different control DNA.
+
+### Lambda with periodicity - perfect
+
+In these fragments I want to incorporate the perfect pattern I see in the entire dependoparvovirus genus. The WT fragment already presents the pattern specific for AAV2 and here I want to prove we have understood the underlying pattern.
+
+What is the pattern though? Just YY every 14-15 bp??
+
+### Lambda with periodicity 2
+
+### New wt fragment
+
+I also designed a new WT fragment based on the wt fragment from before. The difference is that it is assembled from 3 different fragments all of which do not have any widely recognized regulatory regions on it. Also no part of the X-gene is on it.
+
+## 15cm diameter dish production
+
+To compare the production of the different genomes, I produced 3 times 3 plates each for every genotype. 1 transfection mix was made for 3 plates each. I retained some of the crude lysate to measure. The iodixanol gradient was measured with ddPCR.
+
+The titers were very inconsistent (dependent on the individual production). Overall there was no big difference in the mean titer between the different packaged genomes.
+
+```{r}
+library(tidyverse)
+df <- read_table("../results/qPCR/20221214_RRYY_titration.tsv", col_names = c("name", "vg_mL", "genome", "production", "method"))
+
+df %>% 
+  ggplot(aes(x = genome, y=vg_mL, fill=production, label=name)) +
+  geom_boxplot(position = position_dodge()) +
+  geom_point(position=position_dodge(width=.9)) +
+  geom_text(position=position_dodge(width=1.3)) +
+  facet_wrap(~production)
+
+df %>% 
+  ggplot(aes(x = genome, y=vg_mL, fill=production, label=name)) +
+  geom_bar(stat="summary", position = position_dodge()) +
+  geom_point(position=position_dodge(width=.9)) +
+  geom_text(position=position_dodge(width=1.3))
+```
+
+## Transduction
+
+The pattern might be important for transgene expression and or integration into the host chromatin and or change the path of endosomal escape and or capsid shedding. Hek293T cells were transduced at MOI 10e4 and harvested at different timepoints to capture the kinetics of the expression.
+
+In 2 independent experiments it seems like the kinetics of the YY containing genome are delayed and do not reach the height of K or RR.
+
+RR is as fast as K at the 6h mark, but does not reach the same height.
+
+The periodicity might discourage integration into the host transcription machinery.
+
+## Packaging efficiency
+
+RR and YY dinucleotides are inherently complementary. Of course TT does not associate with GG, but on average there is probably a tendency.
+
+In crude lysates of WT and rAAV productions, the empty capsids can outnumber filled ones 20:1, up to 96% empty capsids. Iodixanol gradient purification is supposed to cut that number down to 20% of capsids being empty in the lower 40% phase.
+
+I did another virus production of 2 plates each of WT2, K, YY, and RR virus. I retained 1mL of the crude lysate. For the iodixanol gradient, every phase is 2mL. I discarded the lowest 1.5mL and collected the next 1 mL, and also separately the next 0.5 ml.
+
+* 1st fraction being the upper .5 mL of the 60% phase and the lower .5 mL of the 40% phase. 
+
+* 2nd fraction is the rest of the 40% phase
+
+First I titrated the virus in the qPCR which is a dumb idea because of weird interactions with the ITR secondary structures. I did a dotblot of 1e10 vgs/dot and 2 1:2 dilutions. In this blot the WT had the weakest signal and the K the strongest, at least for the first fraction. The 2nd fraction and the crude lysate was more similar all over the board.
+
+I did an ELISA with an expired kit from Progen, that showed lower numbers for the ELISA than the qPCR should show.
+
+Second try was a ddPCR only with the ITR-HEX primer/probe set. I also remeasured all of the other productions I had of the virus going back to November 2022. I measured the dilution 10e6 and 10e7 for WT and 10e5 and 10e6 for the others. Of every dilution I did triplicates.
+
+WT1, WT2, WT3: December 2022
+WT4: July 2023
+
+K1: November 2022
+K2: ???
+K3: Concentration from April 2023
+K4: July 2023
+
+Y1: November 2022
+Y2: Concentration from April 2023
+Y3: July 2023
+
+R1: November 2022
+R2: Concentration from April 2023
+R3: July 2023
+
+I used the rest of the ELISA kit from Progen (old), with mixed results. I diluted every AAV to 5e8 vg/mL according to the ddPCR concentrations.
+
+```{r}
+library(tidyverse)
+
+f <- read_csv("../results/ELISA/20230714-ELISA.csv") %>% 
+  mutate(group = factor(
+    group,
+    levels = c("negative", "standard", "WT_1", "WT_2", "WT_3", "WT_4", "K_1", "K_2", "K_4", "Y_1", "Y_4", "R_1", "R_4")))
+
+# create the model
+# the fit curve should be a second order polynomial
+std <- f %>% filter(group == "standard")
+fit2 <- lm(given_c_10e8~poly(AVG, 2, raw=TRUE), data=std)
+
+# look at the model
+line <- tibble(
+  AVG = seq(0.2, max(std$AVG)+.5, 0.1)
+) %>%
+  mutate(given_c_10e8 = predict(fit2, data.frame(AVG)))
+ggplot(line, aes(x=AVG, y=given_c_10e8)) +
+  geom_line() +
+  geom_point(data=std) +
+  ggtitle("Standard curve with standard measurements")
+
+f
+
+# predict the data
+f <- f %>% 
+  mutate(predicted = predict(fit2, data.frame(AVG=f$AVG)))
+
+f %>%
+  ggplot(aes(x=group, y=predicted)) +
+  geom_boxplot()
+
+# calculate the empty genomes
+samples <- f %>% filter(!group %in% c("negative", "standard")) %>% 
+  mutate(
+    predicted = predicted * 10e8,
+    empty = predicted - ddPCR_C,
+    empty_perc = empty/predicted) %>% 
+  separate(group, c("genome", "production"), sep = "_") %>% 
+  mutate(genome = factor(genome, levels=c("WT", "K", "Y", "R")))
+
+samples %>% 
+  ggplot(aes(x=genome, y=empty_perc)) +
+  geom_boxplot() +
+  geom_point() +
+  ylim(0.6, 1) +
+  ggtitle("all productions to date")
+
+samples %>% 
+  filter(production == 1) %>%
+  ggplot(aes(x=genome, y=empty_perc)) +
+  geom_boxplot()+
+  geom_point() +
+  ylim(0.6, 1) +
+  ggtitle("Production November 2022")
+
+
+samples %>% 
+  filter(production == 4) %>%
+  ggplot(aes(x=genome, y=empty_perc)) +
+  geom_boxplot()+
+  geom_point() +
+  ylim(0.6, 1) +
+  ggtitle("Production July 2023")
+```
+
+The productions are not all comparable, because only in the last one (4) did I take 1 ml and not 0.9 mL or anything else.
+
+In the production from November 2022, K has the best packaging.
+
+In the production from July 2023, YY has the best packaging. RR is always very close to the WT.
+
+The WT consistently has the least number of full capsids, which is intriguing and also not entirely surprising because the way of production is different with a dual transfection and not a triple one. Maybe this way just leads to less efficient packaging.
+
+I am always at a very low packaging rate for all of the samples. Iodixanol gradients should concentrate packaged capsids so only ~20% are empty. The 90-95% empty capsids are known to happen in crude lysates. This is a huge discrepancy to my data. The ELISA I used from Progen was expired in 2021 (~2years). It is very likely that parts of it degraded that made the quantification incorrect.
+
+Could also stain the AAV in the EM and count the full and total particles in several slices.
+
+I think that the packaging rate for WT virus is not a very good example because they also produce a lot of empty capsids naturally. But how many??? Reference?
+
+##### Second ELISA
+
+I repeated the same ELISA as above with a new kit. 2 replicates with 2 different dilutions (1E8 and 5E7), each. All previous productions were measured.
+
+```{r}
+library(tidyverse)
+
+f <- read_csv("../results/ELISA/20230821-ELISA.csv")
+
+# create the model
+# the fit curve should be a second order polynomial
+std <- f %>% dplyr::filter(group == "Standard")
+fit2 <- lm(given_c_10e8~stats::poly(mean, 2, raw=TRUE), data=std)
+
+# look at the model
+line <- tibble(
+  mean = seq(0, max(std$mean)+.5, 0.1)
+) %>%
+  mutate(given_c_10e8 = predict(fit2, data.frame(mean)))
+
+pred <- f %>% 
+  mutate(
+    predicted_c = predict(fit2, data.frame(mean)),
+    empty_capsids = predicted_c - given_c_10e8,
+    empty_capsids_fraction = empty_capsids / predicted_c,
+    filled_capsids_fraction = given_c_10e8 / predicted_c,
+    in_range = ifelse(predicted_c < 20, "yes", "no")) %>% 
+  dplyr::filter(group == "sample", name != "-") %>% 
+  separate(name, c("genome", "replicate", "measure_replicate", "dilution"), sep=c(1, 2, 3, 4)) %>% 
+  mutate(genome = factor(genome, levels=c("W", "K", "Y", "R")))
+
+ggplot(line, aes(x=mean, y=given_c_10e8)) +
+  geom_line() +
+  geom_point(data=pred, aes(x=mean, y=predicted_c, color=genome)) +
+  geom_point(data=std) +
+  ggtitle("Standard curve with standard measurements")
+
+
+pred %>% 
+  ggplot(aes(x=genome, y=filled_capsids_fraction, color = replicate)) +
+  geom_boxplot() +
+  geom_point(position = position_dodge(.75)) 
+
+
+pred %>% 
+  dplyr::filter(replicate == 4, genome != "W") %>% 
+  ggplot(aes(x=genome, y=filled_capsids_fraction)) +
+  geom_boxplot() +
+  geom_point() +
+  ylim(0, 0.6) +
+  ggtitle("Production 4 - 1 mL")
+ggsave("../results/ELISA/20230821-ELISA.png", width = 3, height =5)
+```
+
+Here the data makes much more sense. There is still a comparatively low number of filled particles, ranging from 25% for WT and 50% for K1 and YY1, 3.
+
+The second productions for K probably presents an outlier and would be best excluded (I don't even remember where it is coming from in the first place). Production 4 is not really comparable to all the others (see above).
+
+The WT and RR genome perform the worst having the lowest fraction of filled capsids. If I have a higher percentage of filled capsids after iodixanol purification that is not represented in the titers. It could mean that the DNA replication is the limiting factor.
+
+
+## 96-well production
+
+### 29.9.2023 production
+
+There is a lot of variance that can be introduced by the transfection mix and the iodixanol gradient. Therefore I used Andrej's protocol for producing in 96-well plates. I used the same transfection mix for 3 columns in the plate each and transfected them with GFPK, GFPYY, and GFPYYRR. The ddPCR worked well at a dilution of 1:200 for every well and the standard triple transfection protocol. I tried different ways of harvesting and found out that the best is: harvesting medium and cells (100µL), 5 freeze-thaw cycles, 10 minutes of centrifugation in the tabletop centrifuge, and then taking 75µL of the Supernatant.
+
+Wildtype virus has a certain dinucleotide pattern on it. From this production method I want to figure out what difference the genome makes in the titer, in the packaging efficiency and maybe transduction.
+
+#### ddPCR
+
+5µL of production are digested with DNAseI (50µL total) to get rid of plasmids and remaining genomic DNA, and then heat inactivation. The digestion is further diluted 1:20 for ddPCR (this ddPCR works well at a total dilution of 1:200).
+
+The DNaseI digestion worked well and seemingly removed most of the plasmid contamination. Interestingly, the contaminating plasmid DNA is much less in the R genome, even though the amount of transgene is not affected. I have no idea why.
+
+```{r}
+dfwellddPCR_1 <- read_csv("../results/ddPCR/20231013_CB_96well_MC/20231013_CB_forR.csv") %>% 
+  mutate(production = "well96_1")
+
+dfwellddPCR_1
+
+droplets <- dfwellddPCR_1 %>% 
+  mutate(
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(Well, Sample, CMVenh, bla, double_pos, negative) %>% 
+  separate(Well, c("biol_rep", "row"), sep="0") %>% 
+  separate(Sample, c("genome", "tech_rep"), sep="_") %>% 
+  gather(key="cat", value="droplets", -c(biol_rep, row, genome, tech_rep)) %>% 
+  drop_na() %>% 
+  mutate(
+    genome = factor(genome, levels = c("K", "Y", "R"))
+  )
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat="summary") +
+  facet_grid(~genome)
+ggsave("../results/ddPCR/20231013_CB_96well_MC/prod1_droplets_bar.png", width=7, height=6, dpi=200)
+
+
+droplets %>% 
+  dplyr::filter(cat %in% c("bla", "double_pos", "CMVenh", "negative")) %>%  
+  ggplot(aes(x=genome, y=droplets, fill = cat)) +
+  geom_boxplot() +
+  geom_jitter(width = .1) +
+  facet_wrap(~cat, scales = "free", nrow=1) +
+  ggtitle("bla contamination and double positives")
+ggsave("../results/ddPCR/20231013_CB_96well_MC/prod1_droplets_box.png", width=7, height=6, dpi=200)
+```
+
+```{r}
+dfwellddPCR_1 %>% 
+  separate(Well, c("biol_rep", "row"), sep="0") %>% 
+  separate(Sample, c("genome", "tech_rep"), sep="_") %>% 
+  drop_na() %>% 
+  mutate(genome = factor(genome, levels = c("K", "Y", "R"))) %>% 
+  ggplot(aes(x=genome, y=`vg/mL`, fill=genome)) +
+  geom_boxplot(width=.2) +
+  geom_jitter(shape = 1, width = .1) +
+  facet_wrap(~Target) +
+  ggtitle("1st production") +
+  scale_y_log10()
+```
+
+The titer does not significantly differ between my genomes.
+
+It is very likely that the pattern has no impact on viral titer.
+
+Another possibility is that I did not capture the truth of the AAV genome pattern. It is also possible that this pattern is only important near packaging capacity.
+
+
+#### ELISA
+
+I did an Elisa of some of the productions, as I had 2 strips left. I used 6 from GFPK and 5 each of GFPYY and GFPRR. Because of the measured titers and the previous ELISA measurements I assumed a packaging efficiency of about 50%. What I neglected was that the previous ELISA was done on iodixanol purified virus and not crude lysate...
+
+Here I diluted the productions 1:5, which (according to the ddPCR) results in vg/mL of ~7e7 for most of them. However, the 450nm OD is extremely high probably near capacity.
+
+```{r}
+dfwellELISA <- read_csv("../results/ELISA/20231024_ELISA_results.csv")
+
+std <- dfwellELISA %>% 
+  filter(std == "standard")
+fit2 <- lm(given_c~poly(OD450nm, 2, raw=TRUE), data=std)
+
+# look at the model
+line <- tibble(
+  OD450nm = seq(0, max(std$OD450nm)+.5, 0.1)
+) %>%
+  mutate(given_c = predict(fit2, data.frame(OD450nm)))
+
+pred <- dfwellELISA %>% 
+  mutate(
+    predicted_c = predict(fit2, data.frame(OD450nm))) %>% 
+  filter(std == "sample")
+
+ggplot(line, aes(x=OD450nm, y=given_c)) +
+  geom_line() +
+  geom_point(data=pred, aes(x=OD450nm, y=predicted_c, color=sample)) +
+  geom_point(data=std) +
+  ylab("1e8 vg/mL") +
+  ggtitle("Standard curve with standard measurements")
+```
+
+The ELISA OD is ridiculously out of range for my samples, meaning I can not calculate the number of empty capsids from this. 
+
+It was probably close to the capacity of what the ELISA can show.
+
+
+#### Combining ddPCR and ELISA measurements
+
+```{r}
+dfddELISA <- merge(
+  dfwellELISA %>% 
+    filter(std == "sample") %>% 
+    unite("Sample", c(sample, replicate), sep="_") %>% 
+    select(-given_c),
+  dfwellddPCR_1 %>% 
+    separate(Sample, c("genome", "tech_replicate"), sep="_") %>% 
+    separate(Well, c("replicate", "col"), sep="0") %>% 
+    unite("Sample", c(genome, replicate)), by="Sample") %>% 
+  separate(Sample, c("genome", "replicate")) %>% 
+  mutate(genome = factor(genome, levels=c("K", "Y", "R")))
+
+dfddELISA %>% 
+  filter(tech_replicate == "1") %>% 
+  ggplot(aes(x="", y=OD450nm, fill=genome)) +
+  geom_boxplot() +
+  geom_point(position=position_dodge(.75), shape=2)
+
+dfddELISA %>% 
+  ggplot(aes(x=OD450nm, y=`vg/mL`, color=genome)) +
+  geom_point()
+```
+There is no clear relationship between vg/mL and OD450nm visible.
+
+The RR productions seem a little lower in OD, hinting to a higher capsid fill percentage, *but I do not want to read so much into this faulty measurement*.
+
+
+### 27.10.2023 Production with GFPwtf
+
+#### protocol
+
+I created a clone with a stuffer that is only AAV2 DNA. It consists of a 358bp piece of rep (959-1317) and a 1432bp piece of the cap gene (673-2105). None of the fragments contain a start codon, stop codon, or annotated promoter. No other cis acting factors are known for AAV packaging AFAIK. The final transgene is called GFPwtf (W).
+
+1.25e4 HEK293T cells were seeded in every well of 2 96-well plates one day before transfection. I mixed 3 replicates of the same transfection mix of 6 fmol each AdH, WHC2 and transgene to account for pipetting inaccuracy. Every column in the 96-well plates received its own transfection mix. Before mixing transfection mixes plasmids were measured with Qubit broad range kit, meaning my approach does not account for plasmid production and measurement inaccuracies (next time measure 10 µL of every plasmid, not 1). 
+
+Columns of the first plate (P1):
+
+K1 K2 K3 Y1 Y2 Y3 W1 W2 W3 R1 R2 R3
+
+The second plate contains a total of 5 columns of mock transfections with 6 fmol each AdH, and transgene (no WHC2) and non transfected cells:
+
+K Y W R no_transfection
+
+
+| 1 well                | µL    | Mix |
+|-----------------------|-------|-----|
+| 300 mM NaCl           | 1.633 | A   |
+| AdH (263 ng/µL)       | 0.162 | A   |
+| WHC2 (267 ng/µL)      | 0.1   | A   |
+| ITR-flanked transgene | -     | A   |
+| water ad 3.27 µL      | -     | A   |
+| 300 mM NaCl           | 1.633 | B   |
+| water                 | 0.9   | B   |
+| PEI max               | 0.73  | B   |
+
+
+Mix A (x12 MM) was mixed one day before transfection. On the day of transfection Mix B was added to Mix A and vortexed. The mixture was divided into 8 tubes/PCR plate (8 µL each) and 6.5µL was pipetted into the respective column with the multichannel pipette.
+
+Incubated for 3 days (cells were 100% confluent at point of harvest). Harvested with the multichannel pipette pipetting the full 100µL 3 times in the center, W, N, E, S, of the wells and then transferring to a new 96-well plate. The plate was freeze-thawed 5 times and then centrifuged at 300g for 10 minutes. 50µL of the Supernatant was transferred to a new plate.
+
+
+#### droplets
+```{r}
+dfwellddPCR_2 <- read_csv("../results/ddPCR/20231031_CB_P1P2.csv") %>% 
+  mutate(production = "well96_2") %>% 
+  mutate(
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  select(Well, Sample, Target, CMVenh, bla, double_pos, negative, transfection_mix, `vg/mL_adj`) %>% 
+  separate(Well, c("biol_rep", "col"), sep=1)
+
+dfwellddPCR_2
+
+droplets <- dfwellddPCR_2  %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(-c(`vg/mL_adj`, Target)) %>% 
+  gather(key="cat", value="droplets", -c(biol_rep, col, Sample, transfection_mix)) %>% 
+  mutate(
+    Sample = factor(Sample, levels = c("K", "Y", "R", "wtf"))
+  ) %>% 
+  drop_na()
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat="identity") +
+  facet_grid(transfection_mix~Sample)
+ggsave("../results/ddPCR/20231031_CB_P1_2023-10-31-17-37/prod2_droplets_bars.png", dpi=300, width=6, height=4)
+
+
+droplets %>% 
+  dplyr::filter(
+    cat %in% c("bla", "double_pos", "CMVenh", "negative"),
+    transfection_mix != "mock"
+    ) %>%  
+  ggplot(aes(x=Sample, y=droplets, fill = cat)) +
+  geom_boxplot() +
+  geom_jitter(width = .1, size=.5, shape=1) +
+  facet_wrap(~cat, scales = "free", nrow=1) +
+  ggtitle("bla contamination and double positives")
+ggsave("../results/ddPCR/20231031_CB_P1_2023-10-31-17-37/prod2_droplets_boxplot.png", dpi=300, width=6, height=4)
+
+
+```
+
+#### concentration
+
+```{r}
+dfwellddPCR_2 %>%
+  ggplot(aes(x=biol_rep, y=`vg/mL_adj`)) +
+  geom_bar(stat="identity") +
+  facet_grid(transfection_mix~Sample)
+
+
+
+dfwellddPCR_2 %>%
+  dplyr::filter(
+    transfection_mix != "mock"
+    ) %>% 
+  mutate(Sample = factor(Sample, levels = c("K", "Y", "R", "wtf"))) %>% 
+  drop_na() %>%
+  ggplot(aes(x=Sample, y=`vg/mL_adj`, fill=Sample)) +
+  geom_boxplot() +
+  geom_jitter(shape=1) +
+  facet_wrap(~Target) +
+  ggtitle("2nd production - 3 separate transduction mixes")
+ggsave("../results/ddPCR/20231031_CB_P1_2023-10-31-17-37/concentrations_combined.png", dpi=300, width=5, height=4)
+
+
+dfwellddPCR_2 %>%
+  dplyr::filter(
+    transfection_mix != "mock"
+    ) %>% 
+  mutate(Sample = factor(Sample, levels = c("K", "Y", "R", "wtf"))) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=Sample, y=`vg/mL_adj`, fill=Sample)) +
+  geom_boxplot() +
+  geom_jitter(shape=1) +
+  facet_grid(transfection_mix~Target) +
+  scale_color_brewer(palette="RdBu") +
+  scale_y_log10() +
+  ggtitle("2nd production - 3 separate transduction mixes")
+ggsave("../results/ddPCR/20231031_CB_P1_2023-10-31-17-37/concentrations_separate.png", dpi=300, width=5, height=4)
+
+```
+
+
+#### mock analysis
+
+```{r}
+mock <- dfwellddPCR_2 %>% 
+  dplyr::filter(transfection_mix == "mock") %>% 
+  mutate(Sample=factor(Sample, levels=c("K", "Y", "R", "wtf", "no_transduct", "water")))
+
+
+mock %>% 
+  ggplot(aes(x=Sample, y=`vg/mL_adj`, fill=Target)) +
+  geom_boxplot() +
+  ggtitle("Mock transductions - no rep/cap")
+```
+
+The mock transfection consisted of 6 fmol Adh (bla) and 6 fmol ITR plasmid (bla + CMV) per well. There should be twice as much bla signal as CMV signal, which is very close to what is displayed in the boxplot.
+
+The theoretical concentration of bla is 7.2e10 copies/mL and CMV half of that at 3.6e10 copies/mL. The DNase digestion can get rid of a big amount of this and shows bla concentration between 2.4e7 (0.03%) and 1.3e7 (0.02%). CMV is similar with between 1.2e7 (0.03%) and 6e6 (0.02%) copies/mL. Although there is also the protective function of PEI
+
+The ratio is as expected and the theoretical reduction of plasmid DNA by DNase digestion is sufficient IMO, although I never measured the freeze thaw crude lysates before DNase digestion.
+
+
+### 07.11.2023
+
+
+#### Second Production with GFPwtf
+
+This production was done to repeat the one from 27.10.2023. I changed the pipetting order and I mixed a Mastermix beforehand of NaCl AdH, WHC2 for the transfection mixes. I also remeasured the concentrations with Qubit and 3 different 1:10 dilutions of the used plasmid. All of these were 10 µL measurements. I noticed that I underestimated the concentration of YY and YYRR significantly last time. The new measurements of GFPK and wtf were much closer. This could explain why Y and R are that much better than Kana in the last production.
+
+The cells were much less confluent this time. Next time I will seed my own cells, that worked much better.
+
+R1 R2 R3 W1 W2 W3 Y1 Y2 Y3 K1 K2 K3
+
+I will add a positive control for bla containing DNA. 
+
+
+##### droplets
+
+```{r}
+library(tidyverse)
+
+
+dfwellddPCR_3 <- read_csv("../results/ddPCR/20231113_CB_plate1_2023-11-13-18-45/20231113_CB_plate1_R.csv") %>% 
+  mutate(transfection_mix = as.character(transfection_mix))
+
+dfwellddPCR_3.2 <- read_csv("../results/ddPCR/20231113_CB_plate2_2023-11-13-17-20/20231113_CB_plate2_R.csv")
+
+productions <- bind_rows(dfwellddPCR_3, dfwellddPCR_3.2) %>% 
+  dplyr::filter(transfection_mix %in% c("1", "2", "3"))
+
+exp <- bind_rows(dfwellddPCR_3, dfwellddPCR_3.2) %>% 
+  dplyr::filter(
+    !transfection_mix %in% c("1", "2", "3"),
+    Sample != "water")
+
+
+droplets_prod <- productions %>% 
+  mutate(
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  select(Well, Sample, CMVenh, bla, double_pos, negative, transfection_mix) %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>%
+  gather(key="cat", value="droplets", -c(col, biol_rep, Sample, transfection_mix)) %>% 
+  mutate(
+    Sample = factor(Sample, levels = c("K", "Y", "R", "wtf"))
+  )
+
+droplets_prod %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat="identity") +
+  facet_grid(transfection_mix~Sample)
+```
+
+```{r}
+droplets_test <- exp %>%
+  mutate(
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  select(Well, Sample, CMVenh, bla, double_pos, negative) %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>%
+  separate(Sample, c("Sample", "dil"), sep="_") %>%
+  gather(key="cat", value="droplets", -c(col, biol_rep, Sample, dil)) %>% 
+  mutate(dil = factor(dil, levels=c("2", "4", "8", "16", "32", "64", "128")))
+
+droplets_test %>% 
+  ggplot(aes(x=dil, y=droplets, fill=cat)) +
+  geom_bar(stat="identity") +
+  facet_wrap(~Sample)
+  
+```
+
+##### concentration
+
+```{r}
+productions %>% 
+  mutate(Sample=factor(Sample, levels=c("K", "Y", "R", "wtf"))) %>% 
+  dplyr::filter(`Ch1-Ch2-` >= 10) %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  ggplot(aes(x=biol_rep, y=`vg/mL`)) +
+  geom_bar(stat="identity") +
+  facet_grid(transfection_mix~Sample) +
+  ylim(0, 1.5e9)
+
+productions %>% 
+  mutate(Sample=factor(Sample, levels=c("K", "Y", "R", "wtf"))) %>% 
+  dplyr::filter(
+    `Ch1-Ch2-` >= 10,
+    transfection_mix != 3
+    ) %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(heigth=0, width = .1) +
+  facet_grid(~transfection_mix)
+```
+
+#### Dilution of production
+
+I had a high number of double positive droplets in my last measurement. It was either that the production worked way better this time or that the Dnase digestion did not work out as expected. 
+
+If the Dnase digestion did not work I expect a higher number of double positive droplets irregardless of the dilution. Therefore I will do a dilution Series of K3H (Well H12) and wtf1A (well A4) of the 3rd production.
+
+##### droplets
+
+```{r}
+prod3_dil <- read_csv("../results/ddPCR/20231114_CB_dilution_2023-11-14-19-03/20231114_CB_R.csv") %>%
+  mutate(
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>%
+  separate(Sample, c("step", "genome", "dil.old"), sep="_") %>%
+  mutate(
+    Dilution = as.character(Dilution),
+    Dilution = factor(Dilution, levels = c("1", "200", "400", "800", "1600", "3200", "1000", "10000", "1e+05", "1e+06", "1e+07", "1e+08")),
+    step = factor(step, levels=c("FT", "D"))
+  )
+
+
+
+
+droplets <- prod3_dil %>%  
+  select(CMVenh, bla, double_pos, negative, Dilution, step, genome) %>% 
+  gather(key="cat", value="droplets", -c(step, genome, Dilution))
+
+
+droplets %>% 
+  drop_na() %>% 
+  ggplot(aes(y=Dilution, x=droplets, fill=cat)) +
+  geom_bar(stat="identity") +
+  facet_grid(genome~step)
+```
+
+```{r}
+prod3_dil %>% 
+  dplyr::filter(Dilution != "1000") %>% 
+  drop_na() %>% 
+  ggplot(aes(x=`copies/mL`, y=Dilution, fill=Target)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_grid(genome~step) +
+  ggtitle("Concentration - crude lysate and DNase digestion")
+
+
+prod3_dil %>% 
+  dplyr::filter(Dilution != "1000") %>% 
+  drop_na() %>% 
+  ggplot(aes(x=step, y=`copies/mL`, fill=Target)) +
+  geom_boxplot() +
+  facet_wrap(~genome) +
+  ggtitle("Concentration") +
+  scale_y_log10()
+```
+
+The theoretical concentration of bla in the freeze thaw cycles is 18 fmol / 100 µL --> ~1e11 copies/mL. The theoretical CMV concentration only from plasmids is about 3.6e10 copies/mL.
+
+The *bla* concentrations I measure are below the theoretical values in the F/T steps for both tested productions. Before DNase digestion in the K production there is a concentration of ~5e9 copies/mL (4.6% of the expected value). For WT the value is at about 1.1e10 copies/mL for bla which is about 10% of the expected concentration. In both cases the value is much lower than expected. This can be attributed to the protective effect of PEI towards DNA it complexes, and also because it co-precipitates with cellular debris.
+
+The *CMV* concentrations are higher than the theoretical value in W and about at the expected level for K. This is because the ddPCR is also measuring DNA that is being replicated during viral production. I would not expect the same level of CMV in the mock transfections. After Dnase digestion the bla signal falls rapidly for both tested genomes, but the decrease is much more significant in W than it is in K. I assume there was something off with the DNase digestion in K. I will repeat that. The higher concentration after F/T cycles in Wtf could be interpreted as an increased DNA replication in WTF compared to K (protein X?) that is removed through DNase digestion. The DNase digestion is never complete and I always measure a part of the replicated DNA too, but how big is what is left? I will need to plot the bla signal in all my samples and gauge the plasmid contamination through that.
+
+Why though is there also a higher bla signal in the wtf genome? 
+
+#### New DNAse digestion
+
+```{r}
+prod3_new <- read_csv("../results/ddPCR/20231116_CB_Dnase2_2023-11-16-14-00/20231116_CB_Dnase2_R.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("K", "Y", "R", "wtf")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+
+
+droplets <- prod3_new %>%  
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(CMVenh, bla, double_pos, negative, Sample, biol_rep) %>% 
+  gather(key="cat", value="droplets", -c(biol_rep, Sample))
+
+
+droplets %>% 
+  drop_na() %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat="identity") +
+  facet_grid(~Sample)
+```
+
+##### Concentration
+
+```{r}
+prod3_new %>% 
+  drop_na() %>% 
+  ggplot(aes(x=biol_rep, y=`vg/mL`)) +
+  geom_bar(stat="identity") +
+  facet_grid(Sample~Target)
+
+
+prod3_new %>% 
+  drop_na() %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=Sample)) +
+  geom_boxplot() +
+  geom_jitter(shape=2, height=0, width=.1) +
+  facet_grid(~Target) +
+  scale_y_log10()
+```
+
+#### New DNase digestion part 2 - 6.12.2023
+
+Because of a promising result from the limited new DNase digestion I also remeasured everything else.
+
+```{r}
+prod3_newnew <- read_csv("../results/ddPCR/20231206_CB_Dnase2Rest_plates/20231206_CB_DNase_R.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "transfection_mix")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("K", "Y", "R", "wtf")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`,
+    transfection_mix = as.double(transfection_mix),
+    transfection_mix = as.character(transfection_mix)
+  )
+```
+
+##### Droplets
+
+```{r}
+
+droplets <- prod3_newnew %>%  
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(CMVenh, bla, double_pos, negative, Sample, biol_rep, transfection_mix) %>% 
+  gather(key="cat", value="droplets", -c(biol_rep, Sample, transfection_mix))
+
+
+droplets %>% 
+  drop_na() %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat="identity") +
+  facet_grid(transfection_mix~Sample)
+```
+
+##### Concentrations
+
+```{r}
+prod3_newnew %>% 
+  drop_na() %>% 
+  ggplot(aes(x=biol_rep, y=`vg/mL`, fill=transfection_mix)) +
+  geom_bar(stat="identity", position = position_dodge()) +
+  facet_grid(Sample~Target)
+
+
+prod3_newnew %>% 
+  drop_na() %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=Sample)) +
+  geom_boxplot() +
+  geom_jitter(shape=2, height=0, width=.1) +
+  facet_grid(transfection_mix~Target) +
+  scale_y_log10()
+```
+
+### Compare multiple 96-well productions
+
+```{r}
+dfwellddPCR <- bind_rows(
+  dfwellddPCR_1 %>% 
+    mutate(
+      transfection_mix = "0",
+      CMVenh = `Ch1+Ch2-`,
+      bla = `Ch1-Ch2+`,
+      double_pos = `Ch1+Ch2+`,
+      negative = `Ch1-Ch2-`
+      ) %>% 
+    separate(Well, c("biol_rep", "row"), sep=1) %>% 
+    separate(Sample, c("Sample", "tech_rep"), sep="_") %>% 
+    select(biol_rep, Sample, double_pos, CMVenh, bla, negative, `vg/mL`, production, transfection_mix, Target),
+  dfwellddPCR_2 %>% 
+    mutate(`vg/mL` = `vg/mL_adj`, production = "well96_2") %>% 
+    select(biol_rep, Sample, double_pos, CMVenh, bla, negative, `vg/mL`, production, transfection_mix, Target),
+  prod3_new %>% 
+    mutate(
+      production = "well96_3",
+      transfection_mix = "6"
+      ) %>% 
+    select(biol_rep, Sample, double_pos, CMVenh, bla, negative, `vg/mL`, production, transfection_mix, Target),
+  prod3_newnew %>% 
+    mutate(
+      production="well96_3"
+    ) %>% 
+    select(biol_rep, Sample, double_pos, CMVenh, bla, negative, `vg/mL`, production, transfection_mix, Target)
+  ) %>% mutate(Sample = factor(Sample, levels = c("K", "Y", "R", "wtf"))) %>% 
+  drop_na()
+
+
+
+dfwellddPCR %>% 
+  select(production, biol_rep, transfection_mix) %>% 
+  unique()
+```
+
+
+```{r}
+dfwellddPCR %>% 
+  dplyr::filter(transfection_mix != "mock") %>% 
+  group_by(Target, Sample) %>% 
+  summarize(
+    mean = mean(`vg/mL`),
+    med = median(`vg/mL`)
+  )
+
+dfwellddPCR %>%
+  dplyr::filter(transfection_mix != "mock") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=transfection_mix)) +
+  geom_boxplot() +
+  facet_wrap(~Target) +
+  scale_y_log10()
+
+dfwellddPCR %>%
+  dplyr::filter(transfection_mix != "mock") %>%
+  ggplot(aes(x=Target, y=`vg/mL`, fill=Sample)) +
+  geom_boxplot() +
+  facet_wrap(~production) +
+  scale_y_log10()
+
+dfwellddPCR %>%
+  dplyr::filter(transfection_mix != "mock") %>%
+  ggplot(aes(x=Target, y=`vg/mL`, fill=Sample)) +
+  geom_boxplot() +
+  facet_grid(~transfection_mix) +
+  scale_y_log10()
+
+
+## log fold-change to kanamycin control
+library(ggpubr)
+
+mean_ctrl <- dfwellddPCR %>%
+  group_by(production, transfection_mix) %>% 
+  dplyr::filter(transfection_mix != "mock", Sample == "K", Target == "CMVenh") %>% 
+  summarise(mean_ctrl = mean(`vg/mL`))
+
+left_join(dfwellddPCR %>% dplyr::filter(Target == "CMVenh"), mean_ctrl) %>% 
+  mutate(logFC = log2(`vg/mL` / mean_ctrl)) %>% 
+  dplyr::filter(transfection_mix != "mock") %>%
+  dplyr::filter(Sample == "R")
+  
+  
+  ggplot(aes(x=Sample, y=logFC, fill=Sample)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot(width = .4, outliers = F) +
+  geom_jitter(height = 0, width = .1, size = .5, shape = 3) +
+  stat_compare_means(comparisons = list(c("K", "wtf"))) +
+  theme_bw() +
+  theme(text = element_text(size = 15)) +
+  ylim(-4.5, 3) +
+  scale_fill_manual(values = c("#1e81b0ff", "#7cae00", "#17813c", "#edd0adff"))
+ggsave("../results/ddPCR/wtf3.8_comparison.png", width = 5, height = 3, dpi = 200)
+ggsave("../results/ddPCR/wtf3.8_comparison.svg", width = 5, height = 3, dpi = 200)
+
+```
+
+
+In production 3 (transfection_mix 6), the bla signal in the wtf productions is double that of the other productions. That would be an error of about ~5% in the wtf titer estimation.
+
+Felix has raised the adequate point to also repeat this in proper plate productions with an iodixanol gradient.
+
+#### statistics
+
+```{r}
+library(ggpubr)
+smallgenome_stat <- dfwellddPCR %>% 
+  dplyr::filter(
+    Target == "CMVenh",
+    production != "well96_1",
+    transfection_mix != "mock"
+  )
+
+# F-test of just K and wtf
+## the variance is significantly different
+var.test(`vg/mL` ~ Sample, data=smallgenome_stat %>% dplyr::filter(Sample%in%c("K", "wtf")))
+
+# normally distributed? Shapiro wilk test
+## K
+shapiro.test(smallgenome_stat %>% dplyr::filter(Sample == "K") %>% pull(`vg/mL`)) # not normally distributed
+## wtf
+shapiro.test(smallgenome_stat %>% dplyr::filter(Sample == "wtf") %>% pull(`vg/mL`)) # normally distributed
+
+
+# wilcox test because of different variance and non-normal distribution
+# pairwise (not paired!) comparisons against control
+smallgenome_stat %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(aes(fill = Sample), width =.5) +
+  geom_jitter(width=.1, size=1, shape=1, height = 0) +
+  stat_compare_means(method = "wilcox.test", comparisons = list( c("K", "Y"), c("K", "R"), c("K", "wtf")))
+
+```
+
+
+The difference is statistically significant between the control group and the wildtype fragment.
+
+This is a promising result, but why the high variance?
+
+
+#### bla correction
+
+There is always some beta-lactamase signal present, stemming from undigested plasmid used for production. Theoretically 33% of the bla signal comes from the CMVenh containing plasmid. Therefore I can correct the transgene concentration by subtracting the measured transgene that actually was part of the production plasmid.
+
+
+```{r}
+dfwellddPCR_corrected <- dfwellddPCR %>% 
+  select(`vg/mL`, Target, Sample, biol_rep, production, transfection_mix) %>% 
+  dplyr::filter(transfection_mix != "0") %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333*bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(Target, `vg/mL`, -c(Sample, biol_rep, production, transfection_mix))
+
+dfwellddPCR_corrected %>% 
+  dplyr::filter(transfection_mix != "mock", Target %in% c("CMVenh", "CMVenh_corrected")) %>%
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=Target)) +
+  geom_boxplot() +
+  scale_y_log10()
+```
+
+The correction is so miniscule that it really does not matter. I will leave it out for these experiments.
+
+### 06.12.2023 Plate production
+
+I produced the genomes K, YY, RR, and wtf in 2 plates each. Iodixanol gradient was performed with 2 mL of every phase. The lowest 1.5 mL was discarded and 0.9 mL was collected.
+
+```{r}
+plate_prod1 <- read_csv("../results/ddPCR/20231206_CB_Dnase2Rest_plates/20231206_CB_plates_R.csv") %>% 
+  separate(Sample, c("Sample", "x1")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("K", "Y", "R", "W")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+
+
+plate_prod1 %>% 
+  ggplot(aes(x=Target, y=`vg/mL`, fill=Sample)) +
+  geom_bar(stat="summary", position = position_dodge()) +
+  geom_point(position = position_dodge(.9)) +
+  scale_y_log10()
+
+plate_prod1 %>% 
+  filter(Target == "CMVenh") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=Sample)) +
+  geom_bar(stat="summary") +
+  geom_point()
+```
+
+The K genome has the highest titer. But again the plate productions have the problem being somewhat inconsistent. They are all in the range of being incredibly similar.
+
+I do not know what happened to the GFP-RR production here.
+
+If this effect does not translate to plate productions it might be useless commercially. The science behind is still worthwhile.
+
+## New transgenes
+
+The transgene I have used above have a size of 3.8 kb and are not exactly close to the packaging limitation. If wildtypic DNA more likely associates with the capsid interior, then I would assume it does so more when the internal pressure is maximal. Therefore I designed transgenes that are close to the maximum size at 4.8kb.
+
+The lambda control sample has 1 fragment from lambda phage DNA 2.6 kb (55% GC). Total length of the transgene is 4774 bp.
+
+The wildtype fragment control is composed of 3 AAV2 WT fragments. None of them containing any start codons or promoter regions (52% GC). The total length of this transgene is 4768 bp.
+
+Because YY and RR do not show a difference to the control, but wtf does, I conclude that I can not accurately emulate the pattern with the information I have. Therefore, I refrain to try to emulate the pattern before I have gathered some information on it. (Library experiments) 
+
+### 18.03.2024 production
+
+The transgene plasmids stem from Midi-preps.
+
+I did the same production in 96 well format as above. 3 different transfection mixes per construct. 8 wells (1 column) per construct. For both constructs I Included 1 column of mock transfections without capsid plasmid.
+
+#### Droplets
+
+```{r}
+FL_prod1 <- read_csv("../results/ddPCR/20240319_CB_wtfnoX_1_2024-03-19-15-55/20240319_CB_wtfnoX_1_R.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtfnoX", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+
+
+droplets <- FL_prod1 %>%  
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(CMVenh, bla, double_pos, negative, Sample, biol_rep, experiment, transfection_mix) %>% 
+  gather(key="cat", value="droplets", -c(biol_rep, Sample, experiment, transfection_mix))
+
+
+droplets %>% 
+  drop_na() %>% 
+  dplyr::filter(experiment != "water") %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat="identity") +
+  facet_grid(transfection_mix~Sample) +
+  ggtitle("FL production")
+```
+
+#### concentration
+
+```{r}
+FL_prod1 %>% 
+  drop_na() %>%
+  dplyr::filter(
+    experiment != "water") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(aes(color=col), width = .1) +
+  facet_grid(Target~experiment)
+
+FL_prod1 %>% 
+  drop_na() %>%
+  dplyr::filter(
+    experiment != "water") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=experiment)) +
+  geom_boxplot() +
+  facet_grid(~Target) +
+  ggtitle("All together") +
+  scale_y_log10()
+```
+
+There are several problems with this production.
+
+* the virus concentration is ~10 fold lower than in my comparable productions with the 3.8 kb genomes. The cell confluency was good, I checked. The PEI was a little older, but it is the same vial that I used for all other productions before. I will replace it just to be safe. The ITRs of the transgenes were also intact according to XmaI digestions. Does the difference in size really amount to a 10x difference??
+
+* the concentrations of bla/CMV is higher (~1.5 times) than comparable productions. DNase digestion was not as complete as it could have been. I will open a new aliquot for next time.
+
+##### bla correction
+
+```{r}
+FL_prod1_corrected <- FL_prod1 %>% 
+  dplyr::filter(experiment == "prod") %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, transfection_mix) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, transfection_mix))
+
+FL_prod1_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=transfection_mix), width = .1, shape = 21) +
+  facet_grid(~Target)
+```
+Here the bla correction makes a bigger difference.
+
+##### Stats
+
+```{r}
+FL_CMV <- FL_prod1_corrected %>% 
+  dplyr::filter(Target == "CMVenh")
+
+print("CMV raw signal")
+wilcox.test(`vg/mL`~Sample, data=FL_CMV, exact = FALSE)
+
+FL_CMVcorr <- FL_prod1_corrected %>% 
+  dplyr::filter(Target == "CMVenh_corrected")
+
+print("CMV corrected signal")
+wilcox.test(`vg/mL`~Sample, data=FL_CMVcorr, exact = FALSE)
+```
+The difference betweeen the wildtype fragment and my control genome is not significantly different. Neither with or without correction for background bla signal.
+
+
+### 25.03.2024 production
+
+```{r}
+FL_prod2 <- read_csv("../results/ddPCR/20240327_CB_wtfnoXFL_2_2024-03-27-14-27/20240327_CB_wtfnoXFL_2_R.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtfnoX", "K", "wtf", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+
+```
+
+#### droplets
+
+```{r}
+droplets <- FL_prod2 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, genome_size, transfection_mix) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, genome_size, transfection_mix))
+
+droplets %>% 
+  dplyr::filter(genome_size == "4.8kb") %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(transfection_mix~Sample) +
+  ggtitle("4.8kb genome")
+
+droplets %>% 
+  dplyr::filter(genome_size == "3.8kb") %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(transfection_mix~Sample) +
+  ggtitle("3.8kb genome")
+```
+
+#### concentration
+
+```{r}
+FL_prod2 %>% 
+  dplyr::filter(Sample != "water") %>% 
+  ggplot(aes(x=Target, y=`vg/mL`, fill= Sample)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(position = position_jitterdodge(dodge.width = .5, jitter.height = 0, jitter.width = .1), size = 1, shape = 1) +
+  facet_grid(~genome_size) +
+  scale_y_log10()
+```
+
+##### bla correction
+
+The bla signal represents the amount of plasmid DNA that was not removed in the DNaseI digestion. In theory, one third of the plasmid also contains CMV. Therefore, I can correct the CMV quantification with the bla signal.
+
+```{r}
+FL_prod2_corrected <- FL_prod2 %>% 
+  dplyr::filter(Sample != "water") %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, transfection_mix, genome_size) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = bla/3,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, transfection_mix, genome_size)) %>% 
+  mutate(Target = factor(Target, levels = c("bla", "CMVenh_from_plasmid", "CMVenh", "CMVenh_corrected")))
+
+FL_prod2_corrected %>% 
+  ggplot(aes(x=Target, y=`vg/mL`, fill=Sample)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(position = position_jitterdodge(dodge.width = .5, jitter.width = .3, jitter.height = 0), shape = 1, size = 1) +
+  facet_grid(~genome_size) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_log10()
+```
+
+##### Statistics
+
+```{r}
+library(ggpubr)
+
+FL_prod2_labels <- FL_prod2_corrected %>% 
+  mutate(
+    Sample = gsub("lambda", "ctrl_4.8", Sample),
+    Sample = gsub("^wtf$", "wt-fragment_3.8", Sample),
+    Sample = gsub("K", "ctrl_3.8", Sample),
+    Sample = gsub("wtfnoX", "wt-fragment_4.8", Sample),
+    Sample = factor(Sample, levels=c("ctrl_3.8", "wt-fragment_3.8", "ctrl_4.8", "wt-fragment_4.8"))
+    ) %>% 
+  dplyr::filter(Target == "CMVenh_corrected")
+
+FL_prod2_labels %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=Sample)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(size=.5, height = 0, width =.1) +
+  stat_compare_means(method = "wilcox.test", comparisons = list(c("ctrl_4.8", "wt-fragment_4.8"), c("ctrl_3.8", "wt-fragment_3.8"))) +
+  theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("#1e81b0", "#edd0ad", "#1e81b0", "#eab676")) +
+  scale_x_discrete(labels = c("ctrl", "wt-fragments", "ctrl", "wt-fragments"))
+ggsave("../results/ddPCR/20240327_CB_wtfnoXFL_2_2024-03-27-14-27/cmvcorrected_comparison.png", width=6, height=5)
+ggsave("../results/ddPCR/20240327_CB_wtfnoXFL_2_2024-03-27-14-27/cmvcorrected_comparison.svg", width=6, height=5)
+
+
+left_join(
+  FL_prod2_labels %>% 
+    separate(Sample, c("Sample", "genome_size"), sep = "_"),
+  FL_prod2_labels %>% 
+    separate(Sample, c("Sample", "genome_size"), sep = "_") %>% 
+    filter(Sample == "ctrl") %>% 
+    group_by(genome_size) %>% 
+    summarize(ctrl_mean = mean(`vg/mL`))
+) %>% 
+  unite("Sample", c(Sample, genome_size)) %>% 
+  mutate(
+    logFC = log2(`vg/mL` / ctrl_mean),
+    Sample = factor(Sample, levels=c("ctrl_3.8", "wt-fragment_3.8", "ctrl_4.8", "wt-fragment_4.8")),
+    ) %>% 
+  ggplot(aes(x=Sample, y=logFC, fill=Sample)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot(width = .5) +
+  geom_jitter(size=.5, height = 0, width =.1) +
+  stat_compare_means(method = "wilcox.test", comparisons = list(c("ctrl_4.8", "wt-fragment_4.8"), c("ctrl_3.8", "wt-fragment_3.8"))) +
+  theme_bw() +
+  theme(text=element_text(size=15), axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("#1e81b0", "#edd0ad", "#1e81b0", "#eab676")) +
+  scale_x_discrete(labels = c("ctrl", "wt-fragments", "ctrl", "wt-fragments"))
+ggsave("../results/ddPCR/20240327_CB_wtfnoXFL_2_2024-03-27-14-27/cmvcorrected_comparison.logFC.png", width=6, height=5)
+ggsave("../results/ddPCR/20240327_CB_wtfnoXFL_2_2024-03-27-14-27/cmvcorrected_comparison.logFC.svg", width=6, height=5)
+
+```
+
+```{r}
+
+```
+
+
+
+### Compare the productions
+
+
+```{r}
+FL_prod_master <- bind_rows(
+  FL_prod1_corrected,
+  FL_prod2_corrected %>% 
+    dplyr::filter(genome_size == "4.8kb") %>% 
+    select(-genome_size)
+) %>% 
+  dplyr::filter(Target %in% c("bla", "CMVenh_corrected"))
+
+# bla
+FL_prod_master %>% 
+  dplyr::filter(Target == "bla") %>% 
+  ggplot(aes(x=Target, y=`vg/mL`)) +
+  geom_boxplot()
+
+FL_prod_master %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=Target)) +
+  geom_boxplot(width = .5) +
+  facet_grid(~transfection_mix) +
+  ggtitle("transfection mix 3 is an outlier")
+
+FL_prod_master %>% 
+  dplyr::filter(Target != "bla") %>% 
+  ggplot(aes(x=transfection_mix, y=`vg/mL`, fill=Sample)) +
+  geom_boxplot(width = .5) +
+  ggtitle("transfection mix 3 is an outlier")
+
+FL_prod_master %>% 
+  dplyr::filter(Target == "CMVenh_corrected") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(width = .1, height = 0, shape = 1, size = 1) +
+  stat_compare_means(method = "wilcox.test", comparisons = list(c("lambda", "wtfnoX"))) +
+  ggtitle("CMV sig corrected for bla")
+
+FL_prod_master %>% 
+  dplyr::filter(transfection_mix != 3, Target == "CMVenh_corrected") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(width = .1, height = 0, shape = 1, size = 1) +  stat_compare_means(method = "wilcox.test", comparisons = list(c("lambda", "wtfnoX"))) +
+  ggtitle("CMV sig corrected for bla", subtitle = "without transfection mix 3")
+```
+
+Median bla concentration across all FL productions is ~1.8e8 copies/mL
+
+
+## WTF mask on lambda | M1 M2 M3
+
+I created the stuffer DNA sequences M1, M2, and M3.
+
+M1 has all YY/RR sequences from wtf copied onto the lambda DNA. This changes 80% of the lambda sequence to AAV2 wt
+
+M2 has only YY/RR sequences with optimal spacing (15bp) copied onto the lambda DNA. This changes ~50% of the lambda sequence to AAV2 wt
+
+M3 has a strict 15 bp YY and shifted 15 bp RR sequence on the lambda DNA. This changes 25% of the DNA.
+
+I have these constructs in the old backbone and the new backbone variety. The old backbone has a mutation in the ITR. This mutation is in all backbones of all constructs tested so far. Because only one ITR is affected it does not make a huge difference in production.
+
+I have since re-cloned all constructs into a backbone with intact ITRs, here called new backbone 2 (nbb2).
+
+### 22.11.2024 production
+
+Here the old backbone still used. The production had some issues because I was missing some routine from last doing those experiments 9 months before.
+
+#### load data
+
+```{r}
+ms_prod <- read_csv("../results/ddPCR/20241129_96well_CB_2024-11-29-15-16/2024-11-29_96well_CB_R.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "MM")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M1", "M2", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+```
+
+#### droplets
+
+```{r}
+droplets <- ms_prod %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, MM) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, MM))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(MM~Sample)
+```
+
+#### bla correction
+
+```{r}
+ms_prod_corrected <- ms_prod %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, MM) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, MM))
+
+ms_prod_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=MM), width = .1, shape = 21) +
+  facet_grid(~Target)
+
+ms_prod_corrected %>% 
+  dplyr::filter(Target == "bla") %>% 
+  ggplot(aes(x=Target, y=`vg/mL`)) +
+  geom_boxplot()
+```
+
+#### concentration
+
+```{r}
+ms_prod_corrected %>% 
+  dplyr::filter(Sample != "water", Target == "CMVenh_corrected") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill= MM)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(position = position_jitterdodge(dodge.width = .5, jitter.height = 0, jitter.width = .1), size = 1, shape = 1) +
+  scale_y_log10()
+```
+
+### 03.12.2024 production
+
+New backbone from Kleo with intact ITRs.
+
+#### load data
+
+```{r}
+nbb2_prod_1 <- read_delim("../results/ddPCR/20241207_96well_CB_2024-12-07-13-33/2024-12-07_96well_CB_R.csv", delim="\t") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "MM")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M1", "M2", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_1 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, MM) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, MM))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(MM~Sample)
+```
+
+#### bla correction
+
+```{r}
+nbb2_prod_1_corrected <- nbb2_prod_1 %>% 
+  select(biol_rep, Sample, Target, vgdg, MM) %>% 
+  pivot_wider(values_from = vgdg, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, MM))
+
+nbb2_prod_1_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=MM), width = .1, shape = 21) +
+  facet_grid(~Target)
+```
+
+
+#### concentration
+
+```{r}
+nbb2_prod_1_corrected %>% 
+  dplyr::filter(Sample != "water", Target == "CMVenh_corrected") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill= MM)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(position = position_jitterdodge(dodge.width = .5, jitter.height = 0, jitter.width = .1), size = 1, shape = 1) +
+  scale_y_log10()
+```
+
+No big difference between the genomes. But I have *a lot* of bla in these productions... 
+
+I have a growing suspicion that the bla contamination heavily relies on the exact plasmid preparation. For the last nbb2 prod I had used AdH and WHC2 that came from Maxipreps with extremely high concentrations. Of which of course I used very little actual volume but still. I have not recorded which exact plasmid productions I had used in the other 96-well productions. I just know that for the first FL productions I used plasmid that came from a Midi-Prep. I have no idea where the ones from the first productions came from.
+
+
+### 13.12.2024 production - new plasmid preparations
+
+#### Droplets
+
+```{r}
+nbb2_prod_2 <- read_delim("../results/ddPCR/20241216_96well_CB_2024-12-16-13-04/2024-12-16_96well_CB_R.csv", delim="\t") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "MM")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M1", "M2", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+```
+
+```{r}
+droplets <- nbb2_prod_2 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, MM) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, MM))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(MM~Sample)
+```
+#### concentration
+
+##### bla correction
+
+```{r}
+nbb2_prod_2_corrected <- nbb2_prod_2 %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, MM) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, MM))
+
+nbb2_prod_2_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=MM), width = .1, shape = 21) +
+  facet_grid(~Target)
+```
+##### conc plot
+
+```{r}
+nbb2_prod_2_corrected %>% 
+  dplyr::filter(Sample != "water", Target %in% c("bla", "CMVenh_corrected")) %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=MM)) +
+  geom_boxplot(width = .5) +
+  scale_y_log10() +
+  facet_wrap(~Target)
+
+nbb2_prod_2_corrected %>% 
+  dplyr::filter(Sample != "water", Target %in% c("bla", "CMVenh_corrected")) %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  scale_y_log10() +
+  facet_wrap(~Target)
+```
+*This production did not work*
+
+The viral DNA concentration from this production is terrible. It is 3 times lower than the bla concentration.
+
+### 14.01.25 production
+
+I had problems with my last 2 productions with the new nbb2 plasmids and I am not sure why. I had tested a different batch of plasmid preparations which lead to the productions not working at all. I will repeat a production with those plasmids but do only a limited set to not burn too much material/kit.
+
+Do 1 column each of lambda, wtf, and M3. From the same harvest, I did a DNase digest and a raw measurement without DNase.
+
+#### load data
+
+```{r}
+nbb2_prod_3 <- read_delim("../results/ddPCR/20250120_CB_DNaseTest_2025-01-20-11-54/20250120_CB_DNaseTest_R.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "treatment")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_3 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, treatment) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, treatment))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "summary") +
+  facet_grid(treatment~Sample)
+```
+#### concentration
+
+##### bla correction
+
+```{r}
+nbb2_prod_3_corrected <- nbb2_prod_3 %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, treatment) %>% 
+  dplyr::filter(treatment != "water") %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, treatment))
+
+nbb2_prod_3_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=treatment), width = .1, shape = 21) +
+  facet_grid(treatment~Target)
+```
+##### conc plot
+
+```{r}
+nbb2_prod_3_corrected %>% 
+  dplyr::filter(Sample != "water", Target %in% c("bla", "CMVenh_corrected")) %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`, fill=treatment)) +
+  geom_boxplot(width = .5) +
+  scale_y_log10() +
+  facet_grid(treatment~Target)
+```
+
+```{r}
+nbb2_prod_3_corrected %>% 
+  pivot_wider(names_from = Target, values_from = `vg/mL`) %>% 
+  mutate(ratio = CMVenh / bla) %>% 
+  ggplot(aes(x = Sample, y = ratio)) +
+  geom_boxplot() +
+  facet_grid(~treatment) +
+  ylim(0, 5) +
+  ylab("ratio of CMV/bla")
+```
+It is not really the exact plasmid production. What makes the difference?
+
+### 14.01.25 dilution order changed
+
+The only thing that I can find that I definitely changed is the order of dilutions. In 2023 I directly put the F/T into the DNase digestion and afterwards did a dilution in water for the ddPCR. Later I did the dilution before the DNase digestion.
+
+Here I try it the old way around.
+
+```{r}
+nbb2_prod_3_dil <- read_delim("../results/ddPCR/20250121_CB_DNaseTest_2025-01-21-14-59/20250121_CB_DNaseTest_r.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_3_dil %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample))
+
+droplets %>% 
+  #dplyr::filter(Sample != "water") %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(~Sample)
+```
+#### concentration
+
+##### bla correction
+
+```{r}
+nbb2_prod_3_dil_corrected <- nbb2_prod_3_dil %>% 
+  dplyr::filter(Sample != "water") %>% 
+  select(biol_rep, Sample, Target, `vg/mL`) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample))
+
+nbb2_prod_3_dil_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(width = .1, shape = 21) +
+  facet_grid(~Target)
+```
+##### conc plot
+
+```{r}
+nbb2_prod_3_dil_corrected %>% 
+  dplyr::filter(Sample != "water", Target %in% c("bla", "CMVenh_corrected")) %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  scale_y_log10() +
+  facet_grid(~Target)
+```
+#### comparison to raw (no DNase)
+
+```{r}
+nbb2_prod3_comp <- bind_rows(nbb2_prod_3_corrected, nbb2_prod_3_dil_corrected %>% mutate(treatment = "DNase_old_order"))
+
+nbb2_prod3_comp
+
+nbb2_prod3_comp %>% 
+  dplyr::filter(Target %in% c("bla", "CMVenh")) %>% 
+  mutate(treatment = factor(treatment, levels = c("raw", "DNase", "DNase_old_order")), Target = factor(Target, levels = c("CMVenh", "bla"))) %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  facet_grid(Target~treatment) +
+  scale_y_log10()
+  #stat_summary(color="blue", fun = "median", geom="text", aes(label = round(after_stat(y))), position = position_nudge(y=.05))
+
+nbb2_prod3_comp %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(ratio = CMVenh / bla, treatment = factor(treatment, levels = c("raw", "DNase", "DNase_old_order"))) %>% 
+  ggplot(aes(x=Sample, y=ratio)) +
+  geom_boxplot() +
+  facet_grid(~treatment) +
+  scale_y_log10() +
+  stat_summary(color="blue", fun = "median", geom="text", aes(label = round(after_stat(y), 2)), position = position_nudge(y=.05))
+```
+
+In production starting from March 2024 I had started to get lower concentrations of CMVenh as well as higher concentrations of contaminating bla plasmid. This has somewhat escalated and I am trying to find the cause for this behaviour. The only difference I can find between the 2023 productions and the ones from 2024 is the changed order of dilutions. Before 2024 I directly added 5µl of the Freeze/Thaw to the DNase digestion and afterward did a 1:40 dilution for the ddPCR measurement. In 2024 I started doing the 1:40 dilution before the DNase digestion, to have less interfering cell extract and substrate to help the DNase do its thing. 
+
+The point of the DNase digestion is to get rid of most of the contaminating plasmid DNA that should be accessible to it. CMVenh should be packaged and be mostly inaccessible to DNase. Upon DNase digestion, I expect the bla signal to be affected more than the CMVenh signal. In my _new productions_ (F/T -> 1:40 -> DNase), I see that the ratio of CMVenh/bla remains at around 2, with and without DNase digestion. The overall concentration is depleted by DNase. This means DNase is affecting both CMVenh and bla the same way. In my revisiting of the _old production order_ (F/T -> DNase -> 1:40), the ratio is __much__ more in favour of CMVenh at around 10 instead of 2. The bla concentration remains relatively high however at ~3e8 cp/mL.
+
+*A possible explanation with problems itself:* With this method I mostly extract free DNA that is open to DNase digestion, which is why bla and CMVenh is similarly decreased in the diluted form. When I directly add the F/T to the DNase digestion the DNase might be overwhelmed and cannot fully digest the present DNA. What this does not explain is why the ratio of CMVenh to bla is so much more in favour of CMVenh, when I change the order of dilutions.
+
+### DNase dilution | 14.01.2025
+
+I still had very high bla concentrations in the production with the old dilution order. I wonder if it was because of the high rate of double positive droplets.
+
+```{r}
+nbb2_prod_3_dil2 <- read_delim("../results/ddPCR/20250123_CB_DNaseDilution_2025-01-23-11-30/20250123_CB_DNaseDilution_r.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>%
+  separate(Sample, c("Sample", "Dilution")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("FT", "DNase")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )  %>% 
+  mutate(Dilution = factor(Dilution, levels=c("400", "8000", "160000", "3200000")))
+
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_3_dil2 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(Dilution, col, Sample, CMVenh, bla, double_pos, negative) %>% 
+  gather(key = "cat", value = "droplets", -c(Dilution, col, Sample))
+
+droplets %>% 
+  ggplot(aes(x=Dilution, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(~Sample)
+```
+#### concentration
+
+```{r}
+nbb2_prod_3_dil2 %>% 
+  ggplot(aes(x=Dilution, y=c)) +
+  geom_point() + 
+  facet_grid(Sample~Target) +
+  scale_y_log10()
+
+nbb2_prod_3_dil2 %>%
+  ggplot(aes(x=Dilution, y=`vg/mL`)) +
+  geom_point() +
+  facet_grid(Sample~Target) +
+  scale_y_log10()
+
+nbb2_prod_3_dil2 %>%
+  dplyr::filter(dil_factor <= 10000) %>% 
+  ggplot(aes(x=Dilution, y=`vg/mL`)) +
+  geom_point() +
+  facet_grid(Sample~Target) +
+  scale_y_log10()
+```
+
+```{r}
+nbb2_prod_3_dil2 %>% 
+  select(biol_rep, Target,  Sample, Dilution, c) %>% 
+  pivot_wider(names_from = Target, values_from = c) %>% 
+  mutate(ratio = CMVenh/bla)
+```
+
+The dilutions were supposed to lower the bla contaminations, but the lower I go, the worse the ratio becomes. Maybe there is a sweet-spot I missed in between 400 and 8000? I should have done different dilution steps.
+
+The measurement of this F/T is way different to the one from 14.01. that I did. Now the 1:400 dilution is *completely* positive. Before it was only ~80% full. This time I did not mimic the DNase incubation, which is 15h at 37° and 30min at 75°. Does that really change the amount of DNA I am measuring??
+
+##### compare both F/T measurements
+
+```{r}
+bind_rows(
+nbb2_prod_3_dil %>% 
+  dplyr::filter(Sample == "wtf", biol_rep == "B") %>% 
+  mutate(Sample = "incubation"),
+nbb2_prod_3_dil2 %>% 
+  dplyr::filter(Sample == "FT", biol_rep == "A") %>% 
+  mutate(Sample = "no_incubation")
+) %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample)) %>% 
+  ggplot(aes(x=Sample, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity", width=.3) +
+  ggtitle("Same F/T sample - WT-f from 14.01.25", subtitle = "1:400 dilution - 37°/75° incubation changes measurement")
+
+```
+
+### Bla problem / DNase order
+
+#### bla concentration
+
+```{r}
+
+bla_comp <- bind_rows(
+  dfwellddPCR %>% 
+    dplyr::filter(Target == "bla") %>% 
+    select(`vg/mL`, production),
+  
+  FL_prod_master %>% 
+    dplyr::filter(Target == "bla") %>% 
+    mutate(production = "FL") %>% 
+    select(`vg/mL`, production),
+  
+  ms_prod_corrected %>% 
+    dplyr::filter(Target == "bla") %>% 
+    mutate(production = "nbb1") %>% 
+    select(`vg/mL`, production),
+
+  nbb2_prod_1_corrected %>% 
+    dplyr::filter(Target == "bla") %>% 
+    mutate(production = "nbb2") %>% 
+    select(`vg/mL`, production),
+  
+  nbb2_prod_3_dil_corrected %>% 
+    dplyr::filter(Target == "bla") %>% 
+    mutate(production = "nbb2_old_order") %>% 
+    select(`vg/mL`, production)
+) %>% 
+  mutate(production = factor(production , levels = c("well96_1", "well96_2", "well96_3", "FL", "nbb1", "nbb2", "nbb2_old_order")))
+
+
+bla_comp %>% 
+  ggplot(aes(x=production, y=`vg/mL`)) +
+  geom_boxplot() +
+  stat_summary(aes(label=formatC(..y.., format="e")), fun.y=mean, geom="text", size=3) +
+  ylab("bla vg/mL")
+```
+
+Here I compare the bla concentrations of most of my 96-well productions. The well96_1-3 are my earliest productions in this format. There I measured the DNase digestion without major dilution steps, which makes most droplets be CMV positive or double positive (see further up). The bla concentrations here are especially low compared to the other productions. In the FL productions I had started adding another dilution step that made most droplets be negative. The bla concentration here is about 2e8 cp/mL. Same goes for the nbb1 production. However in the nbb2 production I have a bla concentration that is way higher than in any of the other productions. I do not know if I want to trust those results like this...
+
+
+#### CMV/bla ratio
+
+```{r}
+ratio_comp <- bind_rows(
+  dfwellddPCR %>% 
+    mutate(ratio = CMVenh / bla) %>% 
+    select(ratio, production),
+  
+  FL_prod_master %>% 
+    pivot_wider(names_from = Target, values_from = `vg/mL`) %>% 
+    mutate(ratio = CMVenh_corrected / bla, production = "FL") %>% 
+    select(ratio, production),
+  
+  ms_prod_corrected %>% 
+    pivot_wider(names_from = Target, values_from = `vg/mL`) %>% 
+    mutate(ratio = CMVenh / bla, production = "nbb1") %>% 
+    select(ratio, production),
+
+  nbb2_prod_1_corrected %>% 
+    pivot_wider(names_from = Target, values_from = `vg/mL`) %>% 
+    mutate(ratio = CMVenh / bla, production = "nbb2") %>% 
+    select(ratio, production),
+  
+  nbb2_prod_3_dil_corrected %>% 
+    pivot_wider(names_from = Target, values_from = `vg/mL`) %>% 
+    mutate(ratio = CMVenh / bla, production = "nbb2_old_order") %>% 
+    select(ratio, production)
+) %>% 
+  mutate(production = factor(production , levels = c("well96_1", "well96_2", "well96_3", "FL", "nbb1", "nbb2", "nbb2_old_order")))
+
+ratio_comp %>% 
+  ggplot(aes(x=production, y=ratio)) +
+  geom_boxplot() +
+  scale_y_log10() +
+  stat_summary(fun = "median", size = 5, color = "blue",
+                 geom = "text", aes(label = round(after_stat(y), 2)), position = position_nudge(y=.2))
+```
+
+
+### EDTA addition 24.01.2025
+
+Test adding EDTA to inactivate the DNase
+
+added EDTA in either the old or new order of DNase dilutions for WT-F from the 14.01.2025 production
+
+#### load
+```{r}
+nbb2_prod_3_edta <- read_delim("../results/ddPCR/20250127_CB_EDTAtest_2025-01-27-14-00/20250127_CB_EDTAtest_r.csv") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "treatment", "addition")) %>% 
+  mutate(
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  )
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_3_edta %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, treatment, addition) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, treatment, addition))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "summary") +
+  facet_grid(treatment~addition)
+```
+
+```{r}
+nbb2_prod_3_edta %>% 
+  ggplot(aes(x=addition, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter() +
+  facet_grid(Target~treatment, scales="free")
+```
+
+```{r}
+nbb2_prod_3_edta %>% 
+  dplyr::filter(Sample != "water") %>% 
+  select(Sample, treatment, addition, Target, `vg/mL`, biol_rep) %>% 
+  pivot_wider(names_from=Target, values_from = `vg/mL`) %>% 
+  mutate(ratio = CMVenh/bla) %>% 
+  ggplot(aes(x=addition, y=ratio)) +
+  geom_boxplot() +
+  geom_jitter(height=0, width = .1, shape = 1) +
+  facet_wrap(~treatment)
+```
+
+Without adding EDTA, in the new method (first dilution, then DNase) CMVenh DNA is preferentially digested which leads to the ratio being pushed to being in favour of bla.
+
+Old with EDTA and a 1:1000 dilution is the way to go forward.
+
+### 03.12.2024 production - old dilution style
+
+I redid the measurement for the 03.12.2024 production with the new dilution style.
+
+1.) DNase digestion of Freeze/Thaw 15h 37°C
+
+2.) add EDTA to final concentration of 5 mM (6 µL 50 mM EDTA to the 50µL DNase digestion)
+
+3.) 15min 75°C
+
+4.) Dilution first 1:40 then 2:5, final 1:1000 dilution
+
+5.) ddPCR measurement CMVenh + bla
+
+#### load data
+
+```{r}
+nbb2_prod_4 <- read_delim("../results/ddPCR/20250128_96well_old_plate251203_CB_2025-01-28-15-42/20250128_96well_old_plate251203_CB_R.csv", delim="\t") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "MM")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M1", "M2", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  mutate(MM = replace_na(MM, "water"))
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_4 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, MM) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, MM))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(MM~Sample)
+```
+
+#### bla correction
+
+```{r}
+nbb2_prod_4_corrected <- nbb2_prod_4 %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, MM) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, MM))
+
+nbb2_prod_4_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=MM), width = .1, shape = 21) +
+  facet_grid(~Target) +
+  scale_y_log10()
+```
+
+
+#### concentration
+
+```{r}
+nbb2_prod_4_corrected %>% 
+  dplyr::filter(Sample != "water", Target == "CMVenh_corrected") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  geom_jitter()
+  #geom_jitter(position = position_jitterdodge(dodge.width = .5, jitter.height = 0, jitter.width = .1), size = 1, shape = 1) +
+  #scale_y_log10()
+```
+
+### 06.12.2024 production - old dilution style
+
+Same as as the one I redid from the production 03.12.2024
+
+#### load data
+
+```{r}
+nbb2_prod_2 <- read_delim("../results/ddPCR/20250130_96well_old_plate251206_CB_2025-01-30-15-22/20250130_96well_old_plate251203_CB_r.csv", delim="\t") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "MM")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M1", "M2", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  mutate(MM = replace_na(MM, "water"))
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_2 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, MM) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, MM))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(MM~Sample)
+```
+
+#### bla correction
+
+```{r}
+nbb2_prod_2_corrected <- nbb2_prod_2 %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, MM) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, MM))
+
+nbb2_prod_2_corrected %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=MM), width = .1, shape = 21) +
+  facet_grid(~Target)
+  #scale_y_log10()
+```
+
+
+#### concentration
+
+```{r}
+nbb2_prod_2_corrected %>% 
+  dplyr::filter(Sample != "water", Target == "CMVenh_corrected") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(width=.1, height=0)
+  #geom_jitter(position = position_jitterdodge(dodge.width = .5, jitter.height = 0, jitter.width = .1), size = 1, shape = 1) +
+  #scale_y_log10()
+```
+
+### 31.01.2024 production - old dilution style
+
+3 times the charm.
+
+#### load data
+
+```{r}
+nbb2_prod_5 <- read_delim("../results/ddPCR/20250201_96well_CB_2025-02-01-13-00/20250201_96well_CB_r.csv", delim="\t") %>% 
+  separate(Well, c("biol_rep", "col"), sep=1) %>% 
+  separate(Sample, c("Sample", "MM")) %>% 
+  mutate(
+    Sample = factor(Sample, levels=c("lambda", "wtf", "M1", "M2", "M3", "water")),
+    CMVenh = `Ch1+Ch2-`,
+    bla = `Ch1-Ch2+`,
+    double_pos = `Ch1+Ch2+`,
+    negative = `Ch1-Ch2-`
+  ) %>% 
+  mutate(MM = replace_na(MM, "water"))
+```
+
+#### droplets
+
+```{r}
+droplets <- nbb2_prod_5 %>% 
+  dplyr::filter(Target == "CMVenh") %>% 
+  select(biol_rep, col, Sample, CMVenh, bla, double_pos, negative, MM) %>% 
+  gather(key = "cat", value = "droplets", -c(biol_rep, col, Sample, MM))
+
+droplets %>% 
+  ggplot(aes(x=biol_rep, y=droplets, fill=cat)) +
+  geom_bar(stat = "identity") +
+  facet_grid(MM~Sample)
+```
+
+#### bla correction
+
+```{r}
+nbb2_prod_5_corrected <- nbb2_prod_5 %>% 
+  select(biol_rep, Sample, Target, `vg/mL`, MM) %>% 
+  pivot_wider(values_from = `vg/mL`, names_from = Target) %>% 
+  mutate(
+    CMVenh_from_plasmid = 0.333 * bla,
+    CMVenh_corrected = CMVenh - CMVenh_from_plasmid) %>% 
+  gather(key = "Target", value = "vg/mL", -c(biol_rep, Sample, MM))
+
+nbb2_prod_5_corrected %>% 
+  dplyr::filter(MM != "water") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot() +
+  geom_jitter(aes(fill=MM), width = .1, shape = 21) +
+  facet_grid(~Target) +
+  scale_y_log10()
+```
+
+
+#### concentration
+
+```{r}
+nbb2_prod_5_corrected %>% 
+  dplyr::filter(Sample != "water", Target == "CMVenh_corrected") %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(width=.1, height=0)
+  #geom_jitter(position = position_jitterdodge(dodge.width = .5, jitter.height = 0, jitter.width = .1), size = 1, shape = 1) +
+  #scale_y_log10()
+```
+
+
+## Conclusion of the nbb2 productions
+
+```{r}
+nbb2 <- bind_rows(
+  nbb2_prod_4_corrected %>% 
+    mutate(prod = "nbb2_prod1"),
+  nbb2_prod_2_corrected %>% 
+    mutate(prod = "nbb2_prod2"),
+  nbb2_prod_5_corrected %>% 
+    mutate(prod = "nbb2_prod3")
+) %>% 
+  dplyr::filter(Sample != "water", Target == "CMVenh_corrected")
+
+# add logFC to lambda
+nbb2 <- left_join(
+  nbb2,
+  nbb2 %>% 
+  dplyr::filter(Sample == "lambda") %>% 
+  group_by(prod) %>% 
+  summarise(mean_lambda = mean(`vg/mL`))) %>% 
+  mutate(logFC = log2(`vg/mL` / mean_lambda))
+
+nbb2 %>% 
+  ggplot(aes(x=Sample, y=`vg/mL`)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(width=.1, height=0, aes(colour=prod)) +
+  facet_wrap(~prod, scales="free") +
+  ggtitle("old DNase dilution order", subtitle = "prod1/prod2 from december; prod3 immediately measured")
+
+nbb2 %>% 
+  ggplot(aes(x=Sample, y=logFC, colour=prod)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(position = position_jitterdodge(jitter.height = 0, jitter.width = .2, dodge.width = .6)) +
+  ylim(-2, 2) +
+  geom_hline(yintercept = 0) +
+  ggtitle("old DNase dilution order", subtitle = "prod1/prod2 from december; prod3 immediately measured")
+
+nbb2 %>% 
+  dplyr::filter(prod != "nbb2_prod2") %>% 
+  # drop outlier
+  dplyr::filter(logFC > -5) %>% 
+  ggplot(aes(x=Sample, y=logFC, fill=Sample)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot(width = .5) +
+  #ylim(-2, 2) +
+  geom_jitter(height=0, width=.2, size=.5) +
+  stat_compare_means(comparisons = list(c("lambda", "wtf"), c("lambda", "M1"), c("lambda", "M2"), c("lambda", "M3"))) +
+  theme_bw() +
+  theme(text=element_text(size=15)) +
+  scale_fill_manual(values = c("#1e81b0", "#eab676", "#fd8d3c", "#f03b20", "#bd0026"))
+  #stat_compare_means(aes(label = after_stat(p.signif)), ref.group = "lambda") +
+  #ggtitle("only prod1 and prod3")
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_nbb2_comparison.logFC.png", width=5, height=4, dpi = 300)
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_nbb2_comparison.logFC.svg", width=5, height=4, dpi = 300)
+
+nbb2 %>% 
+  dplyr::filter(prod != "nbb2_prod2") %>% 
+  select(prod, biol_rep, MM, Sample) %>%
+  group_by(Sample) %>% 
+  summarise(n_biological_replicates = n())
+
+
+nbb2_prod_1_corrected %>% 
+  dplyr::filter(Sample != "water", Target == "CMVenh_corrected") %>% 
+  mutate(mean_lambda = nbb2_prod_1_corrected %>% dplyr::filter(Sample == "lambda", Target == "CMVenh_corrected") %>% pull(`vg/mL`) %>% mean()) %>% 
+  mutate(logFC = log2(`vg/mL` / mean_lambda)) %>% 
+  ggplot(aes(x=Sample, y=logFC)) +
+  geom_boxplot(width = .5) +
+  geom_jitter(height=0, width=.1, colour = "darkred") +
+  ylim(-2, 2) +
+  geom_hline(yintercept = 0) +
+  ggtitle("new DNase dilution order", subtitle = "prod1 measured immediately in december")
+```
+
+The range of measurements is not comparable among the productions. That sucks big balls. I do not really know why, I can only guess. What is prod 1 and prod 2 in the plot were done in december last year; a little over a month ago. Yet the titer measurements are 10 times higher than in prod 3 which was measured immediately after harvesting. But why the time in the freezer has a positive effect for vg/mL counts eludes me. Maybe there is more cell bs in the F/T that could negatively impact DNase activity. Maybe I did not properly mix in the EDTA for the prod 3. I remember vortexing the plate in sections; maybe that was dumb.
+
+I decided to compare every measurement to the lambda control that was in there. This partly gets rid of the crazy range of the titers. This way the entirety of prod2 presents itself as an outlier, probably because the lambda there is abnormally high. Excluding it makes the plot at least make some sense.
+
+However ugly the data may be, there are 2 core trends:
+
+1. wt-F remains better than lambda
+
+2. in general the M1 - M3 are worse than wtf itself, and closer (or below) the lambda control.
+
+The very first nbb2 production (prod 1) was measured also directly after harvesting and diluted in the new dilution order. Here I have a very similar pattern as prod 3, which was measured also directly after harvesting but after the old dilution order. To me this pattern makes the most sense: the further I mutate away from wt-f the more it becomes like lambda, regardless of the periodicity.
+
+This is a troubling result. It might suggest that the higher titer I can see in the wt-f genomes have little to do with the pattern I tried to emulate in M1-M3. It might be caused by recombination events between the WHC2 plasmid and the wt-F genome that could potentially create semi-replication competent virus. I still measuring the abundance of the CMVenh, therefore a recombination could lead to the presence of an intact rep as a stuffer that leads to that transgene being replicated more.
+
+The way I was emulating the pattern on the viral DNA does not have an effect on the titer. We can not add viral DNA as a stuffer into therapeutic transgenes. _But_ the existence of this pattern entails a biological function, that is clear.
+
+
+## 13.02.2025 Jonas Plate production
+
+Jonas has produced 2 plates each of lambda, wtF, M1, M2, and M3 with 3 replicates. Virus was titered with ddPCR and the ddPCR CMVenh primer/probe set. 
+
+### titer comparison
+
+#### load and plot
+
+```{r}
+jbplate <- read_delim("../results/ddPCR/20250213_PLATES_JBtitration_CB.csv") %>% 
+  gather(-Construct, key="replicate", value="vg_per_plate") %>% 
+  mutate(Construct = factor(Construct, levels = c("lambda", "wt-fragments", "M1", "M2", "M3")))
+
+m <- jbplate %>% 
+  dplyr::filter(Construct == "lambda") %>% 
+  pull(vg_per_plate) %>% mean()
+
+jbplate_norm <- jbplate %>% 
+  mutate(control = m, logFC = log2(vg_per_plate / control))
+```
+
+
+```{r}
+jbplate_norm %>% 
+  ggplot(aes(x=Construct, y=logFC, fill=Construct)) +
+  geom_bar(stat="summary", width=.5) +
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  scale_fill_manual(values = c("#1e81b0", "#eab676", "#fd8d3c", "#f03b20", "#bd0026")) +
+  theme_bw() +
+  theme(text = element_text(size = 15)) +
+  ylim(-2, 3)
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_JB_PLATE.logFC.png", width=5, height=4, dpi = 300)
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_JB_PLATE.logFC.svg", width=5, height=4, dpi = 300)
+  
+```
+
+### Transduction HEK different MOI - 3.3.2025
+
+Jonas transduced HEK cells with different MOIs and in triplicates. 3 days post transduction, the medium was replaced by PBS and GFP fluorescence was measured on the TECAN reader on the 6th floor.
+
+#### load and plot
+
+```{r}
+trans_hek_01 <- read_csv("../results/transduction_jonas_2025/20250228_transduction_Hek.csv") %>% 
+  gather(-c(Construct, cells, MOI, experiment), value = "GFP", key="Repl") %>% 
+  mutate(
+    Construct = factor(Construct, levels = c("lambda", "wtf", "M1", "M2", "M3"))
+    )
+
+mean_l <- trans_hek_01 %>% dplyr::filter(Construct == "lambda") %>% group_by(Repl, cells, MOI) %>% 
+  summarise(mean_control = mean(GFP))
+
+trans_hek_01 <- left_join(trans_hek_01, mean_l) %>%
+  mutate(logFC = log2(GFP / mean_control))
+
+trans_hek_01 %>% 
+  ggplot(aes(x=Construct, y=GFP)) +
+  geom_boxplot() +
+  facet_wrap(~MOI, scales="free") +
+  ggtitle("Hek293T transduction", subtitle = "MOI")
+
+trans_hek_01 %>% 
+  dplyr::filter(MOI == "e4") %>% 
+  ggplot(aes(x=Construct, y=logFC, fill = Construct)) +
+  geom_bar(stat = "summary") +
+  geom_point() +
+  scale_fill_manual(values = c("#1e81b0", "#eab676", "#fd8d3c", "#f03b20", "#bd0026")) +
+  geom_hline(yintercept = 0) +
+  theme_bw() +
+  theme(text = element_text(size = 15)) +
+  ylab("logFC GFP intensity")
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_JB_TRANS.logFC.png", width=5, height=4, dpi = 300)
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_JB_TRANS.logFC.svg", width=5, height=4, dpi = 300)
+
+```
+
+### Transduction HEK and Huh7 - 13.3.2025
+
+Jonas repeated the transduction in Hek cells and Huh7 cells. The MOI was kept at 1e4 this time
+
+```{r}
+
+trans_hek_02 <- read_csv("../results/transduction_jonas_2025/20250313_hek_and_huh.csv") %>% 
+  gather(-c(Construct, cells, Repl, experiment, MOI), value = "GFP", key="tech_rep")
+
+  
+mean_control <- trans_hek_02 %>% 
+  dplyr::filter(Construct == "lambda") %>% 
+  group_by(Repl, cells) %>% 
+  summarise(mean_control = mean(GFP))
+
+
+trans_hek_02 <- left_join(trans_hek_02, mean_control) %>% 
+  mutate(logFC = log2(GFP / mean_control))
+
+trans_hek_02 %>% 
+  ggplot(aes(x=Construct, y=logFC)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot() +
+  geom_jitter(aes(colour = Repl), width = .1)+
+  facet_wrap(~cells)
+  
+
+library(ggpubr)
+
+bind_rows(
+  trans_hek_01,
+  trans_hek_02 %>%
+    select(-tech_rep)
+  ) %>% 
+  mutate(
+    Construct = factor(Construct, levels = c("lambda", "wtf", "M1", "M2", "M3")),
+    experiment = as.character(experiment)
+    ) %>% 
+  dplyr::filter(MOI == "e4") %>% 
+  ggplot(aes(x=Construct, y=logFC, fill = Construct)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot(outliers = F) +
+  geom_jitter(position = position_jitterdodge(jitter.width = .1, jitter.height = 0, dodge.width = .9), size = 1, shape = 3)+
+  facet_grid(~cells) +
+  theme_bw() +
+  theme(text = element_text(size = 12)) +
+  scale_fill_manual(values = c("#1e81b0", "#eab676", "#fd8d3c", "#f03b20", "#bd0026")) +
+  stat_compare_means(comparisons = list(  c("lambda", "M2"), c("lambda", "wtf") ))
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_JB_TRANS.02.logFC.png", width=6, height=4, dpi = 300)
+ggsave("../periodify/mask/ddPCRplots/M1M2M3_JB_TRANS.02.logFC.svg", width=6, height=4, dpi = 300)
+```
+
+
+
+

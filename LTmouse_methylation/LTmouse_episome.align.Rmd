@@ -1,0 +1,238 @@
+# Alignment
+
+## Dorado Aligner
+
+```{bash}
+reference=genomes/pPl04.linearized.fasta
+
+# remove short reads below 2 kb
+samtools view -h data/reb/LTmouse.combined.bam | awk 'length($10) > 2000 || $1 ~ /^@/' | samtools view -bS - > data/reb/LTmouse.LengthFiltered.bam
+
+
+# align the rebasecalled bam together with its modifications
+dorado aligner $reference data/reb/LTmouse.LengthFiltered.bam \
+  --emit-summary \
+  -t 16 \
+  --output-dir data/aligned/
+
+# demultiplex the barcodes; this information is also stored in the bam file already from rebasecalling, hence "--no-classify"
+dorado demux data/aligned/ --no-classify -o data/aligned_demux/ -t 16
+```
+
+## Renaming
+
+```{bash}
+declare -A barcode_dict=(
+  ["barcode01"]="2_2_1"
+  ["barcode02"]="2_2_2"
+  ["barcode03"]="2_2_3"
+  ["barcode04"]="2_2_4"
+  ["barcode05"]="9_2_1"
+  ["barcode06"]="9_2_2"
+  ["barcode07"]="9_2_3"
+  ["barcode08"]="9_2_4"
+  ["barcode09"]="2_6_1"
+  ["barcode10"]="2_6_2"
+  ["barcode11"]="2_6_3"
+  ["barcode12"]="2_6_4"
+  ["barcode13"]="9_6_1"
+  ["barcode14"]="9_6_2"
+  ["barcode15"]="9_6_3"
+  ["barcode16"]="9_6_4"
+  ["barcode17"]="2_12_1"
+  ["barcode18"]="2_12_2"
+  ["barcode19"]="2_12_3"
+  ["barcode20"]="2_12_4"
+  ["barcode21"]="9_12_1"
+  ["barcode22"]="9_12_2"
+  ["barcode23"]="9_12_3"
+  ["barcode24"]="9_12_4"
+)
+for key in ${!barcode_dict[@]}
+do
+  infile=data/aligned_demux/SQK-NBD114-24_${key}.bam
+  outfile=data/aligned_demux/${barcode_dict[$key]}.unfiltered.bam
+  mv $infile $outfile
+  samtools index $outfile
+done
+samtools index data/aligned_demux/unclassified.bam
+```
+
+## Remove unmapped reads and supp alignments
+
+```{bash}
+
+for file in data/aligned_demux/*.unfiltered.bam
+do
+  samtools view -@ 12 -b -F 2308 $file > ${file/unfiltered/filt}
+  samtools index ${file/unfiltered/filt}
+  rm $file ${file/.bam/.bam.bai}
+done
+
+```
+
+## Stats
+
+```{bash}
+for file in data/aligned_demux/*.bam
+do
+  samtools idxstats -@ 8 $file > ${file/.bam/.nreads}
+done
+```
+
+```{r}
+library(tidyverse)
+
+nreads <- lapply(list.files("data/aligned_demux/", pattern = ".nreads"), function(x){
+  name <- str_split(x, "\\.")[[1]][1]
+  tmp <- read_delim(paste0("data/aligned_demux/", x), col_names = c("chr", "size", "reads", "umapped_reads")) %>% 
+    mutate(sample = name)
+  return(tmp)
+}) %>% bind_rows() %>% 
+  filter(sample != "unclassified") %>% 
+  separate(sample, c("AAV", "weeks", "mouse")) %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."),  weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+nreads_aligned <- nreads %>% 
+  select(-chr, -size,-umapped_reads) %>% 
+  group_by(AAV, weeks, mouse) %>%
+  summarise(sum_reads = sum(reads))
+
+nreads_aligned %>% 
+  ggplot(aes(x=mouse, y=sum_reads, fill=AAV, label = sum_reads)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ylab("reads") +
+  geom_text(position=position_dodge(.9), hjust = 1) +
+  facet_wrap(~weeks) +
+  ggtitle("Total Number of aligned reads (Mouse + transgene)") +
+  scale_y_log10() +
+  coord_flip() +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+ggsave("plots/aligned_reads.mouse+AAV.png", width = 6, height = 3)
+ggsave("plots/aligned_reads.mouse+AAV.svg", width = 6, height = 3)
+
+nreads %>% 
+  dplyr::filter(chr == "pPl04_linearized") %>% 
+  ggplot(aes(x=mouse, y=reads, fill=AAV, label=reads)) +
+  geom_bar(stat = "identity", position=position_dodge()) +
+  geom_text(position=position_dodge(.9), hjust = -0.1, size = 3) +
+  ggtitle("Number of mapped TRANSGENE reads") +
+  facet_wrap(~weeks) +
+  ylim(0, 800) +
+  coord_flip() +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+ggsave("plots/aligned_reads.AAV.png", width = 6, height = 3)
+ggsave("plots/aligned_reads.AAV.svg", width = 6, height = 3)
+
+
+nreads_pooled <- nreads %>% 
+  dplyr::filter(chr == "pPl04_linearized") %>% 
+  group_by(AAV, weeks) %>% 
+  summarise(sum_reads = sum(reads))
+
+nreads_pooled %>% 
+  ggplot(aes(x=AAV, y=sum_reads, fill=AAV, label=sum_reads)) +
+  geom_bar(stat = "identity") +
+  geom_text(hjust = -0.1, size = 3) +
+  ggtitle("Number of mapped TRANSGENE reads - pooled mice") +
+  facet_wrap(~weeks) +
+  ylim(0, 2000) +
+  coord_flip() +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+ggsave("plots/aligned_reads.AAV.pooledReps.png", width = 6, height = 3)
+ggsave("plots/aligned_reads.AAV.pooledReps.svg", width = 6, height = 3)
+```
+
+# Tabulating Modifications
+
+## Individually
+
+```{bash}
+for file in data/aligned_demux/*.bam
+do
+  # combine the calls for 5mC and 5hmC because bisulfite sequencing can also not differentiate between the 2
+  modbam2bed \
+    --aggregate \
+    --combine \
+    --cpg \
+    --extended \
+    -t 16 \
+    $reference $file > ${file/.bam/.modbed}
+done
+```
+
+# Getting alignment info
+
+```{bash}
+
+touch 'data/aligned_demux/aligned_bases.csv'
+for file in data/aligned_demux/*.bam
+do
+  samtools stats $file | grep ^RL > ${file/.bam/.hist}
+  alnbases=$(samtools stats $file | grep "bases mapped (cigar):" | awk '{print $5}')
+  f=$(basename $file)
+  echo ${alnbases},${f/.bam/} >> 'data/aligned_demux/aligned_bases.csv'
+done
+```
+
+
+## histogram
+
+```{r}
+path <- "data/aligned_demux/"
+hist <- lapply(list.files(path, pattern=".hist"), function(file){
+  tmp <- read_delim(paste0(path, file), col_names = c("field", "length", "count"))
+  
+  read_counts <- c()
+  counts <- pull(tmp, count)
+  lengths <- pull(tmp, length)
+  for (i in seq(nrow(tmp))){
+    for (j in seq(counts[i])){
+      read_counts <- append(read_counts, lengths[i])
+    }
+  }
+  
+  out <- tibble(read_counts) %>% 
+    mutate(sample = str_split(file, "\\.")[[1]][1]) %>% 
+    separate(sample, c("capsid", "weeks", "replicate")) %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+    dplyr::filter(capsid != "unclassified")
+  return(out)
+}) %>% bind_rows()
+
+hist %>% 
+  ggplot(aes(x=read_counts, fill=capsid)) +
+  geom_histogram() +
+  facet_grid(capsid~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  xlim(0, 6000)
+
+hist %>% 
+  ggplot(aes(x=read_counts)) +
+  geom_density() +
+  facet_grid(capsid~weeks) +
+  xlim(0, 6000)
+```
+
+## mapped bases
+
+```{r}
+cov <- read_csv("data/aligned_demux/aligned_bases.csv", col_names = c("aligned_bases", "sample")) %>% 
+  separate(sample, c("capsid", "weeks", "replicate")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    coverage = aligned_bases / 4133
+    ) %>% 
+  dplyr::filter(capsid != "unclassified")
+
+
+cov %>% 
+  ggplot(aes(x=replicate, y=coverage, fill=capsid, label = round(coverage))) +
+  geom_bar(stat="identity") +
+  geom_text() +
+  facet_grid(capsid~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("raw coverage")
+```
+

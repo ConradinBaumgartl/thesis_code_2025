@@ -1,0 +1,18 @@
+
+
+
+
+
+Analysis Type:	PANTHER Overrepresentation Test (Released 20240807)
+Annotation Version and Release Date:	GO Ontology database DOI:  10.5281/zenodo.14083199 Released 2024-11-03
+Analyzed List:	upload_1 (Mus musculus)
+Reference List:	Mus musculus (all genes in database)
+Test Type:	FISHER
+Correction:	FDR
+GO biological process complete	Mus musculus - REFLIST (21836)	upload_1 (41)	upload_1 (expected)	upload_1 (over/under)	upload_1 (fold Enrichment)	upload_1 (raw P-value)	upload_1 (FDR)
+positive regulation of cell migration (GO:0030335)	611	10	1.15	+	8.72	1.40E-07	5.40E-04
+positive regulation of cell motility (GO:2000147)	641	10	1.20	+	8.31	2.18E-07	6.73E-04
+positive regulation of locomotion (GO:0040017)	658	10	1.24	+	8.09	2.78E-07	7.14E-04
+regulation of cell migration (GO:0030334)	1037	13	1.95	+	6.68	2.95E-08	4.55E-04
+regulation of cell motility (GO:2000145)	1101	13	2.07	+	6.29	5.97E-08	4.60E-04
+regulation of locomotion (GO:0040012)	1149	13	2.16	+	6.03	9.83E-08	5.05E-04

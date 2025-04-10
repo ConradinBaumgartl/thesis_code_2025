@@ -1,0 +1,12 @@
+Building DAG of jobs...
+MissingInputException in rule all in file /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/snakefile, line 12:
+Missing input files for rule all:
+    affected files:
+        data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR
+        data/alignment/cmv/K27ac_262_liver.ALL.SEACR
+        data/alignment/cmv/K27ac_961_liver.ALL.SEACR
+        data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR
+        data/alignment/cmv/K27ac_261_liver.ALL.SEACR
+        data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR
+        data/alignment/cmv/K27ac_962_liver.ALL.SEACR
+        data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR

@@ -1,0 +1,63 @@
+# all AAV sequences together
+
+```{bash}
+Rscript Periodicity6_crossDistances.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/AAV_serotypes.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/Xdistance/ \
+Parvoviridae \
+dependoparovirus
+
+Rscript Periodicity6_crossDistances.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/S288C.rndsequences.1.fasta  \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/Xdistance/ \
+Yeast \
+S288C
+```
+
+
+
+```{r}
+f <- bind_rows(
+  read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/Xdistance/dependoparovirus.Xdist.HIST.csv") %>% 
+    mutate(species ="AAV"),
+  read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/Xdistance/S288C.Xdist.HIST.csv") %>% 
+    mutate(species = "yeast")
+) %>% 
+  select(-...1) 
+
+f %>% 
+  dplyr::filter(dinuc1 == "YY", dinuc2 %in% c("YY", "RR")) %>%
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc2)) +
+  geom_line() +
+  xlim(0, 50) +
+  ylim(-0.0005, 0.0005) +
+  facet_wrap(~species)
+
+f %>% 
+  dplyr::filter(dinuc1 == "YY", dinuc2 %in% c("YY", "RR"), species == "AAV") %>%
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc2)) +
+  geom_line(linewidth=1.5) +
+  xlim(0, 50) +
+  ylim(-0.0005, 0.0005) +
+  scale_color_manual(values=c(
+    "#06A78C",
+    "#006BCA"
+  )) +
+  theme_bw() +
+  theme(text = element_text(size=15))
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_joined.aav13.Xdistance.YY-RR.png", width=6, height=4)
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_joined.aav13.Xdistance.YY-RR.svg", width=6, height=4)
+
+
+f %>% 
+  unite("d", c(dinuc1, dinuc2), sep = "_") %>%
+  pivot_wider(values_from = norm_counts, names_from = d) %>% 
+  dplyr::filter(distance < 100) %>% 
+  ggplot(aes(x=YY_YY, y=YY_RR, color=species)) +
+  geom_point()
+```
+
+
+
+
+

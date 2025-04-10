@@ -1,0 +1,100 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job      count    min threads    max threads
+-----  -------  -------------  -------------
+SEACR        8              1              1
+all          1              1              1
+total        9              1              1
+
+Select jobs to execute...
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.bedgraph, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_261_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 104
+    reason: Missing output files: data/alignment/cmv/K27ac_261_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.bedgraph, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_262_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 106
+    reason: Missing output files: data/alignment/cmv/K27ac_262_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.bedgraph, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_961_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 108
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.bedgraph, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_962_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 110
+    reason: Missing output files: data/alignment/cmv/K27ac_962_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR.stringent.bed, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 96
+    reason: Updated input files: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR.stringent.bed, data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 98
+    reason: Updated input files: data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.bedgraph, data/alignment/cmv_mouse/K27ac_262_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR.stringent.bed, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 100
+    reason: Updated input files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:06:21 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph, data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR.stringent.bed, data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 102
+    reason: Updated input files: data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.bedgraph, data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Thu Sep  5 17:17:23 2024]
+Finished job 98.
+1 of 9 steps (11%) done
+[Thu Sep  5 17:18:33 2024]
+Finished job 102.
+2 of 9 steps (22%) done
+[Thu Sep  5 17:19:34 2024]
+Finished job 100.
+3 of 9 steps (33%) done
+[Thu Sep  5 17:19:55 2024]
+Finished job 96.
+4 of 9 steps (44%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2024-09-05T170620.507473.snakemake.log

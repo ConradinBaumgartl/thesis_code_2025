@@ -1,0 +1,138 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job      count    min threads    max threads
+-----  -------  -------------  -------------
+SEACR        8              1              1
+all          1              1              1
+total        9              1              1
+
+Select jobs to execute...
+
+[Thu Aug 29 16:31:06 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.bedgraph
+    output: data/alignment/cmv/K27ac_261_liver.ALL.SEACR
+    jobid: 104
+    reason: Missing output files: data/alignment/cmv/K27ac_261_liver.ALL.SEACR
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 16:31:06 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.bedgraph
+    output: data/alignment/cmv/K27ac_262_liver.ALL.SEACR
+    jobid: 106
+    reason: Missing output files: data/alignment/cmv/K27ac_262_liver.ALL.SEACR
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 16:31:06 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.bedgraph
+    output: data/alignment/cmv/K27ac_961_liver.ALL.SEACR
+    jobid: 108
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.ALL.SEACR
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 16:31:06 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.bedgraph
+    output: data/alignment/cmv/K27ac_962_liver.ALL.SEACR
+    jobid: 110
+    reason: Missing output files: data/alignment/cmv/K27ac_962_liver.ALL.SEACR
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 16:31:06 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR
+    jobid: 96
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 16:31:06 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR
+    jobid: 98
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 16:31:06 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR
+    jobid: 100
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 16:31:07 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR
+    jobid: 102
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule SEACR in file /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/snakemake_scripts/peaks.snakefile, line 10:
+Job 106  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+data/alignment/cmv/K27ac_262_liver.ALL.SEACR
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule SEACR in file /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/snakemake_scripts/peaks.snakefile, line 10:
+Job 104  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+data/alignment/cmv/K27ac_261_liver.ALL.SEACR
+Terminating processes on user request, this might take some time.
+[Thu Aug 29 16:31:27 2024]
+Error in rule SEACR:
+    jobid: 100
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR
+    shell:
+        bash ~/applications/SEACR/SEACR_1.3.sh data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph 0.1 non stringent data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+[Thu Aug 29 16:31:27 2024]
+[Thu Aug 29 16:31:27 2024]
+Error in rule SEACR:
+    jobid: 98
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR
+    shell:
+        bash ~/applications/SEACR/SEACR_1.3.sh data/alignment/cmv_mouse/K27ac_262_liver.ALL.bedgraph 0.1 non stringent data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error in rule SEACR:
+    jobid: 96
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR
+    shell:
+        bash ~/applications/SEACR/SEACR_1.3.sh data/alignment/cmv_mouse/K27ac_261_liver.ALL.bedgraph 0.1 non stringent data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+[Thu Aug 29 16:31:27 2024]
+Error in rule SEACR:
+    jobid: 102
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR
+    shell:
+        bash ~/applications/SEACR/SEACR_1.3.sh data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph 0.1 non stringent data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Cancelling snakemake on user request.

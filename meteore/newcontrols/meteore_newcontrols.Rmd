@@ -1,0 +1,409 @@
+Richi has told me about METEORE (https://github.com/comprna/METEORE), a pipeline that creates a cumulative output from multiple base modification tools that is more robust than any tool on its own. In their paper (https://www.nature.com/articles/s41467-021-23778-6), they also benchmark the tools on their own, where tombo, nanopolish, and guppy all perform quite poorly. Of course its all the ones I have used already...
+
+Here I want to try and use METEORE with at least 2 different inputs.
+
+# installation
+
+cloned from github into applications
+
+```{bash}
+cd ~/applications/METEORE/
+```
+
+Since the initial installation I have moved METEORE to the SDS:
+
+/home/conradin/sds-hd/sd21j005/conradin/METEORE
+
+
+## R init
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+```
+
+
+# METEORE pipelines
+
+## Guppy
+
+Download the scripts that convert CpG methylation from fast5s to reference anchored calls
+
+### rebasecall with fast5 out and methylation detection
+
+```{bash}
+~/applications/ont-guppy/bin/guppy_basecaller \
+  --save_path ~/projects/tmp/run4_fast5_test \
+  --input_path ~/sds-hd/sd21j005/conradin/raw_data/ONT/episome_005/run4_posctrl/20230920_1441_MN37870_FAW66741_48a472e4/ \
+  --device "cuda:0" \
+  --gpu_runners_per_device 4 \
+  --chunks_per_caller 2048 \
+  -r \
+  --fast5_out \
+  --config dna_r9.4.1_e8.1_modbases_5mc_cg_hac.cfg \
+  --barcode_kits SQK-RBK004
+```
+
+### Convert to single fast5 reads
+
+Some tools in the meteore pipeline are still dependent on single fast5 reads, so I need to transform them
+
+```{bash}
+for dir in ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/run4_fast5/workspace/fast5_pass/*/
+do
+  bc=$(basename $dir)
+  paff=$(dirname $dir)
+  out=${paff}/${bc}_single
+  mkdir $out
+  multi_to_single_fast5 -i $dir -s $out --recursive -t 12
+done
+```
+
+
+### call methylation
+The script below:
+
+1. creates the rock-database with all methylation information of the reads
+
+2. aligns the reads to the reference
+
+3. extracts the methylation information for every CpG on the reference
+
+```{bash}
+# generate the rockdb database of all reads
+# rockdb is also dependent on sinlge fast5 files, so run the nanopolish single conversion first
+python ~/applications/gcf52ref/scripts/extract_methylation_fast5.py -p 10 ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/run4_fast5/workspace/*/*/*.fast5 -d base_mod.run4.rockdb
+
+run_n="run4"
+barcodes="barcode10 barcode11 barcode12"
+declare -A names=( \
+    ["barcode10"]="met_CMV_03" \
+    ["barcode11"]="met_LP1_03" \
+    ["barcode12"]="met_GFAP_03"\
+    )
+  
+for BC in $barcodes
+do
+  echo ""
+  echo "Now processing" $run_n $BC "as" ${names[$BC]}
+  
+  fastq=~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/${run_n}_fast5/pass/${names[$BC]}/${names[$BC]}.fastq
+  sam=~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/${run_n}_fast5/pass/${names[$BC]}/${names[$BC]}.sam
+  bamtmp=~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/${run_n}_fast5/pass/${names[$BC]}/${names[$BC]}.tmp.bam
+  bam=~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/${run_n}_fast5/pass/${names[$BC]}/${names[$BC]}.bam
+  reference=~/projects/seq_runs/episome_005/genomes/combined/combined.fasta
+  tsv=results/guppy/${names[$BC]}_guppy-log-perCG.tsv
+  
+  cat ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/${run_n}_fast5/pass/${names[$BC]}/fastq_runid_*.fastq > $fastq
+  minimap2 -a -x map-ont $reference $fastq > $sam
+  # filter reads that are unmapped, secondary or supplementary alignment
+  samtools view -b -F 2308 $sam > $bamtmp
+  samtools sort $bamtmp > $bam
+  samtools index $bam
+  
+  rm $sam
+  rm $bamtmp
+
+  python ~/applications/gcf52ref/scripts/extract_methylation_from_rocks.py \
+  -d ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/base_mod.run4.rockdb/ \
+  -a $bam \
+  -r $reference \
+  -o $tsv
+done
+```
+
+There are a lot of errors that complain about missing methylation information about certain reads, but for the love of god I can not figure out why that is. In my experience this is mostly in the control samples of the PCR controls. I do not know why some reads are not listed in the rocksdb that are present in the bam file, which is why I think the program is complaining. In any case it only happens for a small-ish percentage of reads so I ignore it...
+
+
+### reformat 
+
+        
+```{bash}
+for file in guppy_results/*03_guppy-log-perCG.tsv
+do
+  # reformat
+  Rscript script_in_snakemake/run_guppy.R $file ${file/_guppy-log-perCG.tsv/_guppy-freq-perCG.tsv} ${file/_guppy-log-perCG.tsv/_guppy-freq-perCG-combStrand.tsv}
+  # reformat for combined model
+  Rscript script_in_snakemake/format_guppy.R $file ${file/_guppy-log-perCG.tsv/_guppy-perRead-score.tsv}
+done
+```
+
+
+
+### check
+
+```{r}
+library(tidyverse)
+
+guppy <- lapply(list.files("guppy_results/", pattern = "_guppy-freq-perCG-combStrand"), function(x){
+  read_tsv(paste0("guppy_results/", x)) %>% 
+    mutate(sample = strsplit(x, "_guppy-freq-perCG-combStrand.tsv")[[1]])
+}) %>% bind_rows() %>% 
+  mutate(tool = "guppy")
+
+guppy %>% 
+  separate(sample, c("tissue", "promoter", "replicate")) %>% 
+  ggplot(aes(x=Methylation)) +
+  geom_histogram() +
+  facet_grid(replicate~tissue)
+```
+
+
+## nanopolish
+
+### control samples
+
+
+Now I just need to rename them according to the samples so I can deal with them in the modified nanopolish pipeline snakefile:
+
+```{bash}
+# rename all single barcode fast5 folders
+# define names
+declare -A names=( \
+    ["barcode10"]="met_CMV_03" \
+    ["barcode11"]="met_LP1_03" \
+    ["barcode12"]="met_GFAP_03" \
+    )
+
+
+# loop through the directories
+for dir in ~/sds-hd/sd21j005/conradin/raw_data/ONT/episome_005/run4_posctrl/single/*/
+do
+  BC=$(basename $dir)
+  echo $BC
+  echo ${names[$BC]}
+  mv $dir ${names[$BC]}_single
+done
+```
+
+
+```{bash}
+snakemake -s Nanopolish-ctrl2 \
+  nanopolish_results/met_CMV_03_nanopolish-freq-perCG.tsv \
+  nanopolish_results/met_GFAP_03_nanopolish-freq-perCG.tsv \
+  nanopolish_results/met_LP1_03_nanopolish-freq-perCG.tsv \
+  --cores all -n
+```
+
+```{bash}
+# finalize the results
+snakemake -s Nanopolish-ctrl2 \
+  nanopolish_results/met_CMV_03_nanopolish-perRead-score.tsv \
+  nanopolish_results/met_GFAP_03_nanopolish-perRead-score.tsv \
+  nanopolish_results/met_LP1_03_nanopolish-perRead-score.tsv \
+  --cores all
+```
+
+
+### check it out
+
+```{r}
+nanopolish <- lapply(
+  list.files(path = "nanopolish_results/", pattern = "combStrand"),
+  function(x){
+    read_tsv(paste0("nanopolish_results/", x)) %>% 
+      mutate(sample = strsplit(basename(x), "_nanopolish-freq-perCG-combStrand.tsv")[[1]])
+  }) %>% bind_rows %>%
+  mutate(tool = "nanopolish")
+
+nanopolish %>%
+  separate(sample, c("tissue", "promoter", "replicate")) %>% 
+  ggplot(aes(x=Methylation)) +
+    geom_histogram(bins=100) +
+    facet_grid(replicate~tissue)
+```
+
+
+## Deepsignal
+
+deepsignal needs single fast5 files
+
+For some reason only reads for barcode10 were missing basecalls?? I checked with h5dump individually.
+
+As far as I know the fast5 files were all generated with the model to also call methylation data, which also stores the basecalls including the methlyation calls in the fast5 file. This works perfectly well for met_GFAP_03 and met_CMV_03, but for some reason this information is not in the fast5 files of met_LP1_03. This does not make any sense to me since all of these files were generated with the same commands and to my knowledge without error messages.
+
+```{bash}
+tombo preprocess annotate_raw_with_fastqs \
+--fast5-basedir /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/run4_fast5/workspace/fast5_pass/met_LP1_03_single/ \
+--fastq-filenames /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/run4_fast5/pass/met_LP1_03/*.fastq --processes 12
+```
+
+
+```{bash}
+snakemake -s Deepsignal1-ctrl2 \
+  deepsignal_results/met_CMV_03_deepsignal-freq-perCG-raw.tsv \
+  deepsignal_results/met_LP1_03_deepsignal-freq-perCG-raw.tsv \
+  deepsignal_results/met_GFAP_03_deepsignal-freq-perCG-raw.tsv \
+  --cores 1
+```
+
+### reformat
+
+```{bash}
+snakemake -s Deepsignal2 \
+  deepsignal_results/met_CMV_03_deepsignal-freq-perCG-combStrand.tsv \
+  deepsignal_results/met_LP1_03_deepsignal-freq-perCG-combStrand.tsv \
+  deepsignal_results/met_GFAP_03_deepsignal-freq-perCG-combStrand.tsv \
+  --cores 8
+```
+
+### check it out
+
+```{r}
+rpath <- "deepsignal_results/"
+
+deepsignal <- lapply(
+  list.files(rpath, pattern = "_deepsignal-freq-perCG-combStrand.tsv", recursive = F),
+  function(x){
+    tmp_df <- read_delim(paste0(rpath, x)) %>% 
+      type.convert(as.is = TRUE) %>% 
+      mutate(sample = strsplit(x, split = "_deepsignal-freq-perCG-combStrand.tsv")[[1]])
+    return(tmp_df)
+  }) %>% bind_rows() %>% mutate(Methylation = Methylation * 100, tool = "deepsignal")
+
+deepsignal %>% 
+  separate(Chr, c("alignedProm", "genome_descr")) %>% 
+  separate(sample, c("tissue", "AAVProm", "replicate")) %>% 
+  filter(alignedProm == AAVProm, Coverage >= 10) %>% 
+  ggplot(aes(x=Methylation)) +
+  geom_histogram() +
+  facet_grid(replicate~tissue)
+
+```
+
+
+
+## Megalodon
+
+### controls
+
+```{bash}
+for sample in met_CMV_03 met_LP1_03
+do
+  mkdir megalodon_results_single/${sample}/
+  
+  # run megalodon
+  megalodon ~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/run4_fast5/workspace/fast5_pass/${sample}_single \
+    --outputs basecalls mappings mod_mappings per_read_mods mods \
+    --guppy-config dna_r9.4.1_450bps_hac.cfg \
+    --guppy-server-path ~/applications/ont-guppy/bin/guppy_basecall_server \
+    --reference data/combined.fasta \
+    --remora-modified-bases dna_r9.4.1_e8 hac 0.0.0 5mc CG 0 \
+    --overwrite --mod-motif m CG 0  --write-mods-text \
+    --devices "cuda:all" --processes 20
+  # reformat  
+  ./script/megalodon.sh $sample
+  
+  
+  mv megalodon_results/* megalodon_results_single/${sample}/
+done
+```
+
+
+### Check the output
+
+```{r}
+megalodon <- lapply(list.dirs("megalodon_results_single/", recursive = F), function(x){
+  sample_name=basename(x)
+  read_tsv(paste0(x, "/", sample_name, "_megalodon-freq-perCG-combStrand.tsv")) %>%
+    mutate(sample = sample_name)
+}) %>% bind_rows() %>% 
+  mutate(tool = "megalodon")
+
+
+megalodon %>% 
+  separate(sample, c("tissue", "promoter", "replicate")) %>% 
+  filter(Coverage > 10) %>% 
+  ggplot(aes(x=Methylation)) +
+  geom_histogram() +
+  facet_grid(replicate~tissue)
+```
+
+
+# Compare the models in a plot
+
+## dataframe
+
+```{r}
+df <- bind_rows(
+  guppy %>% 
+    mutate(Methylation = Methylation * 100),
+  nanopolish %>% 
+    mutate(Methylation = Methylation * 100),
+  megalodon,
+  deepsignal
+  ) %>% 
+  separate(Chr, c("genome_prom", "genome")) %>% 
+  separate(sample, c("tissue", "promoter", "replicate"))
+
+df %>% head()
+
+df %>% filter(replicate == "03")
+```
+
+### Pivot DF and annotate
+
+```{r}
+annotation <- read_delim("../seq_runs/episome_005/genomes/combined/combined_genes.bed", col_names = c("chr", "start", "end", "name")) %>% 
+  select(chr, start, end, name) %>% 
+  separate(chr, c("genome_prom", "genome"))
+
+annotate_cpgs <- function(xdf){
+  cpg_annotation <- rep(NA, nrow(xdf))
+  for (index in seq(1, nrow(xdf))){
+    curr_genome = xdf$promoter[index]
+    curr_cpg = as.numeric(xdf$start[index])
+    
+    annotation_OI <- annotation %>% filter(genome_prom == curr_genome)
+    for (annot_index in seq(1, nrow(annotation_OI))){
+      # check if the current cpg falls into one of the categories
+      if (curr_cpg > as.numeric(annotation_OI$start[annot_index]) && curr_cpg < as.numeric(annotation_OI$end[annot_index])){
+        cpg_annotation[index] <- annotation_OI$name[annot_index]
+        }
+      }
+    }
+  xdf["annotation"] <- cpg_annotation
+  return(xdf)
+}
+```
+Collect the per CpG methylation calls for every tool and per replicate. Only do this for the CpGs with correctly aligned CpGs, e.g. only keep the calls from the CMV_liver_01 sample if it was aligned to the CMV genome and discard the ones that were aligned to the LP1 and GFAP genome.
+
+```{r}
+min_coverage <- 10
+
+
+dfp_liver <- df %>%
+  dplyr::filter(tissue == "liver", genome_prom == promoter, Coverage >= min_coverage) %>% 
+  select(promoter, Pos_start, Pos_end, Methylation, tool, replicate, tissue) %>% 
+  unite("coord", c(promoter, Pos_start, Pos_end, tissue)) %>% 
+  unite("tool", c(tool, replicate)) %>% 
+  pivot_wider(names_from = tool, values_from = Methylation) %>% 
+  separate(coord, c("promoter", "start", "end", "tissue")) %>% 
+  annotate_cpgs()
+
+dfp_nat <- df %>%
+  dplyr::filter(tissue == "nat", genome_prom == promoter, Coverage >= min_coverage) %>% 
+  select(promoter, Pos_start, Pos_end, Methylation, tool, replicate, tissue) %>% 
+  unite("coord", c(promoter, Pos_start, Pos_end, tissue)) %>% 
+  unite("tool", c(tool, replicate)) %>% 
+  pivot_wider(names_from = tool, values_from = Methylation) %>% 
+  separate(coord, c("promoter", "start", "end", "tissue")) %>% 
+  annotate_cpgs()
+
+dfp_met <- df %>%
+  dplyr::filter(tissue == "met", genome_prom == promoter, Coverage >= min_coverage) %>% 
+  select(promoter, Pos_start, Pos_end, Methylation, tool, tissue, replicate) %>% 
+  unite("coord", c(promoter, Pos_start, Pos_end, tissue)) %>% 
+  unite("tool", c(tool, replicate)) %>% 
+  pivot_wider(names_from = tool, values_from = Methylation) %>% 
+  separate(coord, c("promoter", "start", "end", "tissue")) %>% 
+  annotate_cpgs()
+
+
+# combine and make the column names more descriptive
+df_master <- bind_rows(dfp_liver, dfp_nat, dfp_met) %>% 
+  rename(AAV = promoter, Sample = tissue)
+
+df_master %>% 
+  write_csv("METEORE_masterdf_newctrls.csv")
+```
+

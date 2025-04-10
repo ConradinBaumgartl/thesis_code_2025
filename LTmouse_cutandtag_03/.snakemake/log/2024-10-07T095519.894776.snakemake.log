@@ -1,0 +1,97 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Job stats:
+job                        count    min threads    max threads
+-----------------------  -------  -------------  -------------
+SEACR                         28              1              1
+all                            1              1              1
+bam_convert                   12              1              1
+bam_coverage_ALL              28              1              1
+bam_coverage_bedgraph         27              1              1
+bam_coverage_rawnumbers       28              1              1
+bam_sort_name                 12              1              1
+bowtie_align                   5              1              1
+filter_bam                    23              1              1
+fixmates                      12              1              1
+insert_size_metrics           28              1              1
+mark_duplicates               12              1              1
+size_bam                      26              1              1
+sort_fixmates                 12              1              1
+total                        254              1              1
+
+Select jobs to execute...
+
+[Mon Oct  7 09:55:22 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.bam, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.bam, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_9-12-3_liver.ALL.H, data/alignment/cmv/K27ac_9-12-3_liver.FILT.H, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.H, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.H, data/alignment/cmv/K27ac_9-12-3_liver.ALL.histogram, data/alignment/cmv/K27ac_9-12-3_liver.FILT.histogram, data/alignment/cmv/K27ac_9-12-3_liver.SIZE.histogram, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.histogram
+    jobid: 269
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-3_liver.ALL.histogram
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct  7 09:55:22 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam
+    jobid: 6
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam; Updated input files: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+
+[Mon Oct  7 09:55:22 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-6-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam
+    jobid: 33
+    reason: Missing output files: data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam; Updated input files: data/alignment/cmv/K27ac_9-6-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+
+[Mon Oct  7 09:55:22 2024]
+rule bam_coverage_rawnumbers:
+    input: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.nreads, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.nreads, data/alignment/cmv_mouse/K27ac_9-12-2_liver.SIZE.nreads, data/alignment/cmv_mouse/K27ac_9-12-2_liver.FILT.SIZE.nreads
+    jobid: 130
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.nreads
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct  7 09:55:42 2024]
+Finished job 130.
+1 of 254 steps (0.4%) done
+Select jobs to execute...
+
+[Mon Oct  7 09:55:42 2024]
+rule SEACR:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.ALL.bedgraph, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.bedgraph
+    output: data/alignment/cmv/K27ac_9-12-3_liver.ALL.SEACR.stringent.bed, data/alignment/cmv/K27ac_9-12-3_liver.FILT.SIZE.SEACR.stringent.bed
+    jobid: 352
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-3_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+Terminating processes on user request, this might take some time.
+[Mon Oct  7 09:55:54 2024]
+Error in rule bam_convert:
+    jobid: 6
+    input: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam
+    shell:
+        samtools view -@ 4 -b data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam > data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+[Mon Oct  7 09:55:54 2024]
+Error in rule bam_convert:
+    jobid: 33
+    input: data/alignment/cmv/K27ac_9-6-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam
+    shell:
+        samtools view -@ 4 -b data/alignment/cmv/K27ac_9-6-3_liver.sam > data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Cancelling snakemake on user request.

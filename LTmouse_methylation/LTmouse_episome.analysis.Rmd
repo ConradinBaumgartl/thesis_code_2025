@@ -1,0 +1,1039 @@
+# Init
+
+## Annotation functions
+
+```{r}
+library(tidyverse)
+
+bed_cmv <- read_delim("genomes/cmv.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "CMV")
+bed_yfp <- read_delim("genomes/YFP.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "YFP")
+bed_bghpa <- read_delim("genomes/BGHpA.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "BGHpA")
+bed_stuffer <- read_delim("genomes/stuffer.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "stuffer")
+bed_itr <- read_delim("genomes/ITR.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "ITR")
+
+annotations_list <- list(bed_cmv, bed_yfp, bed_bghpa, bed_stuffer, bed_itr)
+
+annotate <- function(positions, annotations_list){
+  annot_list <- rep(NA, length(positions))
+  for (i in seq(length(positions))){
+    cpg_start <- positions[[i]]
+    for (annotation_bed in annotations_list){
+      annotation_start <- pull(annotation_bed, start)[[1]]
+      annotation_end <- pull(annotation_bed, end)[[1]]
+      annotation_name <- pull(annotation_bed, name)[[1]]
+      if (cpg_start >= annotation_start && cpg_start < annotation_end){
+        annot_list[i] <- annotation_name
+      }
+    }
+  }
+  return(annot_list)
+}
+```
+
+
+# Replicates
+
+## both
+
+```{r}
+library(tidyverse)
+
+df <- lapply(list.files("data/aligned_demux/", pattern = ".modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned_demux/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1])
+  return(tmp)
+}) %>% bind_rows() %>% 
+  separate(name, c("capsid", "weeks", "replicate")) %>% 
+  select(-c("x1", "x2", "x3")) %>% 
+  dplyr::filter(capsid != "unclassified") %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+df %>% head()
+```
+
+```{r}
+df %>% 
+  ggplot(aes(x=total_coverage)) +
+  geom_histogram() +
+  facet_grid(capsid~weeks)
+
+df %>% 
+  ggplot(aes(x=perc_modified)) +
+  geom_histogram() +
+  facet_grid(capsid~weeks)
+```
+
+```{r}
+df %>% 
+  ggplot(aes(x=total_coverage, y=perc_modified)) + 
+  geom_point() +
+  facet_grid(weeks~capsid, scales = "free")
+```
+
+One can appreciate that with lower sequencing depth the percentage of methylation is restricted to certain values. This is indicated in the lines of the AAV2 samples
+
+The number of sequenced reads differs greatly between the samples. Especially, the AAV2 samples have too low of a coverage to analyse them individually.
+
+For AAV9 the coverage decreases with time. However the vg/dg ratio increases over time. I would need to control for input DNA amount. This experiment is not quantitative in regards to the amount of episomal DNA. However I can assume that there is less AAV2 transgene sequenced likely because it is not circular.
+
+* AAV2 input 2 weeks: 3.6 9.3 3.2 6.0
+
+* AAV2 input 6 weeks: 5.1 7.0 2.5 2.7
+
+* AAV2 input 12 weeks: 2.2 2.1 1.3 1.9
+
+
+* AAV9 input 2 weeks: 7.0 8.1 7.8 9.3
+
+* AAV9 input 6 weeks: 2.7 3.4 7.8 6.7
+
+* AAV9 input 12 weeks: 3.2 2.8 3.5 4.1
+
+The 12 week samples had the lowest input amount and the lowest number of reads.
+
+To make meaningful statements I need to subsample them to the same levels.
+
+
+
+## only AAV9 replicates
+
+I will start by looking at the AAV9 samples only to see if there are changes on methylation status with time.
+
+### All
+
+
+```{r}
+aav9 <- df %>% 
+  dplyr::filter(capsid == "9") 
+
+aav9 %>% 
+  ggplot(aes(x=score, fill=replicate)) +
+  geom_histogram() +
+  facet_wrap(~weeks)
+```
+Scores are mostly in the range between 750 and 1000.
+
+```{r}
+aav9_filtered <- aav9 %>% 
+  dplyr::filter(score > 800, total_coverage > 20)
+
+aav9_filtered %>% 
+  ggplot(aes(x=replicate, y=perc_modified)) +
+  geom_boxplot() +
+  facet_wrap(~weeks)
+
+aav9_filtered %>%
+  ggplot(aes(x=n_mod, fill=replicate)) +
+  geom_histogram(aes(y=..density..),position = "identity", alpha=.5, binwidth = 1) +
+  facet_wrap(~weeks, ncol = 1)
+```
+
+Similar to the AAV2 samples, the AAV9 samples also have a high variability of read counts in between them. This makes informative derivations difficult. I will also subsample these to the same size.
+
+#### Annotate
+
+```{r}
+aav9_filtered <- aav9_filtered %>% 
+  mutate(annotation = factor(
+    annotate(
+      aav9_filtered %>% pull(start),
+      annotations_list),
+    levels = c("ITR", "CMV", "YFP", "BGHpA", "stuffer", NA))
+    ) %>% 
+  dplyr::filter(!(is.na(annotation)))
+```
+
+
+
+#### Correlation
+
+```{r}
+aav9_filtered
+
+msdf <- read_delim("../../meth_proj/mouse_experiments/AAV2_AAV9/master_info.csv", delim="\t") %>% 
+  dplyr::filter(injection == "AAV9-CMV", tissue == "liver") %>% 
+  select(label, `vg/dg`, `vt/hkt`) %>% 
+  separate(label, c("capsid", "weeks", "replicate")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    activity = `vt/hkt` / `vg/dg`)
+
+aav9_filtered_summary_annotation <- aav9_filtered %>% 
+  group_by(capsid, weeks, replicate, annotation) %>% 
+  summarise(mean_met = mean(perc_modified), median_met = median(perc_modified), quant90 = quantile(perc_modified, 0.9))
+
+df_corr_annot <- full_join(aav9_filtered_summary_annotation, msdf)
+
+
+aav9_filtered_summary <- aav9_filtered %>% 
+  group_by(capsid, weeks, replicate) %>% 
+  summarise(mean_met = mean(perc_modified), median_met = median(perc_modified), quant90 = quantile(perc_modified, 0.9))
+
+df_corr <- full_join(aav9_filtered_summary, msdf)
+
+df_corr_annot
+df_corr
+```
+
+
+##### Global correlation
+
+```{r}
+df_corr %>% 
+  ggplot(aes(x=activity, y=mean_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("mean met | DNA activity")
+
+df_corr %>% 
+  ggplot(aes(x=activity, y=median_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("median met | DNA activity")
+
+
+df_corr %>% 
+  ggplot(aes(x=`vt/hkt`, y=mean_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("mean met | transcription")
+
+df_corr %>% 
+  ggplot(aes(x=`vt/hkt`, y=median_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("median met | transcription")
+```
+
+##### Annotation correlation
+```{r}
+df_corr_annot %>% 
+  ggplot(aes(x=activity, y=mean_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("mean met | DNA activity")
+
+df_corr_annot %>% 
+  ggplot(aes(x=activity, y=median_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("median met | DNA activity")
+
+
+df_corr_annot %>% 
+  ggplot(aes(x=`vt/hkt`, y=mean_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("mean met | transcription")
+
+df_corr_annot %>% 
+  ggplot(aes(x=`vt/hkt`, y=median_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("median met | transcription")
+```
+
+No significant correlation. Best correlation is with transcription and mean methylation percentage. But might not be the reason.
+
+### Subsampled to the lowest sample - 60 reads
+
+#### read data
+
+**No averaging!**
+
+```{r}
+aav9repsup_sep <- lapply(list.files("data/aligned_demux/aav9_subsampled/", pattern = "modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned_demux/aav9_subsampled/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1], sub_rep = str_split(f, "\\.")[[1]][2]) %>% 
+    separate(name, c("capsid", "weeks", "replicate")) %>% 
+    select(-c("x1", "x2", "x3")) %>% 
+    dplyr::filter(chr == "pPl04_linearized", capsid != "unclassified", score > 800) %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+    drop_na()
+  return(tmp)
+}) %>% bind_rows() 
+
+aav9repsup <- aav9repsup_sep %>% 
+  group_by(chr, start, end, strand, capsid, weeks, replicate) %>% 
+  summarise(score = mean(score), perc_modified = mean(perc_modified), total_coverage = mean(total_coverage)) %>% 
+  ungroup()
+
+aav9repsup <- aav9repsup_sep %>% 
+  dplyr::filter(sub_rep == "1") %>% select(-sub_rep)
+
+aav9repsup %>% head()
+```
+
+
+#### annotate
+
+```{r}
+aav9repsup <- aav9repsup %>% 
+  mutate(annotation = factor(
+    annotate(
+      aav9repsup %>% pull(start),
+      annotations_list),
+    levels = c("ITR", "CMV", "YFP", "BGHpA", "stuffer", NA))
+    ) %>% 
+  dplyr::filter(!(is.na(annotation)))
+```
+
+
+
+#### plot
+
+```{r}
+aav9repsup %>% 
+  dplyr::filter(score>800, annotation != "ITR") %>% 
+  ggplot(aes(x=weeks, y=perc_modified)) +
+  geom_boxplot()
+
+aav9repsup %>% 
+  dplyr::filter(score>800, annotation != "ITR") %>% 
+  ggplot(aes(x=replicate, y=perc_modified, fill=replicate)) +
+  geom_boxplot() +
+  facet_grid(~weeks)
+
+aav9repsup %>% 
+  dplyr::filter(score>800, annotation != "ITR") %>% 
+  ggplot(aes(x=replicate, y=perc_modified, fill=replicate)) +
+  geom_boxplot() +
+  facet_grid(weeks~annotation)
+```
+
+#### Correlation with vt/hkt or DNA activity
+
+```{r}
+msdf <- read_delim("../../meth_proj/mouse_experiments/AAV2_AAV9/master_info.csv", delim="\t") %>% 
+  dplyr::filter(injection == "AAV9-CMV", tissue == "liver") %>% 
+  select(label, `vg/dg`, `vt/hkt`) %>% 
+  separate(label, c("capsid", "weeks", "replicate")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    activity = `vt/hkt` / `vg/dg`)
+
+aav9repsupsummary_annot <- aav9repsup %>% 
+  group_by(capsid, weeks, replicate, annotation) %>% 
+  summarise(mean_met = mean(perc_modified), median_met = median(perc_modified), quant90 = quantile(perc_modified, 0.9))
+
+df_corr_annot <- full_join(aav9repsupsummary_annot, msdf)
+
+
+aav9repsupsummary <- aav9repsup %>% 
+  group_by(capsid, weeks, replicate) %>% 
+  summarise(mean_met = mean(perc_modified), median_met = median(perc_modified), quant90 = quantile(perc_modified, 0.9))
+
+df_corr <- full_join(aav9repsupsummary, msdf)
+
+df_corr_annot
+df_corr
+```
+
+```{r}
+df_corr_annot %>% 
+  ggplot(aes(x=activity, y=mean_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("mean met | DNA activity")
+
+df_corr_annot %>% 
+  ggplot(aes(x=activity, y=median_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("median met | DNA activity")
+
+
+df_corr_annot %>% 
+  ggplot(aes(x=`vt/hkt`, y=mean_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("mean met | transcription")
+
+df_corr_annot %>% 
+  ggplot(aes(x=`vt/hkt`, y=median_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  facet_wrap(~annotation) +
+  ggtitle("median met | transcription")
+```
+
+
+
+```{r}
+df_corr %>% 
+  ggplot(aes(x=activity, y=mean_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("mean met | DNA activity")
+
+df_corr %>% 
+  ggplot(aes(x=activity, y=median_met)) +
+  geom_point() +
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("median met | DNA activity")
+
+
+df_corr %>% 
+  ggplot(aes(x=`vt/hkt`, y=mean_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("mean met | transcription")
+
+df_corr %>% 
+  ggplot(aes(x=`vt/hkt`, y=median_met)) +
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  stat_cor(method = "pearson") +
+  ggtitle("median met | transcription")
+```
+
+Basicallly no correlation between DNA activity and DNA methylation rate. This is not surprising given the methyation rate is so low anyway.
+
+However there is a correlation between transcription and *mean* methylation. This might not be causally related. With more times comes lower transcription and also slightly increased methylation. There is no correlation with median methlylation percentage.
+
+There is no annotation itself has a correlation with the 
+
+# Pooled replicates
+
+AAV2 samples have very low readcounts, therefore I pooled all mice from the same timepoint and capsid.
+
+## read data
+
+```{r}
+library(tidyverse)
+dfpool <- lapply(list.files("data/aligned_pooled/", pattern = "complete.modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned_pooled/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1]) %>% 
+    separate(name, c("capsid", "weeks", "replicate")) %>% 
+    dplyr::filter(capsid != "unclassified") %>% 
+    select(-c("x1", "x2", "x3")) %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+  return(tmp)
+}) %>% bind_rows()
+
+dfpool
+```
+
+### plotting total
+
+```{r}
+dfpool %>% 
+  ggplot(aes(x = weeks, y = perc_modified, fill = capsid)) +
+  geom_boxplot() +
+  geom_jitter(size = .1, position = position_jitterdodge(jitter.height = 0, jitter.width = .05, dodge.width = .75)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743"))
+
+dfpool %>% 
+  dplyr::filter(total_coverage > 5, score > 800) %>% 
+  ggplot(aes(x = weeks, y = perc_modified, fill = capsid)) +
+  geom_boxplot() +
+  geom_jitter(size = .1, position = position_jitterdodge(jitter.height = 0, jitter.width = .05, dodge.width = .75)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743")) +
+  ggtitle("At least 5 reads deep + score>800")
+ggsave("plots/pooled/methylation.total.png", height=3, width=6)
+ggsave("plots/pooled/methylation.total.svg", height=3, width=6)
+
+dfpool %>% 
+  ggplot(aes(x=total_coverage, y = perc_modified)) +
+  geom_point(size=.5) +
+  facet_grid(weeks~capsid, scales = "free")
+```
+
+The median modification rate is different between the pooled AAV2 and AAV9 samples. *However the read count is significantly different!*
+
+I will concentrate on the subsampled examples.
+
+## Count separate for different regions on transgene
+
+### annotate
+
+```{r}
+dfpool <- dfpool %>% 
+  mutate(annotation = factor(
+    annotate(
+      pull(dfpool, start),
+      annotations_list),
+    levels = c("ITR", "CMV", "YFP", "BGHpA", "stuffer", NA))
+  )
+```
+
+
+### plot annotations
+
+```{r}
+give.n <- function(x){
+  return(c(y = median(x)+5, label = length(x))) 
+  # experiment with the multiplier to find the perfect position
+}
+
+dfpool %>% 
+  ggplot(aes(x=weeks, y=perc_modified, fill=capsid)) +
+  geom_boxplot(position = position_dodge(.9)) +
+  ggtitle("ALL") +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                   position = position_dodge(width = 0.75)) +
+  facet_wrap(~annotation) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743")) +
+  ylim(0, 30)
+
+dfpool %>% 
+  dplyr::filter(total_coverage > 5) %>% 
+  ggplot(aes(x=weeks, y=perc_modified, fill=capsid)) +
+  geom_boxplot(position = position_dodge(.9)) +
+  ggtitle("coverage > 5") +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                   position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743")) +
+  facet_wrap(~annotation) +
+  ylim(0, 30)
+
+dfpool %>% 
+  dplyr::filter(total_coverage > 5, score > 800) %>% 
+  ggplot(aes(x=weeks, y=perc_modified, fill=capsid)) +
+  geom_boxplot(position = position_dodge(.9)) +
+  ggtitle("coverage > 5 && score > 800") +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                   position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743")) +
+  facet_wrap(~annotation) +
+  ylim(0, 30)
+ggsave("plots/pooled/methylation.annotations.png", height=6, width=5)
+ggsave("plots/pooled/methylation.annotations.svg", height=6, width=5)
+```
+
+These plots are split by time post injection and for every annotation on the transgene. The plotted number is the number of CpG sites that pass filtering and are thus included in the boxplot.
+
+It appears that for the promoter the AAV9 delivered transgene is slightly more methylated, as is the stuffer DNA. There is almost no difference in the genebody (YFP), except for the last timepoint.
+
+*Data not compelling: the number of reads is vastly different!*
+
+
+## bed files
+
+```{r}
+for (cap in c("2", "9")){
+  for (TP in c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")){
+    
+    dfpool %>% 
+      dplyr::filter(capsid == cap, weeks == TP, score > 800) %>% 
+      mutate(perc_modified = ifelse(strand == "-", -1*perc_modified, perc_modified)) %>% 
+      select(chr, start, end, perc_modified) %>% 
+      write_delim(paste0("data/aligned_pooled/bedgraphs/", cap, "_", TP, ".METPERC.bedgraph"), delim = "\t", col_names = F)
+    
+  }
+}
+```
+
+# Pooled replicates and Subsampled aligned reads
+
+## Subsampling ALL to AAV2 - 30 reads
+
+All bam files were subsampled to have roughly 50 reads each, to be at the same level of the lowest pooled sample. This was done 10 times with different seeds.
+
+~~Average over the 10 replicates.~~
+
+Averaging introduces an artifact, because in the worst sample I only have 30 reads. When I pull 10 times 30 reads out of a population of 33 reads, I am essentially not getting the average of that, but just the 30 reads. A workaround is to only pull 30 reads once and do the comparison.
+
+### read data
+
+```{r}
+library(tidyverse)
+dfsub_sep <- lapply(list.files("data/aligned_pooled/subsampled/", pattern = "modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned_pooled/subsampled/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1], sub_rep = str_split(f, "\\.")[[1]][3]) %>% 
+    separate(name, c("capsid", "weeks")) %>% 
+    select(-c("x1", "x2", "x3")) %>% 
+    dplyr::filter(capsid != "unclassified", score>0) %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")), )
+  return(tmp)
+}) %>% bind_rows()
+
+
+dfsub <- dfsub_sep %>% 
+  dplyr::filter(sub_rep == "10") %>% 
+  select(-sub_rep)
+  
+
+dfsub %>% head()
+
+dfsub %>% 
+  dplyr::filter(score > 800) %>% 
+  arrange(desc(perc_modified))
+
+
+dfsub %>% 
+  ggplot(aes(x=n_filt, y=score)) +
+  geom_point()
+
+dfsub %>% 
+  ggplot(aes(x=n_cannon, y=score)) +
+  geom_point()
+
+dfsub %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(y=perc_modified, x=start, color=capsid)) +
+  geom_smooth(method = "loess", span=.15) +
+  facet_wrap(~weeks)
+```
+
+The score is mostly dependent on how many canonic Cs were called and filtered CpGs.
+
+From the modbam2bed documentation about call filtering:
+
+_To determine the base present at a locus in a read, the query base in the BAM record is examined along with the modified base information. A "canonical" base probability is calculated as 1 - sum(P_mod), with P_mod being the set of probabilities associated with all the modifications enumerated in the BAM record. The base form with largest probability is taken as the base present subject to the user-specified threshold. If the probability is below the threshold the call is masked and contributes to the "filtered" base count rather than the "canonical" or "modified" counts._
+
+
+The default threshold for filtering a call is 0.66 which I also used.
+
+
+### annotate
+
+```{r}
+dfsub <- dfsub %>% 
+  mutate(annotation = factor(
+    annotate(
+      dfsub %>% pull(start),
+      annotations_list),
+    levels = c("ITR", "CMV", "YFP", "BGHpA", "stuffer", NA))
+    ) %>% 
+  dplyr::filter(!(is.na(annotation)))
+```
+
+
+### add negative controls
+
+```{r}
+negative_30 <- read_csv("data/aligned_pooled/controls/dfr.30reads.annotated.csv") %>% 
+  mutate(capsid = name, weeks = name) %>% 
+  select(-name)
+
+dfsub_ext <- bind_rows(
+  dfsub %>%
+    mutate(sample = "AAV"),
+  negative_30 %>%
+    mutate(sample = "control")
+  )
+```
+
+
+### plot
+
+
+```{r}
+library(ggpubr)
+
+give.n <- function(x){
+  return(c(y = median(x)+5, label = length(x))) 
+  # experiment with the multiplier to find the perfect position
+}
+
+
+my_comparisons <- list( c("2 weeks p.i.", "6 weeks p.i."), c("2 weeks p.i.", "12 weeks p.i."), c("6 weeks p.i.", "12 weeks p.i.") )
+
+
+subsamp30 <- dfsub_ext %>% 
+  dplyr::filter(score > 800) %>%
+  mutate(weeks = ifelse(weeks == "PCR_met", "methylated", weeks),
+         weeks = ifelse(weeks == "PCR_nat", "native", weeks),
+         weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.", "methylated", "native")),
+         capsid = str_replace(capsid, "2", "AAV2"),
+         capsid = str_replace(capsid, "9", "AAV9"),
+         capsid = str_replace(capsid, "PCR_met", "methylated control"),
+         capsid = str_replace(capsid, "PCR_nat", "native control")
+) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=weeks, y=perc_modified, fill=capsid)) +
+  geom_boxplot() +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "#636363", "grey")) +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust=1))
+ggsave("plots/pooled_subsampled_to_aav2/methylation.total.png", height=4, width=8, plot = subsamp30)
+ggsave("plots/pooled_subsampled_to_aav2/methylation.total.svg", height=4, width=8, plot = subsamp30)
+
+
+dfsub %>% 
+  dplyr::filter(score > 800, capsid == "2") %>% 
+  drop_na() %>% 
+  ggplot(aes(x=weeks, y=perc_modified, fill=capsid)) +
+  ggtitle("AAV2") +
+  geom_boxplot(width = 0.2) +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("#1e81b0")) +
+  stat_compare_means(comparisons = my_comparisons)
+  
+dfsub %>% 
+  dplyr::filter(score > 800, capsid == "9") %>% 
+  drop_na() %>% 
+  ggplot(aes(x=weeks, y=perc_modified, fill=capsid)) +
+  ggtitle("AAV9") +
+  geom_boxplot(width = 0.2) +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75)) +
+  scale_fill_manual(values = c("#e28743")) +
+  stat_compare_means(comparisons = my_comparisons)
+
+
+dfsub %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=perc_modified, fill=capsid)) +
+  geom_histogram(aes(y=..density..), position = "identity", alpha=.6) +
+  facet_grid(~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+dfsub %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=perc_modified, color=weeks)) +
+  geom_density() +
+  facet_grid(~capsid)
+```
+
+The number of usable CpG sites differs between the AAV controls and the PCR controls. This is most likely because I also aligned the PCR controls to the linearized genome, that starts with YFP, goes over the ITR and ends with CMV.
+
+
+
+```{r}
+dfsub %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=weeks, y=total_coverage, fill=capsid)) +
+  geom_boxplot() +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75), size=2) +
+  facet_wrap(~annotation) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+dfsub %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=weeks, y=perc_modified, fill=capsid)) +
+  geom_boxplot() +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75), size=2) +
+  facet_wrap(~annotation) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+ggsave("plots/pooled_subsampled_to_aav2/methylation.annotations.png", height=5, width=6)
+ggsave("plots/pooled_subsampled_to_aav2/methylation.annotations.svg", height=5, width=6)
+
+dfsub %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=perc_modified, fill=capsid)) +
+  geom_histogram(aes(y=..density..), position = "identity", alpha=.6) +
+  facet_grid(weeks~annotation) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+```
+
+I subsampled all samples to the same number of aligned reads. All reads are roughly of the same size, which leads to comparable coverage values for all CpG sites. The methylation is still incredibly low.
+
+
+### AAV2 population - is it always the same CpGs?
+
+```{r}
+starts_capsid <- list()
+for (k in c("2", "9")){
+  for (w in c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")){
+    p <- dfsub %>% 
+      dplyr::filter(capsid == k, score > 800, weeks == w) %>% 
+      pull(perc_modified) %>% 
+      quantile(0.9)
+    
+    starts_capsid <- append(
+      starts_capsid,
+      list(dfsub %>% 
+        dplyr::filter(capsid == k, score > 800, perc_modified > p, weeks == w) %>% 
+        pull(start))
+    )
+  }
+}
+
+names(starts_capsid) <- paste(c("2", "2", "2", "9", "9", "9"), c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."), sep = "_")
+
+length(starts_capsid$`2_2 weeks p.i.`)
+
+tibble(stack(starts_capsid)) %>% 
+  separate(ind, c("capsid", "weeks"), "_") %>% 
+  mutate(x = 1) %>% 
+  ggplot(aes(x=values, color=weeks)) +
+  #geom_histogram(aes(y=..density..), binwidth=100) +
+  geom_density(adjust=.33) +
+  facet_grid(~capsid)
+```
+
+It is not the same ones...
+
+Where are the top ones?
+
+
+### different bed files
+
+
+```{r}
+for (cap in c("2", "9")){
+  for (TP in c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")){
+    
+    dfsub %>% 
+      dplyr::filter(capsid == cap, weeks == TP, score > 800) %>% 
+      drop_na() %>% 
+      mutate(perc_modified = ifelse(strand == "-", -1*perc_modified, perc_modified)) %>% 
+      select(chr, start, end, perc_modified) %>% 
+      write_delim(paste0("data/aligned_pooled/subsampled/averaged_bedgraphs/", cap, "_", TP, ".METPERC.bedgraph"), delim = "\t", col_names = F)
+    
+  }
+}
+```
+
+
+## bed files
+
+```{r}
+for (cap in c("2", "9")){
+  for (TP in c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")){
+    
+    dfsub_sep %>% 
+      dplyr::filter(capsid == cap, weeks == TP, score > 800, sub_rep == "1") %>% 
+      mutate(perc_modified = ifelse(strand == "-", -1*perc_modified, perc_modified)) %>% 
+      select(chr, start, end, perc_modified) %>% 
+      write_delim(paste0("data/aligned_pooled/subsampled/one_subset_bedgraphs/", cap, "_", TP, ".METPERC.SUB1.bedgraph"), delim = "\t", col_names = F)
+    
+  }
+}
+```
+
+Looking through these bedfiles I have to conclude that I mostly am seeing noise and falsely positive calls of methylation.
+
+## Subsampling AAV9 - 300 reads
+
+Because subsampling to only 30 reads gets rid of much information I have a look if subsampling only AAV9 to the same level has an impact on the results.
+
+~~I subsample 10 times. Then I take the average of all 10 subsampled replicates.~~
+
+No more averaging, this introduces artifacts.
+
+### read data
+
+```{r}
+library(tidyverse)
+aav9_sub_sep <- lapply(list.files("data/aligned_pooled/aav9_subsampled/", pattern = "modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned_pooled/aav9_subsampled/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1], sub_rep = str_split(f, "\\.")[[1]][3]) %>% 
+    separate(name, c("capsid", "weeks")) %>% 
+    select(-c("x1", "x2", "x3")) %>% 
+    dplyr::filter(chr == "pPl04_linearized", capsid != "unclassified") %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+    drop_na()
+  return(tmp)
+}) %>% bind_rows()
+
+
+aav9_sub <- aav9_sub_sep %>% 
+  dplyr::filter(sub_rep == "2") %>% 
+  select(-sub_rep)
+
+aav9_sub_sep %>% 
+  dplyr::filter(start == 1887, weeks == "12 weeks p.i.")
+
+aav9_sub %>% 
+  dplyr::filter(start == 1887, weeks == "12 weeks p.i.")
+```
+
+
+### annotate
+
+```{r}
+aav9_sub <- aav9_sub %>% 
+  mutate(annotation = factor(
+    annotate(
+      pull(aav9_sub, start),
+      annotations_list),
+    levels = c("ITR", "CMV", "YFP", "BGHpA", "stuffer", NA))
+  )
+```
+
+### add negative controls
+
+```{r}
+  
+negative_300 <- read_csv("data/aligned_pooled/controls/dfr.300reads.annotated.csv") %>% 
+  mutate(capsid = name, weeks = name) %>% 
+  select(-name)
+
+aav9_sub_ext <- bind_rows(
+  aav9_sub %>%
+    mutate(sample = "AAV"),
+  negative_300 %>%
+    mutate(sample = "control")
+  )
+```
+
+### plot
+
+```{r}
+aav9_sub_ext %>% 
+  ggplot(aes(x=perc_modified)) +
+  geom_histogram() +
+  facet_wrap(~weeks)
+
+aav9_sub_ext %>% 
+  ggplot(aes(x=perc_modified, color=weeks)) +
+  geom_density(linewidth=1.5) +
+  xlim(0, 30) +
+  #scale_color_manual(values = c("#8ebeda", "#357eb9", "#0c3d8a")) +
+  ggtitle("AAV9")
+
+aav9_sub %>% 
+  ggplot(aes(x=total_coverage)) +
+  geom_histogram() +
+  facet_wrap(~weeks)
+
+aav9_sub %>% 
+  ggplot(aes(x=weeks, y=total_coverage)) +geom_boxplot()
+
+aav9_sub %>% 
+  ggplot(aes(x=score)) +
+  geom_histogram() +
+  facet_wrap(~weeks)
+```
+
+
+
+```{r}
+aav9_sub %>%
+  drop_na() %>% 
+  ggplot(aes(x=weeks, y=perc_modified)) +
+  geom_violin() +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75)) +
+  ggtitle("AAV9 only - global")
+
+my_comparisons
+
+aav9_plot <- aav9_sub %>%
+  dplyr::filter(score > 800) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=weeks, y=perc_modified)) +
+  geom_violin(width=.5) +
+  geom_boxplot(width=.2, aes(fill=capsid)) +
+  stat_summary(aes(label=..y..), fun.y=mean, geom="point", size=1, shape=3) +
+  stat_summary(aes(label=round(after_stat(y), 2)), fun=mean, geom="text", hjust=-1) +
+  stat_compare_means(comparisons = my_comparisons) +
+  scale_fill_manual(values = c("#e28743")) +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust=1), legend.position="none")
+ggsave("plots/pooled_subsampled_to_aav9/methylation.total.png", width = 6, height = 4, plot=aav9_plot)
+ggsave("plots/pooled_subsampled_to_aav9/methylation.total.svg", width = 6, height = 4, plot=aav9_plot)
+```
+
+
+
+```{r}
+aav9_sub %>%
+  drop_na() %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=weeks, y=perc_modified)) +
+  geom_violin(width=0.5) +
+  geom_boxplot(width=0.1, aes(fill=capsid)) +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75)) +
+  stat_summary(aes(label=round(after_stat(y), 2)), fun=mean, geom="text", hjust=-1) +
+  facet_wrap(~annotation) +
+  ylim(0, 25) +
+  scale_fill_manual(values = c("#e28743")) +
+  stat_compare_means(method = "wilcox", comparisons = my_comparisons) +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust=1), legend.position = "none")
+ggsave("plots/pooled_subsampled_to_aav9/methylation.annotation.png", width = 8, height = 6)
+ggsave("plots/pooled_subsampled_to_aav9/methylation.annotation.svg", width = 8, height = 6)
+```
+
+The difference in methylation happens mostly within the stuffer DNA.
+
+
+```{r}
+aav9_annot <- aav9_sub %>% 
+  dplyr::filter(annotation != "ITR") %>% 
+  mutate(annotation2 = ifelse(annotation == "stuffer", "stuffer", "therapeutic"),
+         annotation2 = factor(annotation2, levels = c("therapeutic", "stuffer"))) %>% 
+  drop_na() %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=weeks, y=perc_modified)) +
+  geom_violin(width=0.5) +
+  geom_boxplot(width=0.1, aes(fill=capsid)) +
+  stat_summary(fun.data = give.n, geom = "text", fun.y = median,  
+                 position = position_dodge(width = 0.75)) +
+  facet_wrap(~annotation2) +
+  ylim(0, 25) +
+  scale_fill_manual(values = c("#e28743")) +
+  stat_compare_means(method = "wilcox", comparisons = my_comparisons) +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust=1), legend.position = "none")
+ggsave("plots/pooled_subsampled_to_aav9/methylation.annotation2.png", width = 8, height = 6, plot=aav9_annot)
+ggsave("plots/pooled_subsampled_to_aav9/methylation.annotation2.svg", width = 8, height = 6, plot=aav9_annot)
+```
+
+### arrange figure
+
+```{r}
+ggarrange(subsamp30, ggarrange(aav9_plot, aav9_annot, widths=c(4, 6)), nrow = 2, heights=c(6, 6))
+ggsave("plots/thesis.fig.png", width=9, height=8, dpi=300)
+ggsave("plots/thesis.fig.svg", width=9, height=8, dpi=300)
+```
+
+
+
+### different bed files
+
+```{r}
+for (TP in c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")){
+  
+  aav9_sub %>% 
+    dplyr::filter(weeks == TP, score>800) %>% 
+    drop_na() %>% 
+    mutate(perc_modified = ifelse(strand == "-", -1*perc_modified, perc_modified)) %>% 
+    select(chr, start, end, perc_modified) %>% 
+    write_delim(paste0("data/aligned_pooled/aav9_subsampled/one_subset_bedgraph/9_", TP, ".METPERC.bedgraph"), delim = "\t", col_names = F)
+  
+  aav9_sub %>% 
+    dplyr::filter(weeks == TP, score>800) %>% 
+    mutate(score = ifelse(strand == "-", -1*score, score)) %>% 
+    select(chr, start, end, score) %>% 
+    write_delim(paste0("data/aligned_pooled/aav9_subsampled/one_subset_bedgraph/9_", TP, ".SCORE.bedgraph"), delim = "\t", col_names = F)
+  
+  aav9_sub %>% 
+    dplyr::filter(weeks == TP, score>800) %>% 
+    mutate(total_coverage = ifelse(strand == "-", -1*total_coverage, total_coverage)) %>% 
+    select(chr, start, end, total_coverage) %>% 
+    write_delim(paste0("data/aligned_pooled/aav9_subsampled/one_subset_bedgraph/9_", TP, ".COV.bedgraph"), delim = "\t", col_names = F)
+  
+}
+```
+
+
+Very often the CpG sites with higher methlyation percentage have a low score.
+
+
+
+

@@ -1,0 +1,95 @@
+
+# Init
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+pycoQC_data <- read_table("../data/guppy_modifications/5mC/bamqc/multiqc_data/multiqc_general_stats.txt") %>% 
+  select(c(Sample, `QualiMap_mqc-generalstats-qualimap-mapped_reads`, `QualiMap_mqc-generalstats-qualimap-median_coverage`, `QualiMap_mqc-generalstats-qualimap-mean_coverage`, `QualiMap_mqc-generalstats-qualimap-general_error_rate`)) %>% 
+  rename(
+    filtered_mapped_reads = `QualiMap_mqc-generalstats-qualimap-mapped_reads`,
+    median_coverage = `QualiMap_mqc-generalstats-qualimap-median_coverage`,
+    mean_coverage = `QualiMap_mqc-generalstats-qualimap-mean_coverage`,
+    general_error_rate = `QualiMap_mqc-generalstats-qualimap-general_error_rate`
+  )
+
+samples <- pycoQC_data %>% 
+  pull(Sample)
+
+aln_stats <- merge(
+  lapply(samples, function(x){
+    read_delim(
+        paste0("../data/guppy_modifications/5mC/", x, "/", x, ".stats"),
+        delim=":\t",
+        col_names = c("feature_name", "value")) %>%
+      filter(feature_name %in% c("raw total sequences", "reads mapped", "non-primary alignments")) %>% 
+      pivot_wider(names_from = feature_name, values_from = value) %>% 
+      rename(total_passed_sequences = `raw total sequences`, mapped_reads = `reads mapped`, non_primary_mapped = `non-primary alignments`) %>% 
+      mutate(total_passed_sequences = as.integer(total_passed_sequences), mapped_reads = as.integer(mapped_reads)) %>% 
+      mutate(Sample = x)
+  }) %>%
+    bind_rows() %>% 
+    mutate(perc_mapped = mapped_reads / total_passed_sequences),
+  pycoQC_data,
+  by="Sample"
+)
+
+aln_stats %>% head()
+```
+
+
+```{r}
+
+aln_plot <- aln_stats %>% 
+  select(Sample, total_passed_sequences, mapped_reads, filtered_mapped_reads) %>% 
+  gather(key="read_cat", value="n_reads", -Sample) %>% 
+  separate(Sample, c("run", "genome", "methylation", "replicate"))
+
+aln_plot <- bind_rows(
+  aln_plot %>%
+    filter(run != "ctrl") %>% 
+    rename(tissue = genome, genome = methylation) %>% 
+    mutate(methylation = "sample"),
+  aln_plot %>%
+    filter(run == "ctrl") %>% 
+    mutate(tissue = "PCR")
+)
+         
+
+aln_plot %>% 
+  filter(run == "ctrl") %>% 
+  ggplot(aes(x=genome, y=n_reads, fill=read_cat, label=n_reads)) +
+    geom_bar(stat="summary", position = position_dodge()) +
+    geom_point(position=position_dodge(.9)) +
+    facet_wrap(~methylation) +
+  ggtitle("PCR controls", subtitle = "Number of reads after every filtering step")
+```
+
+```{r}
+aln_plot %>% 
+  filter(run != "ctrl") %>% 
+  ggplot(aes(x=genome, y=n_reads, fill=read_cat, label=n_reads)) +
+  geom_bar(stat="summary", position = position_dodge()) +
+  geom_point(position=position_dodge(.9)) +
+  facet_wrap(~tissue) +
+  ggtitle("mouse samples", subtitle = "Number of reads after every filtering step") +
+  scale_y_log10()
+```
+
+
+```{r}
+aln_plot %>% 
+  filter(run != "ctrl", tissue == "Liver", read_cat == "filtered_mapped_reads") %>% 
+  ggplot(aes(x=genome, y=n_reads, fill=replicate, label=n_reads)) +
+    geom_bar(stat="summary", position = position_dodge()) +
+    geom_text(position=position_dodge(.9)) +
+  ggtitle("Liver samples", subtitle = "Number of finally aligned reads")
+```
+
+```{r}
+aln_stats
+```
+

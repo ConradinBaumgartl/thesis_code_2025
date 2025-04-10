@@ -1,0 +1,87 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job          count    min threads    max threads
+---------  -------  -------------  -------------
+all              1              1              1
+bamqc_ALL       28              1              1
+total           29              1              1
+
+Select jobs to execute...
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-12-3_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_2-12-3_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.ALL, data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.FILT, data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.SIZE, data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.FILT.SIZE, data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.ALL/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.FILT/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.SIZE/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_2-12-3_liver.FILT.SIZE/genome_results.txt
+    jobid: 91
+    reason: Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv/K27ac_2-2-2_liver.ALL.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.bam, data/alignment/cmv/K27ac_2-2-2_liver.SIZE.bam, data/alignment/cmv/K27ac_2-2-2_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/QC/K27ac_2-2-2_liver.ALL, data/alignment/cmv/QC/K27ac_2-2-2_liver.FILT, data/alignment/cmv/QC/K27ac_2-2-2_liver.SIZE, data/alignment/cmv/QC/K27ac_2-2-2_liver.FILT.SIZE, data/alignment/cmv/QC/K27ac_2-2-2_liver.ALL/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-2_liver.FILT/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-2_liver.SIZE/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-2_liver.FILT.SIZE/genome_results.txt
+    jobid: 151
+    reason: Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.ALL, data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.FILT, data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.SIZE, data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.FILT.SIZE, data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.ALL/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.FILT/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.SIZE/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_9-2-1_liver.FILT.SIZE/genome_results.txt
+    jobid: 46
+    reason: Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-1_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv/K27ac_2-6-3_liver.ALL.bam, data/alignment/cmv/K27ac_2-6-3_liver.FILT.bam, data/alignment/cmv/K27ac_2-6-3_liver.SIZE.bam, data/alignment/cmv/K27ac_2-6-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/QC/K27ac_2-6-3_liver.ALL, data/alignment/cmv/QC/K27ac_2-6-3_liver.FILT, data/alignment/cmv/QC/K27ac_2-6-3_liver.SIZE, data/alignment/cmv/QC/K27ac_2-6-3_liver.FILT.SIZE, data/alignment/cmv/QC/K27ac_2-6-3_liver.ALL/genome_results.txt, data/alignment/cmv/QC/K27ac_2-6-3_liver.FILT/genome_results.txt, data/alignment/cmv/QC/K27ac_2-6-3_liver.SIZE/genome_results.txt, data/alignment/cmv/QC/K27ac_2-6-3_liver.FILT.SIZE/genome_results.txt
+    jobid: 127
+    reason: Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv/K27ac_2-2-3_liver.ALL.bam, data/alignment/cmv/K27ac_2-2-3_liver.FILT.bam, data/alignment/cmv/K27ac_2-2-3_liver.SIZE.bam, data/alignment/cmv/K27ac_2-2-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/QC/K27ac_2-2-3_liver.ALL, data/alignment/cmv/QC/K27ac_2-2-3_liver.FILT, data/alignment/cmv/QC/K27ac_2-2-3_liver.SIZE, data/alignment/cmv/QC/K27ac_2-2-3_liver.FILT.SIZE, data/alignment/cmv/QC/K27ac_2-2-3_liver.ALL/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-3_liver.FILT/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-3_liver.SIZE/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-3_liver.FILT.SIZE/genome_results.txt
+    jobid: 159
+    reason: Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv/K27ac_9-6-3_liver.ALL.bam, data/alignment/cmv/K27ac_9-6-3_liver.FILT.bam, data/alignment/cmv/K27ac_9-6-3_liver.SIZE.bam, data/alignment/cmv/K27ac_9-6-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/QC/K27ac_9-6-3_liver.ALL, data/alignment/cmv/QC/K27ac_9-6-3_liver.FILT, data/alignment/cmv/QC/K27ac_9-6-3_liver.SIZE, data/alignment/cmv/QC/K27ac_9-6-3_liver.FILT.SIZE, data/alignment/cmv/QC/K27ac_9-6-3_liver.ALL/genome_results.txt, data/alignment/cmv/QC/K27ac_9-6-3_liver.FILT/genome_results.txt, data/alignment/cmv/QC/K27ac_9-6-3_liver.SIZE/genome_results.txt, data/alignment/cmv/QC/K27ac_9-6-3_liver.FILT.SIZE/genome_results.txt
+    jobid: 135
+    reason: Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.ALL.bam, data/alignment/cmv/K27ac_2-2-1_liver.FILT.bam, data/alignment/cmv/K27ac_2-2-1_liver.SIZE.bam, data/alignment/cmv/K27ac_2-2-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/QC/K27ac_2-2-1_liver.ALL, data/alignment/cmv/QC/K27ac_2-2-1_liver.FILT, data/alignment/cmv/QC/K27ac_2-2-1_liver.SIZE, data/alignment/cmv/QC/K27ac_2-2-1_liver.FILT.SIZE, data/alignment/cmv/QC/K27ac_2-2-1_liver.ALL/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-1_liver.FILT/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-1_liver.SIZE/genome_results.txt, data/alignment/cmv/QC/K27ac_2-2-1_liver.FILT.SIZE/genome_results.txt
+    jobid: 143
+    reason: Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Mon Oct 14 11:00:32 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv/K27ac_2-12-3_liver.ALL.bam, data/alignment/cmv/K27ac_2-12-3_liver.FILT.bam, data/alignment/cmv/K27ac_2-12-3_liver.SIZE.bam, data/alignment/cmv/K27ac_2-12-3_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/QC/K27ac_2-12-3_liver.ALL, data/alignment/cmv/QC/K27ac_2-12-3_liver.FILT, data/alignment/cmv/QC/K27ac_2-12-3_liver.SIZE, data/alignment/cmv/QC/K27ac_2-12-3_liver.FILT.SIZE, data/alignment/cmv/QC/K27ac_2-12-3_liver.ALL/genome_results.txt, data/alignment/cmv/QC/K27ac_2-12-3_liver.FILT/genome_results.txt, data/alignment/cmv/QC/K27ac_2-12-3_liver.SIZE/genome_results.txt, data/alignment/cmv/QC/K27ac_2-12-3_liver.FILT.SIZE/genome_results.txt
+    jobid: 207
+    reason: Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+Terminating processes on user request, this might take some time.
+Cancelling snakemake on user request.

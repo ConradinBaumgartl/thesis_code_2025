@@ -1,0 +1,20 @@
+# load parameters from configfile
+configfile: "snakemake_scripts/config.yaml"
+samples = config["samples"]
+threads = config["threads"]
+genomes = config["genomes"]
+
+# include files
+include: "snakemake_scripts/qc.snakefile"
+include: "snakemake_scripts/alignment.snakefile"
+include: "snakemake_scripts/peaks.snakefile"
+
+rule all:
+    input:
+        #"data/raw_data/QC/multiqc/multiqc_report.html",
+        #expand("data/alignment/{genome}/{sample}.unsorted.bam", genome = list(config["genomes"].keys()), sample = samples),
+        #expand("data/alignment/{genome}/{sample}.ALL.nreads", genome = list(config["genomes"].keys()), sample = samples),
+        #expand("data/alignment/{genome}/{sample}.ALL.histogram", genome = list(config["genomes"].keys()), sample = samples),
+        #expand("data/alignment/{genome}/{sample}.ALL.bw", genome = list(config["genomes"].keys()), sample = samples)
+        #expand("data/alignment/{genome}/QC/{sample}.ALL/genome_results.txt", genome = list(config["genomes"].keys()), sample = samples),
+        expand("data/alignment/cmv_mouse/{sample}.ALL.SEACR.stringent.bed", sample = samples)

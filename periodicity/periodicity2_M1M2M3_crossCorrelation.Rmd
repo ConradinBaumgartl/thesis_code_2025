@@ -1,0 +1,102 @@
+# M1 M2 M3
+
+```{bash}
+for fasta in ../periodify/mask/raw_sequences/*.fasta
+do
+  bname=$(basename $fasta)
+  mkdir ../periodify/mask/raw_sequences/Xcorr/
+  
+  Rscript Periodicity6_crossDistances.R \
+  $fasta    \
+  ../periodify/mask/raw_sequences/Xcorr/ \
+  raw_sequences \
+  ${bname/.fasta/}
+done
+
+```
+
+
+## read in R
+
+```{r}
+p <- "../periodify/mask/raw_sequences/Xcorr/"
+df <- lapply(list.files(p, pattern=".csv"), function(x){
+  bname <- str_split(x, pattern = "\\.")[[1]][1]
+  tmp <- read_csv(paste0(p, x)) %>% 
+    select(-...1) %>% 
+    mutate(sample = bname)
+  return(tmp)
+}) %>% bind_rows() %>% 
+  mutate(
+      sample = ifelse(sample == "lambda_stuffer", "lambda", sample),
+      sample = ifelse(sample == "wtf_stuffer", "wt-fragments", sample),
+      sample = ifelse(sample == "m1_lambda", "M1", sample),
+      sample = ifelse(sample == "m2_lambda", "M2", sample),
+      sample = ifelse(sample == "m3_lambda", "M3", sample)
+    ) %>%
+  mutate(
+    sample = factor(sample, levels = c("lambda", "wt-fragments", "M1", "M2", "M3"))
+  )
+  
+
+```
+
+## plot
+
+```{r}
+df %>% 
+  dplyr::filter(dinuc1 == "YY", dinuc2 %in% c("YY", "RR")) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc2)) +
+  geom_line(linewidth = 1) +
+  xlim(0, 40) +
+  facet_wrap(~sample, nrow = 1) +
+  theme_bw() +
+  theme(text = element_text(size = 15)) +
+  scale_color_manual(values = c("#999999ff", "#000000")) +
+  ylab("normalized counts")
+ggsave("../periodify/mask/raw_sequences/Xcorr/Xcorr.plot.png", dpi = 200, width = 10, height = 3)
+ggsave("../periodify/mask/raw_sequences/Xcorr/Xcorr.plot.svg", dpi = 200, width = 10, height = 3)
+```
+
+
+# YY and YYRR
+
+the old 3.8 kb stuffers
+
+```{bash}
+for fasta in ../../meth_proj/scripts/autocorrelation_dinucs/sequences/individual/*.fasta
+do
+  bname=$(basename $fasta)
+  mkdir ../../meth_proj/scripts/autocorrelation_dinucs/sequences/individual/Xcorr
+  
+  Rscript Periodicity6_crossDistances.R \
+  $fasta    \
+  ../../meth_proj/scripts/autocorrelation_dinucs/sequences/individual/Xcorr/ \
+  raw_sequences \
+  ${bname/.fasta/}
+done
+```
+
+
+```{r}
+p <- "../../meth_proj/scripts/autocorrelation_dinucs/sequences/individual/Xcorr/"
+dfold <- lapply(list.files(p, pattern=".csv"), function(x){
+  bname <- str_split(x, pattern = "\\.")[[1]][1]
+  tmp <- read_csv(paste0(p, x)) %>% 
+    select(-...1) %>% 
+    mutate(seq = bname)
+  return(tmp)
+}) %>% bind_rows()
+```
+
+
+```{r}
+dfold %>% 
+  dplyr::filter(dinuc1 == "YY", dinuc2 %in% c("YY", "RR")) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc2)) +
+  geom_line(linewidth = 1.2) +
+  facet_wrap(~seq) +
+  ylim(-0.0014, 0.0014) +
+  xlim(0, 50)
+```
+

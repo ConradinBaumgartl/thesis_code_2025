@@ -1,0 +1,88 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job                    count    min threads    max threads
+-------------------  -------  -------------  -------------
+all                        1              1              1
+insert_size_metrics        8              1              1
+total                      9              1              1
+
+Select jobs to execute...
+
+[Wed Aug  7 18:01:31 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_261_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_261_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.H, data/alignment/cmv_mouse/K27ac_261_liver.FILT.H, data/alignment/cmv_mouse/K27ac_261_liver.SIZE.H, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.H, data/alignment/cmv_mouse/K27ac_261_liver.ALL.histogram, data/alignment/cmv_mouse/K27ac_261_liver.FILT.histogram, data/alignment/cmv_mouse/K27ac_261_liver.SIZE.histogram, data/alignment/cmv_mouse/K27ac_261_liver.FILT.SIZE.histogram
+    jobid: 72
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_261_liver.ALL.histogram
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+[Wed Aug  7 18:01:31 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_961_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_961_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.H, data/alignment/cmv_mouse/K27ac_961_liver.FILT.H, data/alignment/cmv_mouse/K27ac_961_liver.SIZE.H, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.H, data/alignment/cmv_mouse/K27ac_961_liver.ALL.histogram, data/alignment/cmv_mouse/K27ac_961_liver.FILT.histogram, data/alignment/cmv_mouse/K27ac_961_liver.SIZE.histogram, data/alignment/cmv_mouse/K27ac_961_liver.FILT.SIZE.histogram
+    jobid: 74
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.histogram
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Wed Aug  7 18:01:32 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.bam, data/alignment/cmv/K27ac_261_liver.FILT.bam, data/alignment/cmv/K27ac_261_liver.SIZE.bam, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_261_liver.ALL.H, data/alignment/cmv/K27ac_261_liver.FILT.H, data/alignment/cmv/K27ac_261_liver.SIZE.H, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.H, data/alignment/cmv/K27ac_261_liver.ALL.histogram, data/alignment/cmv/K27ac_261_liver.FILT.histogram, data/alignment/cmv/K27ac_261_liver.SIZE.histogram, data/alignment/cmv/K27ac_261_liver.FILT.SIZE.histogram
+    jobid: 76
+    reason: Missing output files: data/alignment/cmv/K27ac_261_liver.ALL.histogram
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+[Wed Aug  7 18:01:32 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.bam, data/alignment/cmv/K27ac_961_liver.FILT.bam, data/alignment/cmv/K27ac_961_liver.SIZE.bam, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_961_liver.ALL.H, data/alignment/cmv/K27ac_961_liver.FILT.H, data/alignment/cmv/K27ac_961_liver.SIZE.H, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.H, data/alignment/cmv/K27ac_961_liver.ALL.histogram, data/alignment/cmv/K27ac_961_liver.FILT.histogram, data/alignment/cmv/K27ac_961_liver.SIZE.histogram, data/alignment/cmv/K27ac_961_liver.FILT.SIZE.histogram
+    jobid: 78
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.ALL.histogram
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Wed Aug  7 18:01:32 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_262_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_262_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.H, data/alignment/cmv_mouse/K27ac_262_liver.FILT.H, data/alignment/cmv_mouse/K27ac_262_liver.SIZE.H, data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.H, data/alignment/cmv_mouse/K27ac_262_liver.ALL.histogram, data/alignment/cmv_mouse/K27ac_262_liver.FILT.histogram, data/alignment/cmv_mouse/K27ac_262_liver.SIZE.histogram, data/alignment/cmv_mouse/K27ac_262_liver.FILT.SIZE.histogram
+    jobid: 73
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_262_liver.ALL.histogram
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Wed Aug  7 18:01:32 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_962_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_962_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.H, data/alignment/cmv_mouse/K27ac_962_liver.FILT.H, data/alignment/cmv_mouse/K27ac_962_liver.SIZE.H, data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.H, data/alignment/cmv_mouse/K27ac_962_liver.ALL.histogram, data/alignment/cmv_mouse/K27ac_962_liver.FILT.histogram, data/alignment/cmv_mouse/K27ac_962_liver.SIZE.histogram, data/alignment/cmv_mouse/K27ac_962_liver.FILT.SIZE.histogram
+    jobid: 75
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.ALL.histogram
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Wed Aug  7 18:01:32 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.bam, data/alignment/cmv/K27ac_262_liver.FILT.bam, data/alignment/cmv/K27ac_262_liver.SIZE.bam, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_262_liver.ALL.H, data/alignment/cmv/K27ac_262_liver.FILT.H, data/alignment/cmv/K27ac_262_liver.SIZE.H, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.H, data/alignment/cmv/K27ac_262_liver.ALL.histogram, data/alignment/cmv/K27ac_262_liver.FILT.histogram, data/alignment/cmv/K27ac_262_liver.SIZE.histogram, data/alignment/cmv/K27ac_262_liver.FILT.SIZE.histogram
+    jobid: 77
+    reason: Missing output files: data/alignment/cmv/K27ac_262_liver.ALL.histogram
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Wed Aug  7 18:01:32 2024]
+rule insert_size_metrics:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.bam, data/alignment/cmv/K27ac_962_liver.FILT.bam, data/alignment/cmv/K27ac_962_liver.SIZE.bam, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.bam
+    output: data/alignment/cmv/K27ac_962_liver.ALL.H, data/alignment/cmv/K27ac_962_liver.FILT.H, data/alignment/cmv/K27ac_962_liver.SIZE.H, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.H, data/alignment/cmv/K27ac_962_liver.ALL.histogram, data/alignment/cmv/K27ac_962_liver.FILT.histogram, data/alignment/cmv/K27ac_962_liver.SIZE.histogram, data/alignment/cmv/K27ac_962_liver.FILT.SIZE.histogram
+    jobid: 79
+    reason: Missing output files: data/alignment/cmv/K27ac_962_liver.ALL.histogram
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2024-08-07T180130.623884.snakemake.log

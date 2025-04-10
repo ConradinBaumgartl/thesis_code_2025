@@ -1,0 +1,618 @@
+# Idea
+
+I read this paper https://doi.org/10.1371/journal.pgen.1009042, in which the authors also noticed that fourier analysis is not the best tool for analyzing dinucleotide autocorrelations. They use something relatively simple: a dampened sinewave is fit to the autocorrelations with the period, amplitude, and half-life to be fit. 
+
+$$Y = e^{-\frac {ln(2)*x} {H} }*A*sin({\frac {2*pi*x} {l}} + \frac {pi} {2})$$
+
+Where H is the half-life of the wave, A is the amplitude, l the period, x the distance in the Autocorrelation, and Y the autocorrelation value.
+
+With a sufficiently long nucleotide sequence and the di-nucleotide repeats being *real*, this curve should be able to accurately describe what you see in the autocorrelation.
+
+This is an improvement over fourier, because it correctly weighs the autcorrelation being important from distance 0 onwards, ie. the first peaks need to be bigger than the following ones. Fourier just cares about high amplitudes in general. The downside for the curve is the necessity of correctly initiating the parameters; nls can be very finicky. I solve this by initializing the curve fit x times and choosing the best fit.
+
+# Shotokuvirae and control genomes
+
+```{bash}
+# iterate through the families
+for family_path in ../results/dinucleotide_periodicity_TAX/*/ 
+do
+  family=$(basename $family_path)
+  echo $family
+  # iterate through the genera
+  for genus_path in ${family_path}*/ 
+  do
+    genus=$(basename $genus_path)
+    outpath=${genus_path}/curve_fit
+    echo $genus
+    # the script subsamples a set of sequences to analyze. To counteract the randomness I do it 10 times each
+    for i in 1 2 3 4 5 6 7 8 9 10
+    do
+      echo $i
+      
+      Rscript Periodicity6.R \
+      ${genus_path}/${genus}.size.rmdup.fasta \
+      ${outpath}/${genus}_${i} \
+      $family \
+      $genus
+    done
+  done
+done
+```
+
+## canine protoparvo only
+
+```{bash}
+for i in 1 2 3 4 5 6 7 8 9 10
+do
+  Rscript Periodicity6.R \
+    ../results/dinucleotide_periodicity_TAX/Parvoviridae/canine_protoparvovirus/canine_protoparvovirus.size.rmdup.fasta \
+    ../results/dinucleotide_periodicity_TAX/Parvoviridae/canine_protoparvovirus/curve_fit/canine_protoparvovirus_${i} \
+    canine_protoparvovirus \
+    Parvoviridae
+done
+```
+
+# Satellite viruses
+
+The dinucleotide periodicity I find in the dependoparvovirus genome is very unique. To get an idea about the real life function of this unique periodicity I look at viruses that behave similarly to analyse their periodicities.
+
+By definition dependoparvoviruses fulfill all prerequisites to be classified as a satellite virus. However they are rarely called that in the literature.
+
+From ICTV:
+
+_"Satellites are subviral agents which lack genes that could encode functions needed for replication. Thus for their multiplication they depend on the co-infection of a host cell with a helper virus. Satellite genomes have a substantial portion or all of their nucleotide sequences distinct from those of the genomes of their helper virus."_
+
+ICTV also features this listing:
+
+_Satellite viruses:_
+
+1. _Chronic bee-paralysis virus-associated satellite virus_
+
+2. _Satellites that resemble tobacco necrosis satellite virus_
+
+3. _Nodavirus-associated satellite virus_
+
+4. _Adenovirus-associated satellite virus (Dependovirus)_
+
+5. _Mimivirus-associated satellite virus (Sputnik, virophage)_
+
+There is an issue that there simply are not many sequences available for a lot of satellite virus families.
+
+## Alphasatellitidae
+
+Alphasatellitidae have single stranded circular DNA genomes that mostly infect plants and often require begomovirus as a helper.
+
+```{bash}
+# iterate through the families
+for family_path in ../results/dinucleotide_periodicity_TAX/Alphasatellitidae/ 
+do
+  family=$(basename $family_path)
+  echo $family
+  # iterate through the genera
+  for genus_path in ${family_path}*/ 
+  do
+    genus=$(basename $genus_path)
+    outpath=${genus_path}/curve_fit
+    
+    # these ones have less than 100kb total sequences
+    if [[ $genus == "Petromoalphasatellinae" ]]
+    then
+      continue
+    fi
+    
+    echo $genus
+    # the script subsamples a set of sequences to analyze. To counteract the randomness I do it 3 times each
+    for i in 1 2 3 4 5 6 7 8 9 10
+    do
+      echo $i
+      
+      Rscript Periodicity6.R \
+      ${genus_path}/${genus}.size.rmdup.fasta \
+      ${outpath}/${genus}_${i} \
+      $family \
+      $genus
+    done
+  done
+done
+```
+
+
+## Hepatitis D and other satellite viruses
+
+Hepatitis D is a single stranded negative sense circular RNA virus that requires the presence of hepatitis B to propagate. The hepatitis D genomes are very short generally. Average ~700bp. Therefore I did the size cutoff at 600 bp
+
+Tobacco-mosaic satellite viruses are classified in the genus virtoviruses (19 unique sequences). They do not fulfill my requirement for at least 100kb total length. I still include them.
+
+I used the list from ICTV as a guide, but some of the entries turn up little to no results.
+
+Sometimes satellite viruses are put together into the same clade as their helper virus which is confusing. Therefore I just download all sequences that are associated with the term "satellite virus".
+
+
+```{bash}
+for family_path in ../results/dinucleotide_periodicity_TAX/satellite_virus/ 
+do
+  family=$(basename $family_path)
+  echo $family
+  # iterate through the genera
+  for genus_path in ${family_path}*/ 
+  do
+    genus=$(basename $genus_path)
+    outpath=${genus_path}/curve_fit
+    
+    # these ones have less than 100kb total sequences
+    if [[ $genus == "unclassified_viroids" ]]
+    then
+      continue
+    fi
+    
+    echo $genus
+    # the script subsamples a set of sequences to analyze. To counteract the randomness I do it 3 times each
+    for i in 1 2 3 4 5 6 7 8 9 10
+    do
+      echo $i
+      
+      Rscript Periodicity6.R \
+      ${genus_path}/${genus}.size.rmdup.fasta \
+      ${outpath}/${genus}_${i} \
+      $family \
+      $genus
+    done
+  done
+done
+```
+
+## Mavirus
+
+Maviruses are virophages that also need the co-infection of a helper virus to undergo replication. There are few sequences associated with Mavirus on NCBI, so I opted for its family lavidaviridae.
+
+The number of sequences is still very limited at 55. The most prominent period I can find here is again 10 for multiple dinucleotides.
+
+```{bash}
+# iterate through the genera
+for genus_path in ../results/dinucleotide_periodicity_TAX/Lavidaviridae 
+do
+  family="Lavidaviridae"
+  genus=$(basename $genus_path)
+  outpath=${genus_path}/curve_fit
+  
+  # these ones have less than 100kb total sequences
+  if [[ $genus == "unclassified_viroids" ]]
+  then
+    continue
+  fi
+  
+  echo $genus
+  # the script subsamples a set of sequences to analyze. To counteract the randomness I do it 3 times each
+  for i in 1 2 3 4 5 6 7 8 9 10
+  do
+    echo $i
+    
+    Rscript Periodicity6.R \
+    ${genus_path}/${genus}.size.rmdup.fasta \
+    ${outpath}/${genus}_${i} \
+    $family \
+    $genus
+  done
+done
+```
+
+
+# Pan family analysis
+
+## Read dataframes
+
+```{r}
+library(tidyverse)
+
+df <- lapply(list.dirs("../results/dinucleotide_periodicity_TAX/", recursive = F), function(fam_path){
+  lapply(list.dirs(fam_path, recursive = F), function(genus_path){
+    genus <- basename(genus_path)
+    
+    # exclusion list
+    exclusion_list <- c("dependoparvovirus_extended", "Virtovirus", "dependoparvovirus_onehosteach")
+    if(genus %in% exclusion_list){
+      return()
+    }
+    
+    tmp <- tibble()
+    for (i in seq(10)){
+      tmp <- bind_rows(
+        tmp,
+        read_csv(paste0(genus_path, "/curve_fit/", genus, "_", as.character(i), ".CURVE.csv")) %>% 
+          mutate(replicate = i)
+        )
+    }
+    return(tmp)
+  })
+}) %>% bind_rows %>% 
+  mutate(logGOF = -1*log(nGOF)) %>% 
+  dplyr::filter(
+    dinucleotide %in% c( # remove complementary dinucleotides
+        "AA", "TA", "WW",
+        "GG", "CG", "SS",
+        "TC", "YY",
+        "AG", 
+        "YR", "RY", "WS", "SW", "YS", "SY", "YW", "WY"
+    ),
+    period < 40, # remove periodicities that are too large to be relevant
+    HL > 5 # remove Half lifes that are too low to be relevant
+  )
+
+df %>% nrow
+```
+
+## merge with other info
+
+```{r}
+# read meta info
+meta_info <- read_csv("../results/dinucleotide_periodicity_TAX/family_ass.csv") %>% 
+  select(-Family)
+
+# merge and add calculations
+df_meta_info <- merge(
+  df,
+  meta_info,
+  by = "Genus"
+  )
+
+df_meta_info %>% nrow()
+
+
+# save
+
+df_meta_info %>% select(-...1) %>% write_csv("../results/dinucleotide_periodicity_TAX/GOF_meta_info.csv", col_names = T)
+```
+
+
+## load data
+
+```{r}
+df_meta_info <- read_csv("../results/dinucleotide_periodicity_TAX/GOF_meta_info.csv")
+```
+
+
+
+## Plot GOF against period
+
+### Plot colors
+
+```{r}
+scatter_colors = c(
+    "AAV Helper Kingdoms"="#6929c4" ,
+    "Shotokuvirae"="#1192e8",
+    "Human"="#fa4d56",
+    "E.coli"="#9f1853",
+    "C.elegans"="#8a3800",
+    "Yeast"="#b28600",
+    "Satellite virus"="#198038")
+```
+
+### Scatterplot
+
+```{r}
+library(ggpubr)
+
+# example
+df_meta_info %>% 
+  dplyr::filter(Genus == "canine_protoparvovirus") %>% 
+  arrange(nGOF)
+
+df_meta_info_aggregated_replicates <- df_meta_info %>% 
+  mutate(periodicity = 1 / log2(GOF / amplitude)) %>% 
+  drop_na() %>% 
+  group_by(Family, Genus, dinucleotide, Kingdom, Group) %>% 
+  summarise(mperiod = median(period), mGOF = median(GOF), mA = median(amplitude), mperiodicity = median(periodicity)) %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels =c("YY", "SS", "WW"))) %>% 
+  drop_na()
+  
+  
+
+# GOF against period
+gdf_total <- df_meta_info_aggregated_replicates %>% 
+  dplyr::filter(
+    dinucleotide %in% c("YY", "SS", "WW")) %>%
+  ggplot(aes(x=mperiod, y=mperiodicity, label = Genus)) +
+  geom_point(aes(color=Group)) +
+  geom_hline(yintercept = 0.23) +
+  xlab("period") +
+  ylab("periodicity | log2(GdF/amplitude)^-1") +
+  facet_wrap(~dinucleotide, ncol=1) +
+  theme(text=element_text(size=8)) +
+  scale_color_manual(values = scatter_colors) +
+  theme_bw()
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.genera.png", plot=gdf_total, width = 6, height = 4)
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.genera.svg", plot=gdf_total, width = 6, height = 4)
+
+
+# arbitrary cutoff at 45
+gdf_zoom <- df_meta_info_aggregated_replicates %>% 
+  dplyr::filter(
+    dinucleotide %in% c("YY", "SS", "WW")) %>%
+  ggplot(aes(x=mperiod, y=mperiodicity, label = Genus)) +
+  geom_point(aes(fill=Group), shape=21, size = 3) +
+  geom_text(size = 2, nudge_x =0, hjust = 0) +
+  xlab("period") +
+  ylab("periodicity | log2(GdF/amplitude)^-1") +
+  ylim(0.23, 0.3) +
+  xlim(0, 30) +
+  facet_wrap(~dinucleotide, ncol=1) +
+  theme(text=element_text(size=10)) +
+  scale_fill_manual(values = scatter_colors) +
+  theme_bw()
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.genera.top.png", plot = gdf_zoom, width = 6, height = 4)
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.genera.top.svg", plot = gdf_zoom, width = 6, height = 4)
+
+ggarrange(gdf_total, gdf_zoom, nrow = 1)
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.panel.png", width = 10, height = 7)
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.panel.svg", width = 10, height = 7)
+
+df_meta_info_aggregated_replicates %>% 
+  dplyr::filter(Genus == "celegans")
+```
+
+
+## Rank all GOF values
+
+```{r}
+ranked <- df_meta_info_aggregated_replicates  %>%
+  arrange(desc(mperiodicity)) %>% 
+  ungroup() %>% 
+  mutate(rown = row_number(),
+         xaxis = paste0(Genus, rown), 
+         mperiod = round(mperiod, 1))
+
+# top 20
+ranked %>% 
+  dplyr::filter(rown < 20) %>% 
+  mutate(xaxis = factor(xaxis, levels = ranked %>% pull(xaxis))) %>% 
+  ggplot(aes(x=xaxis, y=mperiodicity, fill=dinucleotide, label = mperiod)) +
+  geom_bar(stat="identity") +
+  geom_text(size = 3) +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  ggtitle("Top 20 all dinucleotides")
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.top20.ALL.png", width=10, height=10)
+
+# top 20 only Shotokuvirae
+ranked_schoko <- df_meta_info_aggregated_replicates  %>%
+  dplyr::filter(Kingdom == "Shotokuvirae") %>% 
+  arrange(desc(mperiodicity)) %>% 
+  ungroup() %>% 
+  mutate(rown = row_number(),
+         xaxis = paste0(Genus, rown), 
+         mperiod = round(mperiod, 1))
+
+ranked_schoko %>% 
+  dplyr::filter(rown < 20) %>% 
+  mutate(xaxis = factor(xaxis, levels = ranked_schoko %>% pull(xaxis))) %>% 
+  ggplot(aes(x=xaxis, y=mperiodicity, fill=dinucleotide, label = mperiod)) +
+  geom_bar(stat="identity") +
+  geom_text(size = 3) +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  ggtitle("Top 20 shotokuvirae dinucleotides")
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.top20.SHOTOKUVIRAE.png", width=8, height=6)
+  
+```
+
+### Rank only YY
+
+```{r}
+rankedyy <- df_meta_info_aggregated_replicates  %>%
+  dplyr::filter(dinucleotide == "YY") %>% 
+  arrange(desc(mperiodicity)) %>% 
+  ungroup() %>% 
+  mutate(rown = row_number(),
+         xaxis = paste0(Genus, rown), 
+         mperiod = round(mperiod, 1)) %>% 
+  dplyr::filter(rown < 19)
+
+
+rankedyy %>%
+  mutate(xaxis = factor(xaxis, levels = rankedyy %>% pull(xaxis)), mperiodicity = round(mperiodicity, 1)) %>% 
+  ggplot(aes(x=xaxis, y=mperiod, fill=Group)) +
+  geom_bar(stat="identity") +
+  #geom_text(size = 2) +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  ylab("period") +
+  theme_bw() +
+  theme(
+    text = element_text(size = 15),
+    plot.margin = margin(0,0,0,1, "cm")) +
+  scale_fill_manual(values = scatter_colors)
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.top20.YY.svg", width=7, height=4)
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.top20.YY.png", width=7, height=4)
+```
+
+### Rank only AA
+
+```{r}
+rankedaa <- df_meta_info %>% 
+  dplyr::filter(dinucleotide == "AA") %>% 
+  group_by(Kingdom, Family, Genus, dinucleotide) %>% 
+  drop_na() %>% 
+  summarise(mlogGOF = median(logGOF), mperiod = median(period), mnGOF = median(nGOF)) %>% 
+  arrange(mnGOF) %>% 
+  ungroup() %>% 
+  mutate(rown = row_number(),
+         xaxis = paste0(Genus, rown), 
+         mperiod = round(mperiod, 1)) %>% 
+  dplyr::filter(rown < 20)
+
+rankedaa %>%
+  mutate(xaxis = factor(xaxis, levels = rankedaa %>% pull(xaxis))) %>% 
+  ggplot(aes(x=xaxis, y=mnGOF, fill=Kingdom, label = mperiod)) +
+  geom_bar(stat="identity") +
+  geom_text(size = 3) +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  ggtitle("Top 20: AA dinucleotides")
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.top20.AA.png", width=8, height=6)
+```
+
+### Rank only YR
+
+```{r}
+rankedyr <- df_meta_info %>% 
+  dplyr::filter(dinucleotide == "YR") %>% 
+  group_by(Kingdom, Family, Genus, dinucleotide) %>% 
+  drop_na() %>% 
+  summarise(mlogGOF = median(logGOF), mperiod = median(period), mnGOF = median(nGOF)) %>% 
+  arrange(mnGOF) %>% 
+  ungroup() %>% 
+  mutate(rown = row_number(),
+         xaxis = paste0(Genus, rown), 
+         mperiod = round(mperiod, 1)) %>% 
+  dplyr::filter(rown < 20)
+
+rankedyr %>%
+  mutate(xaxis = factor(xaxis, levels = rankedyr %>% pull(xaxis))) %>% 
+  ggplot(aes(x=xaxis, y=mnGOF, fill=Kingdom, label = mperiod)) +
+  geom_bar(stat="identity") +
+  geom_text(size = 3) +
+  scale_x_discrete(guide = guide_axis(angle = 45)) +
+  ggtitle("Top 20: YR dinucleotides")
+ggsave("../results/dinucleotide_periodicity_TAX/curveGOF.top20.YR.png", width=8, height=6)
+```
+
+## unusual periods
+
+The vast majority of periods is around 10. Dependoparvovirus sticks out like a sore thumb with its good GOF and period of 15.
+
+```{r}
+poff <- df_meta_info %>% 
+  dplyr::filter(period > 12 | period < 8, dinucleotide %in% c("YY", "SS", "WW")) %>% 
+  group_by(Family, Genus, dinucleotide) %>% 
+  summarise(
+    mperiod = median(period),
+    mnGOF = median(nGOF),
+    mlogGOF = median(logGOF),
+    mGOF = median(GOF)
+  ) %>% 
+  arrange(desc(mlogGOF)) %>% 
+  dplyr::filter(mnGOF < 50)
+
+poff
+
+poff %>% 
+  ggplot(aes(x=mperiod, y= mnGOF, label = Genus)) +
+  geom_text(size= 4, nudge_x = 2, hjust=0) +
+  geom_point(aes(fill=dinucleotide), shape=21, size = 3) +
+  ylim(30, 50) +
+  xlim(0, 40) +
+  geom_hline(yintercept = 45) +
+  scale_fill_brewer(palette = "Dark2") +
+  theme(text = element_text(size = 15))
+ggsave("../results/dinucleotide_periodicity_TAX/off_periods.png", width=6, height=6)
+ggsave("../results/dinucleotide_periodicity_TAX/off_periods.svg", width=6, height=6)
+
+  
+```
+
+## Are there meta differences?
+
+### In ssDNA viruses? Circular viruses?
+
+```{r}
+df_meta_info %>% 
+  dplyr::filter(nGOF < 100, dinucleotide %in% c("YY", "WW", "SS", "AA")) %>% 
+  ggplot(aes(x=organisation, y=nGOF)) +
+  geom_boxplot() +
+  facet_grid(genome_molecule~dinucleotide)
+```
+
+### Relationship with genome length?
+
+```{r}
+df_meta_info %>%
+  dplyr::filter(
+    dinucleotide %in% c("YY", "SS", "WW", "AA", "GG", "TC")) %>% 
+  group_by(Family, Genus, dinucleotide) %>% 
+  summarise(genome_sizeKB = mean(genome_sizeKB), nGOF = mean(nGOF)) %>% 
+  ggplot(aes(y=genome_sizeKB, x=nGOF, color=Family)) +
+  geom_point() +
+  facet_wrap(~dinucleotide) +
+  xlim(0, 100) +
+  scale_y_log10()
+
+df_meta_info %>%
+  dplyr::filter(
+    dinucleotide %in% c("YY", "SS", "WW", "AA", "GG", "TC"),
+    Kingdom == "Shotokuvirae") %>% 
+  group_by(Family, Genus, dinucleotide) %>% 
+  summarise(genome_sizeKB = mean(genome_sizeKB), nGOF = mean(nGOF)) %>% 
+  ggplot(aes(y=genome_sizeKB, x=nGOF, color=Family)) +
+  geom_point() +
+  facet_wrap(~dinucleotide) +
+  xlim(0, 100) +
+  ggtitle("Shotokuvirae")
+```
+
+Not really.
+
+# Conclusion
+
+## Sine fitting
+
+Fitting a dampened sine curve to the data is a much better representation of the expected Autocorrelation pattern. This is especially underlined in well documented periodicities like AA in yeast and elegans showing up with the greater fits. In contrast to that, the fourier analysis of the PSD does not show these 2 examples to be very interesting. Even more striking is that Dependoparvovirus still shows up near the top for YY/RR-dinucleotide autocorrelations. (Also for AA autocorrelations). The most interesting take-away from this is is that the dependoparvovirus YY periodicity is the only one in the top 20 that is not around 10, but at 15-nt. The Ecoli genome is known to display ~10bp periodicty as it aids in supercoiling. The eukaryotic genomes (yeast, celegans, human) are known to display ~10bp periodicity as it aids the nucleosome formation. For Viruses that perform a lysogenic infection within eukaryotic hosts, the same explanation for their genome periodicity can be applied. (This has never been reported either!)
+
+It is bothering me that some of the YY-autocorrelations that appear in the top 20 (Grablovirus, Gemykibivirus) do not display a nice curve of the autocorrelation. However I can not deny the accuracy of the fit. I could solve this by introducing a value- or significance-threshold into the determination of good fits...
+
+## Meta parameters
+
+I do not see a clear correlation of goodness of fit in meta variables like the circularity/linearity and genome size.
+
+## Satellite viruses
+
+Satellite viruses do not portray a unifying sequence periodicity
+
+```{r}
+df_meta_info %>% 
+  dplyr::filter(
+    Kingdom %in% c("satellite_virus", "virophage"),
+    dinucleotide %in% c("YY", "SS", "WW", "RR", "AA")) %>% 
+  ggplot(aes(x=period, y=nGOF, color=Genus, label=replicate)) +
+  geom_point() +
+  facet_grid(dinucleotide~Genus) +
+  geom_hline(yintercept = 45)
+```
+
+
+# Addendum
+
+## repetetive elements
+
+## Tiny periods with seemingly great fits
+
+There is interesting behaviour of the curve fitting. Sometimes I find periods of 0.90 or 0.11 as the best fitting curve. This does not make sense to me because the periods that make sense in dinucleotide autocorrelations should be much higher than that. But the curves look beautifully fit with periods that look much higher than their lambda value suggests.
+
+I tested around and found out it is because the data I am trying to predict is discrete. I only have values for 0, 1, 2, ...; none in between. It ends up that a sine curve with a period of e.g. 0.11 looks indistinguishable from a sine curve with a period of 11, because they overlap at exactly the right points.
+
+I fixed this by adding a failsave for very small periods (<3) into the script.
+
+```{r}
+H <- 13
+A <- 8.741500e-05
+l <- 0.10999
+
+distance <- seq(1, 20, 1)
+Y <- list()
+for (d in distance){
+  Y <- append(
+    Y,
+    exp(-1*(log(2)*d)/abs(H)) * abs(A) * sin((((2*pi*d)/abs(l))) + (pi/2))
+  )
+}
+plot(distance, unlist(Y), main = paste("Period", l))
+
+
+l <- 10.999
+
+distance <- seq(1, 20, 1)
+Y <- list()
+for (d in distance){
+  Y <- append(
+    Y,
+    exp(-1*(log(2)*d)/abs(H)) * abs(A) * sin((((2*pi*d)/abs(l))) + (pi/2))
+  )
+}
+plot(distance, unlist(Y), main = paste("Period", l))
+
+```

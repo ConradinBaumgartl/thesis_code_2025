@@ -1,0 +1,272 @@
+# Why
+
+Originally my positive control for ONT sequencing was not perfectly positive. I had shown this data in my last TAC meeting. Directly after my TAC meeting I made a new batch of positive control and sequenced it on an R9 flowcell and the rapid barcoding kit. I basecalled and called the modifications with METEORE which showed that the positive control was properly positive this time (see progress report 5, 7.11.2023).
+
+The new data I am mostly calling with dorado and R10 flowcells. The best control would be running the PCRs again and sequencing on a R10 flowcells. I think this would be a waste of money because probably nothing will change. The best I can do is a rebasecalling of the data with dorado and confirming that not much is changing. 
+
+# Rebasecalling
+
+Looking for the CMV containing transgene.
+
+## negative control
+
+From this I need barcode 5
+
+```{bash}
+in=~/sds-hd/sd21j005/conradin/raw_data/ONT/conradin_baumgartl/episome_005/ctrl/
+out=~/sds-hd/sd21j005/conradin/raw_data/ONT/conradin_baumgartl/episome_006/reb/20230123_ctrl.dorado.combined.bam
+dorado basecaller dna_r9.4.1_e8_sup@v3.3 $in --min-qscore 8 --emit-moves --kit-name SQK-RBK004 -r --modified-bases 5mCG_5hmCG > $out
+
+
+reference=genomes/pPl04.linearized.fasta
+# remove short reads below 2 kb
+samtools view -h $out | awk 'length($10) > 2000 || $1 ~ /^@/' | samtools view -bS - > data/reb/20230123_ctrl.dorado.LengthFiltered.bam
+# align the rebasecalled bam together with its modifications
+dorado aligner $reference data/reb/20230123_ctrl.dorado.LengthFiltered.bam \
+  --emit-summary \
+  -t 16 \
+  --output-dir data/aligned/20230123_ctrl/
+# demultiplex the barcodes; this information is also stored in the bam file already from rebasecalling, hence "--no-classify"
+dorado demux data/aligned/20230123_ctrl/ --no-classify -o data/aligned_demux/20230123_ctrl/ -t 16
+```
+
+
+## positive control
+
+From this I need barcode 10
+
+```{bash}
+in=~/sds-hd/sd21j005/conradin/raw_data/ONT/conradin_baumgartl/episome_005/run4_posctrl/
+out=~/sds-hd/sd21j005/conradin/raw_data/ONT/conradin_baumgartl/episome_006/reb/20230920_Posctrl.dorado.combined.bam
+dorado basecaller dna_r9.4.1_e8_sup@v3.3 $in --min-qscore 8 --emit-moves --kit-name SQK-RBK004 -r --modified-bases 5mCG_5hmCG > $out
+
+reference=genomes/pPl04.linearized.fasta
+# remove short reads below 2 kb
+samtools view -h $out | awk 'length($10) > 2000 || $1 ~ /^@/' | samtools view -bS - > data/reb/20230920_Posctrl.dorado.LengthFiltered.bam
+# align the rebasecalled bam together with its modifications
+dorado aligner $reference data/reb/20230920_Posctrl.dorado.LengthFiltered.bam \
+  --emit-summary \
+  -t 16 \
+  --output-dir data/aligned/20230920_ctrl/
+# demultiplex the barcodes; this information is also stored in the bam file already from rebasecalling, hence "--no-classify"
+dorado demux data/aligned/20230920_ctrl/ --no-classify -o data/aligned_demux/20230920_ctrl/ -t 16
+```
+
+
+Renamed and moved the aforementioned files to data/aligned_pooled/controls/PCR_met.01.unfiltered.bam and data/aligned_pooled/controls/PCR_nat.01.unfiltered.bam
+
+## Filter and get read counts
+
+```{bash}
+for file in data/aligned_pooled/controls/*unfiltered.bam
+do
+  samtools view -@ 12 -b -F 2308 $file > ${file/unfiltered/filt}
+  samtools index ${file/unfiltered/filt}
+  samtools idxstats -@ 8 ${file/unfiltered/filt} > ${file/unfiltered.bam/filt.nreads}
+  
+  modbam2bed \
+    --aggregate \
+    --combine \
+    --cpg \
+    --extended \
+    -t 16 \
+    $reference ${file/unfiltered/filt} > ${file/unfiltered.bam/filt.modbed}
+done
+```
+
+
+# Subsample to 30 reads
+
+```{bash}
+for file in data/aligned_pooled/controls/*.filt.nreads
+do
+  bname=$(basename $file)
+  nreads=$(awk '{ if($1 == "pPl04_linearized") print $3 }' $file)
+  sample_perc=$(bc -l <<< "30/"${nreads})
+  
+  inbam=${file/.nreads/.bam}
+  outbam=data/aligned_pooled/controls/subsampled_30/${bname/.nreads/}.bam
+  
+  samtools view -b -s 1${sample_perc} $inbam > $outbam
+  samtools index $outbam
+  samtools idxstats $outbam> ${outbam/.bam/.nreads}
+  
+  
+  modbam2bed \
+    --aggregate \
+    --combine \
+    --cpg \
+    --extended \
+    -t 16 \
+    $reference $outbam > ${outbam/.bam/.modbed}
+done
+```
+
+## read data
+
+
+```{r}
+dfctrl_sub30 <- lapply(list.files("data/aligned_pooled/controls/subsampled_30/", pattern = "modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned_pooled/controls/subsampled_30/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1]) %>%
+    select(-c("x1", "x2", "x3")) %>% 
+    dplyr::filter(score>0)
+  return(tmp)
+}) %>% bind_rows()
+
+
+dfctrl_sub30 %>% head()
+```
+
+## Annotation functions
+
+```{r}
+library(tidyverse)
+
+bed_cmv <- read_delim("genomes/cmv.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "CMV")
+bed_yfp <- read_delim("genomes/YFP.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "YFP")
+bed_bghpa <- read_delim("genomes/BGHpA.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "BGHpA")
+bed_stuffer <- read_delim("genomes/stuffer.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "stuffer")
+bed_itr <- read_delim("genomes/ITR.bed", col_names = c("chr", "start", "end")) %>% mutate(name = "ITR")
+
+annotations_list <- list(bed_cmv, bed_yfp, bed_bghpa, bed_stuffer, bed_itr)
+
+annotate <- function(positions, annotations_list){
+  annot_list <- rep(NA, length(positions))
+  for (i in seq(length(positions))){
+    cpg_start <- positions[[i]]
+    for (annotation_bed in annotations_list){
+      annotation_start <- pull(annotation_bed, start)[[1]]
+      annotation_end <- pull(annotation_bed, end)[[1]]
+      annotation_name <- pull(annotation_bed, name)[[1]]
+      if (cpg_start >= annotation_start && cpg_start < annotation_end){
+        annot_list[i] <- annotation_name
+      }
+    }
+  }
+  return(annot_list)
+}
+```
+
+## annotate
+
+```{r}
+dfctrl_sub30_annot <- dfctrl_sub30 %>% 
+  mutate(annotation = factor(
+    annotate(
+      dfctrl_sub30 %>% pull(start),
+      annotations_list),
+    levels = c("ITR", "CMV", "YFP", "BGHpA", "stuffer", NA))
+    ) %>% 
+  dplyr::filter(!(is.na(annotation)))
+
+
+dfctrl_sub30_annot %>% 
+  write_csv("data/aligned_pooled/controls/dfr.30reads.annotated.csv")
+```
+
+
+
+## plot
+
+```{r}
+dfctrl_sub30_annot %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=name, y=perc_modified)) +
+  geom_boxplot(width = .2) +
+  theme_bw()
+ggsave("plots/pooled_subsampled_to_aav2/methylation.total.controls.png", width = 5, height=4, dpi=120)
+ggsave("plots/pooled_subsampled_to_aav2/methylation.total.controls.svg", width = 5, height=4, dpi=120)
+
+
+dfctrl_sub30_annot %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=name, y=perc_modified)) +
+  geom_boxplot(width = .2) +
+  theme_bw() +
+  facet_wrap(~annotation)
+```
+
+
+
+
+# Subsample to 300 reads
+
+```{bash}
+for file in data/aligned_pooled/controls/*.filt.nreads
+do
+  bname=$(basename $file)
+  nreads=$(awk '{ if($1 == "pPl04_linearized") print $3 }' $file)
+  sample_perc=$(bc -l <<< "300/"${nreads})
+  
+  inbam=${file/.nreads/.bam}
+  outbam=data/aligned_pooled/controls/subsampled_300/${bname/.nreads/}.bam
+  
+  samtools view -b -s 1${sample_perc} $inbam > $outbam
+  samtools index $outbam
+  samtools idxstats $outbam> ${outbam/.bam/.nreads}
+  
+  
+  modbam2bed \
+    --aggregate \
+    --combine \
+    --cpg \
+    --extended \
+    -t 16 \
+    $reference $outbam > ${outbam/.bam/.modbed}
+done
+```
+
+## read data
+
+
+```{r}
+dfctrl_sub300 <- lapply(list.files("data/aligned_pooled/controls/subsampled_300/", pattern = "modbed"), function(f){
+  tmp <- read_delim(paste0("data/aligned_pooled/controls/subsampled_300/", f), col_names = c("chr", "start", "end", "mod", "score", "strand", "x1", "x2", "x3", "total_coverage", "perc_modified", "n_cannon", "n_mod", "n_filt", "n_nocall", "n_alternative_mod")) %>% 
+    mutate(name = str_split(f, "\\.")[[1]][1]) %>%
+    select(-c("x1", "x2", "x3")) %>% 
+    dplyr::filter(score>0)
+  return(tmp)
+}) %>% bind_rows()
+
+
+dfctrl_sub300 %>% head()
+```
+
+## annotate
+
+```{r}
+dfctrl_sub300_annot <- dfctrl_sub300 %>% 
+  mutate(annotation = factor(
+    annotate(
+      dfctrl_sub300 %>% pull(start),
+      annotations_list),
+    levels = c("ITR", "CMV", "YFP", "BGHpA", "stuffer", NA))
+    ) %>% 
+  dplyr::filter(!(is.na(annotation)))
+
+
+dfctrl_sub300_annot %>% 
+  write_csv("data/aligned_pooled/controls/dfr.300reads.annotated.csv")
+```
+
+
+## plot
+
+```{r}
+dfctrl_sub300_annot %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=name, y=perc_modified)) +
+  geom_boxplot(width = .2) +
+  theme_bw()
+#ggsave("plots/pooled_subsampled_to_aav2/methylation.total.controls.png", width = 5, height=4, dpi=120)
+#ggsave("plots/pooled_subsampled_to_aav2/methylation.total.controls.svg", width = 5, height=4, dpi=120)
+
+
+dfctrl_sub300_annot %>% 
+  dplyr::filter(score > 800) %>% 
+  ggplot(aes(x=name, y=perc_modified)) +
+  geom_boxplot(width = .2) +
+  theme_bw() +
+  facet_wrap(~annotation)
+```

@@ -1,0 +1,696 @@
+# Init
+## Libraries
+```{r}
+library(tidyverse)
+library(pheatmap)
+library(bio3d)
+library(RColorBrewer)
+```
+
+## load df
+```{r}
+df_old <- read_csv("../results/METEORE_masterdf.csv")
+
+df_master <- read_csv("../../../METEORE/METEORE_masterdf_newctrls.csv")
+
+all.equal(df_old, df_master)
+
+```
+
+This dataframe is pivoted to make comparisons between tools and replicates, not so much between the different genomes. This is the first step to figure out which tools to rely on to make meaningful conclusions from the different promoters on the data.
+
+# All samples
+
+## all, but only annotations
+
+```{r}
+dfp_annot <- df_master %>% 
+  filter(!is.na(annotation)) %>% 
+  gather(key="tool", value="Methylation", -c(AAV, start, end, Sample, annotation)) %>%
+  type.convert(as.is=T) %>% 
+  separate(tool, c("tool", "replicate")) %>% 
+  unite("Sample", c(Sample, replicate)) %>% 
+  dplyr::filter(!Sample %in% c("met_01", "met_02")) %>% 
+  separate(Sample, c("Sample", "replicate")) %>% 
+  drop_na() %>% 
+  mutate(
+    Sample = factor(Sample, levels = c("met", "nat", "liver")),
+    annotation = ifelse(annotation == "ITR2_left", "ITR", annotation),
+    annotation = ifelse(annotation == "ITR2_right", "ITR", annotation),
+    annotation = ifelse(annotation == "CMV_church", "CMV", annotation)
+    
+  )
+
+dfp_annot
+```
+
+
+## Which tools is most accurate in calling no methylation in the negative control and methylation on the positive control?
+
+The native controls should be called as 0. I compare all tools only within the CpG calls in the YFP annotation. The sequence should therefore only have limited influence. I also combined the replicates for simplicity.
+
+```{r}
+dfp_annot %>% 
+  filter(annotation == "eYFP") %>% 
+  ggplot(aes(x=tool, y=Methylation, fill=AAV)) +
+  geom_boxplot() +
+  facet_grid(~Sample) +
+  ggtitle("Methylation calls on the YFP annotation on different genomes - combined replicates")
+ggsave("../results/plots/tool_comparison/METEORE.eYFP.png", height = 8)
+```
+
+For the negative control *megalodon* and *nanopolish* are both closest to 0.
+
+In the positive control it seems that the methylation of the CMV PCR product worked the worst.
+
+## Which tool sees a difference between the native and the liver sampels?
+
+```{r}
+dfp_annot %>% 
+  filter(
+    annotation == "eYFP",
+    Sample != "met") %>% 
+  ggplot(aes(x=tool, y=Methylation, fill=Sample)) +
+  geom_violin() +
+  facet_wrap(~AAV, ncol = 1) +
+  ggtitle("Methylation calls on the YFP annotation on different genomes")
+ggsave("../results/plots/tool_comparison/METEORE.eYFP.liver-nat.png", height = 8)
+```
+
+# Compare boxplot of methylation across different annotations
+
+```{r}
+colormap <- c("#767676", "#f1f1f1", "#dd9f1d", "#b12052")
+```
+
+
+```{r}
+
+meteore_ONT_plot_thesis <- dfp_annot %>% 
+  mutate(
+    Sample = as.character(Sample),
+    annotation = ifelse(annotation %in% c("CMV", "LP1", "GFAP"), "promoter", annotation)
+    )
+
+
+meteore_ONT_plot_thesis %>% write_csv("meteore_ONT_plot_thesis.csv")
+
+meteore_ONT_plot_thesis %>% 
+  dplyr::filter(annotation %in% c("promoter", "eYFP")) %>% 
+  mutate(
+    annotation = factor(annotation, levels = c("promoter", "eYFP")),
+    Sample = ifelse(Sample == "met", "methylated control", Sample),
+    Sample = ifelse(Sample == "nat", "native control", Sample),
+    Sample = factor(Sample, levels = c("methylated control", "native control", "liver"))
+  ) %>% 
+  ggplot(aes(x=tool, y=Methylation, fill=Sample)) +
+  geom_boxplot() +
+  facet_grid(AAV~annotation) +
+  scale_fill_manual(values = colormap) +
+  theme_bw() +
+  ylab("Methylation %") +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+ggsave("../results/plots/methylation_boxplot.promoter.eYFP.png", width = 8, height = 6, dpi=200)
+ggsave("../results/plots/methylation_boxplot.promoter.eYFP.svg", width = 8, height = 6, dpi=200)
+```
+
+
+
+
+
+# Pivot for CpG completely
+
+```{r}
+# pseudocount
+log2pseudo <- function(x, pc=1){
+  return(log2(x+pc))
+}
+
+
+# pivot the dataframe into a monster that also includes the values for replicates and samples for every CPG
+df_logfc <- df_master %>% 
+  gather(key="tool_replicate", value = "Methylation", -c(AAV, start, end, Sample, annotation)) %>% 
+  unite("sample_tool_replicate", c(Sample, tool_replicate)) %>% 
+  pivot_wider(values_from = Methylation, names_from = sample_tool_replicate) %>% 
+  arrange(AAV, start) %>% # then calculate the logFC for every replicate to the negative control
+  mutate(
+    liver_guppy_01_logFC = log2pseudo(liver_guppy_01) - log2pseudo(nat_guppy_01),
+    liver_guppy_02_logFC = log2pseudo(liver_guppy_02) - log2pseudo( nat_guppy_02),
+    liver_nanopolish_01_logFC = log2pseudo(liver_nanopolish_01) - log2pseudo(nat_nanopolish_01),
+    liver_nanopolish_02_logFC = log2pseudo(liver_nanopolish_02) - log2pseudo(nat_nanopolish_02),
+    liver_megalodon_01_logFC = log2pseudo(liver_megalodon_01) - log2pseudo(nat_megalodon_01),
+    liver_megalodon_02_logFC = log2pseudo(liver_megalodon_02) - log2pseudo(nat_megalodon_02),
+    liver_deepsignal_01_logFC = log2pseudo(liver_deepsignal_01) - log2pseudo(nat_deepsignal_01),
+    liver_deepsignal_02_logFC = log2pseudo(liver_deepsignal_02) - log2pseudo(nat_deepsignal_02),
+    liver_tombo_01_logFC = log2pseudo(liver_tombo_01) - log2pseudo(nat_tombo_01),
+    liver_tombo_02_logFC = log2pseudo(liver_tombo_02) - log2pseudo(nat_tombo_02),
+    
+    met_guppy_01_logFC = log2pseudo(met_guppy_01) - log2pseudo(nat_guppy_01),
+    met_guppy_02_logFC = log2pseudo(met_guppy_02) - log2pseudo(nat_guppy_02),
+    met_nanopolish_01_logFC = log2pseudo(met_nanopolish_01) - log2pseudo(nat_nanopolish_01),
+    met_nanopolish_02_logFC = log2pseudo(met_nanopolish_02) - log2pseudo(nat_nanopolish_02),
+    met_megalodon_01_logFC = log2pseudo(met_megalodon_01) - log2pseudo(nat_megalodon_01),
+    met_megalodon_02_logFC = log2pseudo(met_megalodon_02) - log2pseudo(nat_megalodon_02),
+    met_deepsignal_01_logFC = log2pseudo(met_deepsignal_01) - log2pseudo(nat_deepsignal_01),
+    met_deepsignal_02_logFC = log2pseudo(met_deepsignal_02) - log2pseudo(nat_deepsignal_02),
+    met_tombo_01_logFC = log2pseudo(met_tombo_01) - log2pseudo(nat_tombo_01),
+    met_tombo_02_logFC = log2pseudo(met_tombo_02) - log2pseudo(nat_tombo_02),
+    
+    nat_guppy_0102_logFC = log2pseudo(nat_guppy_01) - log2pseudo(nat_guppy_02), # as a sanity check also calculate the logFC of the native replicates to each other
+    nat_nanopolish_0102_logFC = log2pseudo(nat_nanopolish_01) - log2pseudo(nat_nanopolish_02),
+    nat_megalodon_0102_logFC = log2pseudo(nat_megalodon_01) - log2pseudo(nat_megalodon_02),
+    nat_deepsignal_0102_logFC = log2pseudo(nat_deepsignal_01) - log2pseudo(nat_deepsignal_02),
+    nat_tombo_0102_logFC = log2pseudo(nat_tombo_01) - log2pseudo(nat_tombo_02)
+  )
+```
+
+
+## YFP
+
+```{r}
+# gather only the logFC data out of it
+# filter by eYFP CpGs and exclude the sanity control for now
+df_logFC_plot <- df_logfc %>% 
+  gather(key="sample", value="logFC Methylation", -c(AAV, start, end, annotation)) %>% 
+  filter(grepl('logFC', sample)) %>% 
+  separate(sample, c("Sample", "tool", "replicate", "x1")) %>% 
+  select(-x1) %>% 
+  mutate(Sample = factor(Sample, levels = c("met", "nat", "liver"))) %>% 
+  filter(
+    annotation == "eYFP",
+    Sample != "nat")
+
+df_logFC_plot %>% 
+  ggplot(aes(x=tool, y=`logFC Methylation`, fill=Sample)) +
+  geom_violin() +
+  geom_hline(yintercept = 0) +
+  facet_wrap(~AAV, ncol=3) +
+  ggtitle("per CpG difference in Methylation on eYFP") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+ggsave("../results/plots/tool_comparison/METEORE.eYFP.logFC.png", width = 8)
+```
+
+
+```{r}
+df_logFC_plot %>% 
+  filter(Sample == "liver") %>% 
+  ggplot(aes(x=AAV, y=`logFC Methylation`)) +
+  geom_boxplot() +
+  geom_jitter(size=.1, width=.35)
+```
+
+
+## YFP + promoter
+
+```{r}
+# gather only the logFC data out of it
+# filter by eYFP CpGs and exclude the sanity control for now
+df_logFC_plot <- df_logfc %>% 
+  gather(key="sample", value="logFC Methylation", -c(AAV, start, end, annotation)) %>% 
+  filter(grepl('logFC', sample)) %>% 
+  separate(sample, c("Sample", "tool", "replicate", "x1")) %>% 
+  select(-x1) %>% 
+  mutate(
+    Sample = factor(Sample, levels = c("met", "nat", "liver")),
+    annotation = str_replace(annotation, "CMV_church", "promoter"),
+    annotation = str_replace(annotation, "LP1", "promoter"),
+    annotation = str_replace(annotation, "GFAP", "promoter")
+    )
+
+
+df_logFC_plot %>% 
+  filter(
+    annotation %in% c("promoter", "eYFP"),
+    Sample == "liver"
+    ) %>% 
+  ggplot(aes(x=AAV, y=`logFC Methylation`, color = replicate)) +
+  geom_hline(yintercept = 0) +
+  geom_boxplot() +
+  geom_jitter(size = .1, position = position_jitterdodge(jitter.width = .25)) +
+  facet_wrap(~annotation)
+```
+
+There seems to be a little bit more methylation on the annotations of the GFAP and LP1 genomes. The replicates are also relatively far apart in these samples.
+
+How to interpret CpGs that have a negative logFC compared to the native controls?
+
+
+## Count
+
+Count the number of CpGs that have a logFC to the native control greater than a certain treshold.
+
+I have tried setting the treshold by the native DNA. To do this I checked the 99th percentile of the logFC between the 2 replicates in the native DNA for every annotation and tool!
+
+Maybe a threshold of 0.5 (~ 50% more methylation frequency of that CpG to the native control) should be enough. It makes everything just a little bit more complicated and there is not much to be gained.
+
+### Sophisticated
+
+```{r}
+# sophisticated/complicated threshold
+thresh <- df_logFC_plot %>% 
+  filter(
+    Sample == "nat"
+    ) %>% 
+  drop_na() %>% 
+  group_by(AAV, Sample, tool, annotation) %>% 
+  summarise(thresh = quantile(`logFC Methylation`, .99)) %>% 
+  unite("name", c(AAV, annotation, tool), sep="-") %>% 
+  ungroup() %>% 
+  select(-Sample)
+
+met_cpgs_count <- merge(df_logFC_plot %>% 
+        drop_na() %>% 
+        unite("name", c(AAV, annotation, tool), sep="-"),
+      thresh,
+      by="name") %>% 
+  separate(name, c("AAV", "annotation", "tool"), sep="-") %>% 
+  filter(
+    annotation %in% c("promoter", "eYFP"),
+    Sample != "nat",
+    `logFC Methylation` > thresh) %>% 
+  group_by(AAV, annotation, tool, Sample, replicate) %>% 
+  count()
+
+met_cpgs_count %>% 
+  ggplot(aes(x=AAV, y=n, fill=replicate)) +
+  geom_boxplot() +
+  facet_wrap(~Sample+annotation)
+```
+
+### Simple
+
+```{r}
+thresh <- 0.5
+
+met_cpgs_count <- df_logFC_plot %>% 
+  drop_na() %>% 
+  filter(
+    annotation %in% c("promoter", "eYFP"),
+    Sample != "nat") %>% 
+  mutate(n = if_else(`logFC Methylation` > thresh, 1, 0)) %>% 
+  group_by(AAV, annotation, tool, Sample, replicate) %>% 
+  summarise(met_CpGs = sum(n))
+```
+
+
+
+
+### Plot the violin plot with the treshhold
+
+```{r}
+for (repl in c("01", "02")){
+  df_logfc %>% 
+    gather(key="sample", value="logFC Methylation", -c(AAV, start, end, annotation)) %>% 
+    filter(grepl('logFC', sample)) %>% 
+    drop_na() %>% 
+    separate(sample, c("Sample", "tool", "replicate", "x1")) %>% 
+    select(-x1) %>% 
+    mutate(
+      Sample = factor(Sample, levels = c("met", "nat", "liver")),
+      annotation = str_replace(annotation, "CMV_church", "promoter"),
+      annotation = str_replace(annotation, "LP1", "promoter"),
+      annotation = str_replace(annotation, "GFAP", "promoter")
+      ) %>% 
+    filter(annotation %in% c("promoter", "eYFP"), replicate == repl) %>%
+    mutate(annotation = factor(annotation, levels = c("promoter", "eYFP"))) %>% 
+    ggplot(aes(x = tool, y= `logFC Methylation`, fill=Sample)) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    geom_violin(scale="width") +
+    geom_hline(yintercept = thresh) +
+    geom_jitter(size=.005, position = position_jitterdodge(dodge.width = .9)) +
+    facet_wrap(~AAV+annotation, ncol = 2)
+  ggsave(paste0("../results/plots/tool_comparison/METEORE.promoter.eYFP.logFCMethylation.threshold.", repl, ".png"), width = 10, height = 8)
+}
+```
+
+Tombo can not accurately predict the positive control samples. I will therefore leave it out.
+
+```{r}
+# exluding tombo!
+df_logfc %>% 
+  gather(key="sample", value="logFC Methylation", -c(AAV, start, end, annotation)) %>% 
+  filter(grepl('logFC', sample)) %>% 
+  drop_na() %>% 
+  separate(sample, c("Sample", "tool", "replicate", "x1")) %>% 
+  select(-x1) %>% 
+  mutate(
+    Sample = factor(Sample, levels = c("met", "nat", "liver")),
+    annotation = str_replace(annotation, "CMV_church", "promoter"),
+    annotation = str_replace(annotation, "LP1", "promoter"),
+    annotation = str_replace(annotation, "GFAP", "promoter")
+    ) %>% 
+  filter(
+    annotation %in% c("promoter", "eYFP"),
+    replicate != "0102", 
+    Sample == "liver",
+    tool != "tombo") %>%
+  mutate(annotation = factor(annotation, levels = c("promoter", "eYFP"))) %>% 
+  ggplot(aes(x = tool, y= `logFC Methylation`, fill=replicate)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_violin(scale="width") +
+  geom_hline(yintercept = thresh) +
+  geom_jitter(size=.005, position = position_jitterdodge(dodge.width = .9)) +
+  facet_wrap(~AAV+annotation, ncol = 2)
+ggsave(paste0("../results/plots/tool_comparison/METEORE.promoter.eYFP.logFCMethylation.threshold.liver.replicates.png"), width = 10, height = 8)
+```
+
+
+
+## Divide by the number of CpGs
+
+```{r}
+cg_count <- read_csv("../genomes/combined/cpg_count.csv") %>% 
+  unite("name", c(AAV, annotation))
+
+met_cpgs_count_perc <- merge(
+  cg_count,
+  met_cpgs_count %>%
+    unite("name", c(AAV, annotation)),
+  by="name") %>% 
+  separate(name, c("AAV", "annotation")) %>% 
+  mutate(perc_met_cpgs = (met_CpGs / count) * 100) %>% 
+  filter(tool != "tombo") # exclude tombo
+
+
+met_cpgs_count_perc %>% 
+  filter(Sample == "liver") %>% 
+  ggplot(aes(x=AAV, y=perc_met_cpgs, fill=replicate)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  facet_wrap(~tool+ annotation, ncol = 2) +
+  ggtitle("Percentage of CpGs with a positive logFC to the neg. control") +
+  scale_fill_brewer(palette="Set1")
+ggsave("../results/plots/tool_comparison/perc_CpG_over_native_control.single.png", height = 8)
+
+
+met_cpgs_count_perc %>% 
+  filter(Sample == "liver") %>% 
+  mutate(annotation = factor(annotation, levels = c("promoter", "eYFP"))) %>% 
+  ggplot(aes(x=AAV, y=perc_met_cpgs)) +
+  geom_bar(stat="summary") +
+  geom_jitter(aes(shape=tool), size = 1, position = position_jitterdodge(jitter.width = .05)) +
+  facet_wrap(~annotation, ncol = 2) +
+  ggtitle("Percentage of CpGs with a positive logFC to the neg. control", subtitle = "Combined the calls from all tools except tombo.") +
+  ylim(0, 100)
+ggsave("../results/plots/tool_comparison/perc_CpG_over_native_control.deepsignal.guppy.megalodon.nanopolish.png", width = 5)
+
+
+met_cpgs_count_perc %>% 
+  filter(Sample == "liver", tool != "nanopolish") %>% 
+  mutate(annotation = factor(annotation, levels = c("promoter", "eYFP"))) %>% 
+  ggplot(aes(x=AAV, y=perc_met_cpgs)) +
+  geom_bar(stat="summary") +
+  geom_jitter(aes(shape=tool), size = 1, position = position_jitterdodge(jitter.width = .05)) +
+  facet_wrap(~annotation, ncol = 2) +
+  ggtitle("Percentage of CpGs with a positive logFC to the neg. control", subtitle = "Combined the calls from all tools except tombo nanopolish") +
+  ylim(0, 100)
+ggsave("../results/plots/tool_comparison/perc_CpG_over_native_control.deepsignal.guppy.megalodon.png", width = 5)
+```
+
+3/4 tools are mostly in agreement. Just nanopolish is calling very high all the time. It is questionable whether this is scientific but I will try excluding it
+
+```{r}
+met_cpgs_count_perc %>% 
+  filter(Sample == "liver", tool != "nanopolish") %>% 
+  mutate(annotation = factor(annotation, levels = c("promoter", "eYFP"))) %>% 
+  ggplot(aes(x=AAV, y=perc_met_cpgs, fill=replicate)) +
+  geom_bar(stat="summary", position = position_dodge()) +
+  geom_jitter(size = .1, position = position_jitterdodge(jitter.width = .1, dodge.width=.9)) +
+  facet_wrap(~annotation, ncol = 2) +
+  ggtitle("Percentage of CpGs with a positive logFC to the neg. control", subtitle = "Combined the calls from all tools except tombo and nanopolish.") +
+  scale_fill_brewer(palette="Set1") +
+  ylim(0, 100)
+ggsave("../results/plots/tool_comparison/perc_CpG_over_native_control.REPLICATES.deepsignal.guppy.megalodon.png", width = 5)
+```
+
+
+
+## Do the exact CpGs overlap with each other?
+
+```{r}
+tr_list <- c("guppy_01", "guppy_02", "nanopolish_01", "nanopolish_02", "deepsignal_01", "deepsignal_02", "megalodon_01", "megalodon_02", "tombo_01", "tombo_02")
+
+eYFP_cpgs <- lapply(
+  tr_list, 
+  function(x){
+    return(df_logFC_plot %>% 
+      unite("tr", c(tool, replicate)) %>% 
+      filter(
+        Sample == "liver",
+        AAV == "CMV",
+        `logFC Methylation` > 0.5,
+        tr == x,
+        annotation == "eYFP"
+        ) %>% 
+      pull(start))
+})
+
+names(eYFP_cpgs) <- tr_list
+```
+
+
+```{r}
+length(eYFP_cpgs$deepsignal_01)
+length(eYFP_cpgs$deepsignal_02)
+length(intersect(eYFP_cpgs$deepsignal_01, eYFP_cpgs$deepsignal_02))
+```
+```{r}
+Reduce(intersect, list(eYFP_cpgs$deepsignal_01, eYFP_cpgs$deepsignal_02, eYFP_cpgs$nanopolish_01, eYFP_cpgs$nanopolish_02))
+```
+
+The overlap is very inconsistent
+
+
+# perCG Correlation
+
+## Liver samples
+
+### all annotations
+
+```{r}
+for (genome in c("CMV", "LP1", "GFAP")){
+  liver_cor <- master_df %>%
+    filter(Sample == "liver", annotation == "eYFP", AAV == genome) %>% 
+    type.convert(as.is=T) %>%
+    drop_na() %>% 
+    select(-c(AAV, start, end, Sample, annotation)) %>% 
+    as.matrix() %>% 
+    cor()
+  
+  pheatmap(
+    liver_cor,
+    cluster_rows = F,
+    cluster_cols = F,
+    display_numbers = T,
+    main = paste0(genome, " | perCpG Methlyation correlation"),
+    filename = paste0("../results/plots/correlation/meteore/Corr.METEORE.", genome, ".liver.eYFP.pdf")
+    )
+}
+```
+
+There is very bad correlation in the samples. This could be because of (1) the tools being really indecisive and calling completely different things (2) the 2 different mice just being very different from each other, stichwort interindividual difference.
+
+I need to do technical replicates of the same liver from the same mice.
+
+But I do have technical replicates in the control samples that were taken from (in theory) very repeatable PCR reactions.
+
+
+## Controls
+
+```{r}
+for (genome in c("CMV", "LP1", "GFAP")){
+  native_cor <- df_master %>%
+    filter(Sample == "nat", annotation == "eYFP", AAV == genome) %>% 
+    type.convert(as.is=T) %>%
+    drop_na() %>% 
+    select(-c(AAV, start, end, Sample, annotation)) %>% 
+    as.matrix() %>% 
+    cor()
+  
+  pheatmap(
+    native_cor,
+    cluster_rows = F,
+    cluster_cols = F,
+    display_numbers = T,
+    main = paste0(genome, " | perCpG Methlyation correlation"),
+    filename = paste0("../results/plots/correlation/meteore/Corr.METEORE.", genome, ".native.eYFP.pdf")
+    )
+}
+```
+
+
+
+The correlation between the technical replicates in the PCR control samples is much clearer. This might be because the coverage of these samples is just much greater and thus better at filtering out the noise. Or the interindividual differences are just greater in the liver samples. I will only know when I do technical replicates of the liver samples.
+
+But even here it is almost hilariously not correlating between the different tools.
+
+## RMSD
+
+Exclude tombo since it is so different to all the others and it skews the heatmap colours.
+
+```{r}
+breaksList = seq(0, 15, by = .1)
+
+
+for (genome in c("CMV", "LP1", "GFAP")){
+  for (s in c("nat", "met", "liver")){
+    yfp_mtx <- master_df %>%
+      filter(
+        Sample == s,
+        annotation == "eYFP",
+        AAV == genome) %>% 
+      select(-c(tombo_01, tombo_02)) %>% 
+      type.convert(as.is=T) %>%
+      drop_na() %>% 
+      select(-c(AAV, start, end, Sample, annotation)) %>% 
+      as.matrix() %>% 
+      t()
+    
+    yfp_rmsd <- rmsd(a = yfp_mtx, a.ind = ncol(yfp_mtx))
+
+    pheatmap(
+      yfp_rmsd,
+      cluster_rows = F,
+      cluster_cols = F,
+      display_numbers = T,
+      color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(length(breaksList)),
+      breaks = breaksList,
+      main = paste0("RMSD of YFP methylation calls on ", s, " DNA in ", genome),
+      filename = paste0("../results/plots/correlation/meteore/RMSD.METEORE.", genome, ".", s,".eYFP.png")
+      )
+  }
+}
+
+```
+
+The RMSD value provides a measure of distance between the methylations from the tools and replicates.
+
+On the negative control, the values are very close between the replicates. Except for the YFP in the CMV PCR samples, no replicate exceeds an RMSD of above 1.
+
+Between the tools there is more differences of course. 
+
+# Mean annotation Methylation Correlation
+
+Maybe the methylation level of the annotations is comparable
+
+## Calculate the mean across every annotation
+
+```{r}
+mean_annotations <- df_master %>% 
+  filter(!is.na(annotation)) %>% 
+  drop_na() %>% 
+  mutate(across("annotation", str_replace, "LP1", "promoter")) %>% 
+  mutate(across("annotation", str_replace, "GFAP", "promoter")) %>% 
+  mutate(across("annotation", str_replace, "CMV_church", "promoter")) %>% 
+  group_by(annotation, AAV, Sample) %>% 
+  dplyr::summarise(
+    guppy_01 = mean(guppy_01),
+    guppy_02 = mean(guppy_02),
+    megalodon_01 = mean(megalodon_01),
+    megalodon_02 = mean(megalodon_02),
+    nanopolish_01 = mean(nanopolish_01),
+    nanopolish_02 = mean(nanopolish_02),
+    deepsignal_01 = mean(deepsignal_01),
+    deepsignal_02 = mean(deepsignal_02),
+    tombo_01 = mean(tombo_01),
+    tombo_02 = mean(tombo_02)) %>% 
+  ungroup()
+```
+
+## Dotplot
+
+```{r}
+# plot by replicate
+mean_annotations %>% 
+  filter(annotation == "eYFP") %>% 
+  gather(key="tool_replicate", value="Methylation", -c(annotation, AAV, Sample)) %>% 
+  separate(tool_replicate, c("tool", "replicate")) %>% 
+  pivot_wider(values_from = Methylation, names_from = replicate) %>% 
+  ggplot(aes(x=`01`, y=`02`, color = tool)) +
+  geom_point() +
+  facet_wrap(~Sample)
+
+# plot different tool combinations
+mean_annotations %>% 
+  filter(annotation == "eYFP") %>% 
+  gather(key="tool_replicate", value="Methylation", -c(annotation, AAV, Sample)) %>% 
+  separate(tool_replicate, c("tool", "replicate")) %>% 
+  pivot_wider(values_from = Methylation, names_from = tool) %>% 
+  ggplot(aes(x=guppy, y=megalodon, color = AAV)) +
+  geom_point() +
+  facet_wrap(~Sample) +
+  ggtitle("guppy+megalodon")
+
+mean_annotations %>% 
+  filter(annotation == "eYFP") %>% 
+  gather(key="tool_replicate", value="Methylation", -c(annotation, AAV, Sample)) %>% 
+  separate(tool_replicate, c("tool", "replicate")) %>% 
+  pivot_wider(values_from = Methylation, names_from = tool) %>% 
+  ggplot(aes(x=deepsignal, y=megalodon, color = AAV)) +
+  geom_point() +
+  facet_wrap(~Sample) +
+  ggtitle("deepsignal+megalodon")
+
+mean_annotations %>% 
+  filter(annotation == "eYFP") %>% 
+  gather(key="tool_replicate", value="Methylation", -c(annotation, AAV, Sample)) %>% 
+  separate(tool_replicate, c("tool", "replicate")) %>% 
+  pivot_wider(values_from = Methylation, names_from = tool) %>% 
+  ggplot(aes(x=deepsignal, y=nanopolish, color = AAV)) +
+  geom_point() +
+  facet_wrap(~Sample) +
+  ggtitle("deepsignal+nanopolish")
+```
+
+## YFP
+### all samples
+
+```{r}
+yfp_cor <- mean_annotations %>% 
+  filter(annotation == "eYFP") %>% 
+  select(-annotation, -AAV, -Sample) %>% 
+  as.matrix() %>% 
+  cor()
+
+pheatmap(yfp_cor, cluster_rows = F, cluster_cols = F, display_numbers = T, main="Correlation of mean Methylation on YFP")
+```
+### only native
+
+```{r}
+yfp_cor <- mean_annotations %>% 
+  filter(Sample == "nat") %>% 
+  select(-annotation, -AAV, -Sample) %>% 
+  as.matrix() %>% 
+  cor()
+
+pheatmap(yfp_cor, cluster_rows = F, cluster_cols = F, display_numbers = T, main="Correlation of mean Methylation on YFP only native")
+```
+
+### only methylated positive control
+
+```{r}
+yfp_cor <- mean_annotations %>% 
+  filter(annotation == "eYFP", Sample == "met") %>% 
+  select(-annotation, -AAV, -Sample) %>% 
+  as.matrix() %>% 
+  cor()
+
+pheatmap(yfp_cor, cluster_rows = F, cluster_cols = F, display_numbers = T, main="Correlation of mean Methylation on YFP only met control")
+```
+
+WTF? This looks very strange but the way I do it looks sound to me.
+
+The replicates correlate great with one another, irregardless of the tool used. The replicates each come from the same reaction. This implies that the reaction conditions between the samples was actually very different and the tools are very successful at calling the mean modification frequency.
+
+### only the liver samples
+
+```{r}
+yfp_cor <- mean_annotations %>% 
+  filter(annotation == "eYFP", Sample == "liver") %>% 
+  select(-annotation, -AAV, -Sample) %>% 
+  as.matrix() %>% 
+  cor()
+
+pheatmap(yfp_cor, cluster_rows = F, cluster_cols = F, display_numbers = T, main="Correlation of mean Methylation on YFP only met control")
+```
+
+

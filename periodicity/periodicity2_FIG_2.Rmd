@@ -1,0 +1,111 @@
+```{r}
+library(tidyverse)
+
+
+curve_plot <- function(base_path){
+  # reconstruct the curve
+  ## get curve paramters
+  yy_curve <- read_csv(paste0(base_path, ".CURVE.csv")) %>% 
+    dplyr::filter(dinucleotide == "YY")
+
+  read_csv(paste0(base_path, ".HIST.csv")) %>% 
+    select(-...1) %>% 
+    dplyr::filter(dinucleotide %in% c("YY")) %>% 
+    ## re-generate the curve
+    mutate(fitted_curve = exp(-1*(log(2)*distance)/abs(pull(yy_curve, HL))) * abs(pull(yy_curve, amplitude)) * sin((((2*pi*distance)/abs(pull(yy_curve, period)))) + (pi/2))) %>%
+    gather(-c(distance, dinucleotide), key="curve", value="value") %>% 
+    mutate(curve = ifelse(curve=="norm_counts", "histogram", "sine_curve")) %>% 
+    ggplot(aes(x=distance, y=value, color=curve)) +
+    geom_line(linewidth=1.5) +
+    xlim(0, 60) +
+    ylim(-2.2e-4, 4e-4) +
+    scale_color_manual(values = c("sine_curve"="red", "histogram"="black")) +
+    theme_bw() +
+    ylab("normalized counts")
+  
+}
+```
+
+```{r}
+curve_plot("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/curve_fit/dependoparvovirus_1")
+ggsave("../results/dinucleotide_periodicity_TAX/2024_plots/dependoparvo.YY.png", width=5, height=4, dpi=100)
+ggsave("../results/dinucleotide_periodicity_TAX/2024_plots/dependoparvo.YY.svg", width=5, height=4, dpi=100)
+
+
+curve_plot("../results/dinucleotide_periodicity_TAX/celegans/celegans/curve_fit/celegans_1")
+ggsave("../results/dinucleotide_periodicity_TAX/2024_plots/celegans.YY.png", width=5, height=4, dpi=100)
+ggsave("../results/dinucleotide_periodicity_TAX/2024_plots/celegans.YY.svg", width=5, height=4, dpi=100)
+
+```
+
+## One from each species
+
+The ICTV lists 27 species for dependoparvovirus. I downloaded every individual sequence and combined them into one sequence set.
+
+```{bash}
+
+Rscript Periodicity6.R \
+  ../results/dinucleotide_periodicity_dependoparvovirus/dependo_species.fasta \
+  ../results/dinucleotide_periodicity_dependoparvovirus/curve_fit/ \
+  Parvoviridae \
+  dependoparvovirus_species
+
+```
+
+
+```{r}
+
+
+
+dependo_species_curve <- read_csv("../results/dinucleotide_periodicity_dependoparvovirus/curve_fit/.CURVE.csv") %>% 
+  dplyr::filter(dinucleotide == "YY")
+
+period <- dependo_species_curve %>% pull(period)
+A <- dependo_species_curve %>% pull(amplitude)
+HL <- dependo_species_curve %>% pull(HL)
+
+
+dependo_species_hist <- read_csv("../results/dinucleotide_periodicity_dependoparvovirus/curve_fit/.HIST.csv")
+  
+
+
+ dependo_species_hist %>% 
+  select(-...1) %>% 
+  dplyr::filter(dinucleotide == "YY") %>% 
+  mutate(sine_fit = exp(-1 * (log(2)*distance) / HL) * A * sin(((2*pi*distance) / period) + (pi/2))) %>% 
+  gather(-c(distance, dinucleotide), key = "curve", value = "value") %>% 
+  ggplot(aes(x = distance, y = value, color = curve)) +
+  geom_line(linewidth = 1.5) +
+  xlim(0, 60) +
+  ylab("normalized counts") +
+  scale_color_manual(values = c("black", "red")) +
+  theme_bw() +
+  theme(text = element_text(size = 15))
+ggsave("../results/dinucleotide_periodicity_dependoparvovirus/dependoparvo.1species.YY.png", width=5, height=4, dpi=100)
+ggsave("../results/dinucleotide_periodicity_dependoparvovirus/dependoparvo.1species.YY.svg", width=5, height=4, dpi=100)
+
+
+```
+
+
+```{r}
+
+bind_rows(
+  read_csv("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/curve_fit/dependoparvovirus_1.HIST.csv") %>% 
+    dplyr::filter(dinucleotide == "YY") %>% 
+    mutate(sequence_set = "complete n = 203"),
+  dependo_species_hist %>% 
+    dplyr::filter(dinucleotide == "YY") %>% 
+    mutate(sequence_set = "only species n = 27")
+) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color = sequence_set)) +
+  geom_line(linewidth = 1.5) +
+  scale_color_manual(values = c("black", "darkgrey")) +
+  xlim(0, 50) +
+  ylab("normalized counts") +
+  theme_bw() +
+  theme(text = element_text(size = 15))
+ggsave("../results/dinucleotide_periodicity_dependoparvovirus/dependoparvo.completeANDspecies.YY.png", width=6, height=4, dpi=100)
+ggsave("../results/dinucleotide_periodicity_dependoparvovirus/dependoparvo.completeANDspecies.YY.svg", width=6, height=4, dpi=100)
+```
+

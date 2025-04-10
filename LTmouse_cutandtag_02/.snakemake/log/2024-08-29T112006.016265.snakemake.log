@@ -1,0 +1,96 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job           count    min threads    max threads
+----------  -------  -------------  -------------
+all               1              1              1
+bam_to_bed        8              1              1
+genomecov         8              1              1
+sort              8              1              1
+total            25              1              1
+
+Select jobs to execute...
+
+[Thu Aug 29 11:20:18 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam
+    jobid: 119
+    reason: Missing output files: data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 11:20:18 2024]
+rule sort:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SORTED.bam
+    jobid: 104
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 11:20:18 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam
+    jobid: 110
+    reason: Missing output files: data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 11:20:19 2024]
+rule sort:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SORTED.bam
+    jobid: 101
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 11:20:19 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam
+    jobid: 116
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 11:20:24 2024]
+rule sort:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SORTED.bam
+    jobid: 107
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 11:20:25 2024]
+rule sort:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SORTED.bam
+    jobid: 98
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 11:20:26 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam
+    jobid: 113
+    reason: Missing output files: data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam; Code has changed since last execution
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+Terminating processes on user request, this might take some time.
+Cancelling snakemake on user request.

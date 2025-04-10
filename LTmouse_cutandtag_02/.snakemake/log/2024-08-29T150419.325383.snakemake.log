@@ -1,0 +1,147 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job           count    min threads    max threads
+----------  -------  -------------  -------------
+all               1              1              1
+bam_to_bed        6              1              1
+genomecov         8              1              1
+total            15              1              1
+
+Select jobs to execute...
+
+[Thu Aug 29 15:04:20 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SORTED.bam
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bed
+    jobid: 97
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bed; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 15:04:20 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_262_liver.ALL.bed
+    jobid: 112
+    reason: Updated input files: data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 15:04:20 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_962_liver.ALL.bed
+    jobid: 118
+    reason: Updated input files: data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 15:04:21 2024]
+rule genomecov:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bed
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph
+    jobid: 105
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Thu Aug 29 15:04:21 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_261_liver.ALL.bed
+    jobid: 109
+    reason: Updated input files: data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 15:04:22 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SORTED.bam
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bed
+    jobid: 100
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bed; Code has changed since last execution
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 15:04:23 2024]
+rule genomecov:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bed
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph
+    jobid: 102
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Thu Aug 29 15:04:24 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_961_liver.ALL.bed
+    jobid: 115
+    reason: Updated input files: data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+Terminating processes on user request, this might take some time.
+[Thu Aug 29 15:04:33 2024]
+Error in rule bam_to_bed:
+    jobid: 118
+    input: data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_962_liver.ALL.bed
+    shell:
+        bedtools bamtobed -bedpe -i data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam | awk '$1==$4 && $6-$2 < 1000 {print $0}' | cut -f 1,2,6 | sort -k1,1 -k2,2n -k3,3n > data/alignment/cmv/K27ac_962_liver.ALL.bed
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+[Thu Aug 29 15:04:33 2024]
+[Thu Aug 29 15:04:33 2024]
+[Thu Aug 29 15:04:33 2024]
+Error in rule bam_to_bed:
+    jobid: 109
+    input: data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_261_liver.ALL.bed
+    shell:
+        bedtools bamtobed -bedpe -i data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam | awk '$1==$4 && $6-$2 < 1000 {print $0}' | cut -f 1,2,6 | sort -k1,1 -k2,2n -k3,3n > data/alignment/cmv/K27ac_261_liver.ALL.bed
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error in rule bam_to_bed:
+    jobid: 100
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SORTED.bam
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bed
+    shell:
+        bedtools bamtobed -bedpe -i data/alignment/cmv_mouse/K27ac_262_liver.ALL.SORTED.bam | awk '$1==$4 && $6-$2 < 1000 {print $0}' | cut -f 1,2,6 | sort -k1,1 -k2,2n -k3,3n > data/alignment/cmv_mouse/K27ac_262_liver.ALL.bed
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+[Thu Aug 29 15:04:33 2024]
+Error in rule bam_to_bed:
+    jobid: 115
+    input: data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_961_liver.ALL.bed
+    shell:
+        bedtools bamtobed -bedpe -i data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam | awk '$1==$4 && $6-$2 < 1000 {print $0}' | cut -f 1,2,6 | sort -k1,1 -k2,2n -k3,3n > data/alignment/cmv/K27ac_961_liver.ALL.bed
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+[Thu Aug 29 15:04:33 2024]
+Error in rule bam_to_bed:
+    jobid: 97
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SORTED.bam
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bed
+    shell:
+        bedtools bamtobed -bedpe -i data/alignment/cmv_mouse/K27ac_261_liver.ALL.SORTED.bam | awk '$1==$4 && $6-$2 < 1000 {print $0}' | cut -f 1,2,6 | sort -k1,1 -k2,2n -k3,3n > data/alignment/cmv_mouse/K27ac_261_liver.ALL.bed
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Error in rule bam_to_bed:
+    jobid: 112
+    input: data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam
+    output: data/alignment/cmv/K27ac_262_liver.ALL.bed
+    shell:
+        bedtools bamtobed -bedpe -i data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam | awk '$1==$4 && $6-$2 < 1000 {print $0}' | cut -f 1,2,6 | sort -k1,1 -k2,2n -k3,3n > data/alignment/cmv/K27ac_262_liver.ALL.bed
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Complete log: .snakemake/log/2024-08-29T150419.325383.snakemake.log

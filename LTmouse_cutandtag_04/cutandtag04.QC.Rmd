@@ -1,0 +1,74 @@
+# QC plots
+
+## read size histogram
+
+```{r}
+library(tidyverse)
+
+histogram_mouse <- lapply(list.files("data/alignment/cmv_mouse/", recursive=F, pattern = ".histogram"), function(x){
+
+  path <- paste0("data/alignment/cmv_mouse/", x)
+  x_list <- str_split(x, "\\.")
+  filt <- x_list[[1]][2]
+  if(x_list[[1]][3] != "histogram"){
+    filt <- "FILTSIZE"
+  }
+  
+  tmp <- read_delim(path, skip = 11, col_names = c("size", "n")) %>% 
+    mutate(filter = filt, sample_name = x_list[[1]][1])
+  return(tmp)
+}) %>% bind_rows()
+
+histogram_aav <- lapply(list.files("data/alignment/cmv/", recursive=F, pattern = ".histogram"), function(x){
+  
+  path <- paste0("data/alignment/cmv/", x)
+  x_list <- str_split(x, "\\.")
+  filt <- x_list[[1]][2]
+  if(x_list[[1]][3] != "histogram"){
+    filt <- "FILTSIZE"
+  }
+  
+  tmp <- read_delim(path, skip = 11, col_names = c("size", "n")) %>% 
+    mutate(filter = filt, sample_name = x_list[[1]][1])
+  return(tmp)
+}) %>% bind_rows()
+```
+
+```{r}
+histogram <- bind_rows(
+  histogram_mouse %>% 
+    mutate(
+      genome = "mouse",
+      nnorm = n / sum(n)),
+  histogram_aav %>% 
+    mutate(genome = "AAV",
+      nnorm = n / sum(n))
+)
+
+
+histogram %>% 
+  dplyr::filter(filter =="ALL", genome == "mouse") %>% 
+  separate(sample_name, c("mod", "mouseNr", "tissue"), sep="_") %>%
+  separate(mouseNr, c("capsid", "weeks", "replicate")) %>% 
+  mutate(weeks = factor(weeks, levels = c("2", "6", "12"))) %>% 
+  ggplot(aes(x=size, y=n, color=replicate)) +
+  geom_line(linewidth=.5) +
+  facet_grid(weeks~capsid)
+  #scale_color_manual(values = c("#1e81b0", "#154c79", "#e28743", "#eab676"))
+ggsave("results/read_size.histogram.ALL.png", width=6, height=6)
+ggsave("results/read_size.histogram.ALL.svg", width=6, height=6)
+
+histogram %>% 
+  dplyr::filter(filter =="ALL", genome == "AAV") %>% 
+  separate(sample_name, c("mod", "mouseNr", "tissue"), sep="_") %>%
+  separate(mouseNr, c("capsid", "weeks", "replicate")) %>% 
+  mutate(weeks = factor(weeks, levels = c("2", "6", "12"))) %>% 
+  ggplot(aes(x=size, y=n, color=replicate)) +
+  #geom_line(linewidth=.5) +
+  geom_smooth(method = "loess", span = .25) +
+  facet_grid(weeks~capsid) +
+  ggtitle("Only AAV genome")
+```
+
+
+

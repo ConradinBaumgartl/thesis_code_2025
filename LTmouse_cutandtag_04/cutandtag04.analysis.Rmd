@@ -1,0 +1,564 @@
+# Init functions
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+
+get_metrics <- function(path){
+    
+  n <- basename(path) %>% str_split("\\.")
+  
+  # get the sample name from the filename
+  sample_name <- n[[1]][1]
+  
+  # add the filter type from the filename
+  if (length(n[[1]]) == 4){
+    filter_type <- paste0(n[[1]][2], n[[1]][3])
+  } else {
+    filter_type <- n[[1]][2]
+  }
+  
+  # read the nreads file that contains the number of reads against every chromosome
+  tmp <- read_delim(path, col_names = c("chr", "size", "reads", "umapped_reads"))
+  
+  # count reads that align to the main mouse chromosomes
+  mouse_genome_reads <- tmp %>% 
+    dplyr::filter(str_starts(chr, "NC")) %>% 
+    dplyr::filter(chr != "NC_005089.1") %>% # exclude mitochondrium genome
+    pull(reads) %>% sum()
+  
+  # count reads that align to the AAV genome
+  AAV_genome_reads <- tmp %>% 
+    dplyr::filter(chr == "pPl04") %>% 
+    pull(reads)
+  
+  # get the vg/dg number from the ddPCR measurements
+  vgdg <- read.table(paste0("data/vgdg/", str_replace(sample_name, "K27me3_", ""), ".vgdg")) %>% pull(V1)
+  
+  
+  return(tibble("mouse_genome_reads" = mouse_genome_reads, "AAV_genome_reads" = AAV_genome_reads, "vg_dg" = vgdg, "sample_name" = sample_name, "filter_type" = filter_type))
+}
+```
+
+
+# Normalized epitopes on transgene
+
+## get data
+
+```{r message=FALSE, warning=FALSE}
+df <- lapply(list.files("data/alignment/cmv_mouse/", pattern = ".nreads", full.names = T), get_metrics) %>%
+  bind_rows() %>% mutate(
+    ratio = AAV_genome_reads / mouse_genome_reads,
+    ratio_n = AAV_genome_reads / (mouse_genome_reads * vg_dg)
+    ) %>% 
+  separate(sample_name, c("modification", "mouse", "tissue"), sep="_")
+
+
+# change to a more descriptive name
+df <- df %>% 
+  mutate(
+    filter_type = str_replace(filter_type, "ALL", "all_reads"),
+    filter_type = str_replace(filter_type, "FILTSIZE", "no_dup+nuc_sized"),
+    filter_type = str_replace(filter_type, "FILT", "no_duplicates"),
+    filter_type = str_replace(filter_type, "SIZE", "nuc_sized"),
+    filter_type = factor(filter_type, levels = c("all_reads", "nuc_sized", "no_duplicates", "no_dup+nuc_sized"))
+    ) %>% 
+  separate(mouse, c("capsid", "weeks", "mouse"), sep="-")
+
+df %>% dplyr::filter(filter_type == "all_reads")
+```
+
+## Plot
+
+```{r}
+x1 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=mouse, y=ratio, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27me3 on AAV genome") +
+    ylab("reads gAAV/gMOUSE") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+x2 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid)) +
+    geom_bar(stat="summary", fun=mean, position=position_dodge()) +
+    geom_point(position = position_dodge(.75)) +
+    ggtitle("H3K27me3 on AAV genome | all reads") +
+    ylab("reads gAAV/gMOUSE") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+p1 <- ggarrange(x1, x2, ncol=1)
+annotate_figure(p1, top = "raw ratio")
+
+x1 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=mouse, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27me3 on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+x2 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="summary", position=position_dodge()) +
+    geom_point(position = position_dodge(.75)) +
+    ggtitle("H3K27me3 on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+p2 <- ggarrange(x1, x2, ncol=1)
+annotate_figure(p2, top = "normalized ratio")
+
+```
+
+
+### Plot
+
+```{r}
+df %>%
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=mouse, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27me3 on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+df %>%
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=capsid, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="summary", position=position_dodge(), fun = mean) +
+    geom_point() +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27me3 on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+ggsave("results/H3k27me3.vgdg.filteroptions.png", width=6, height=5, dpi=200)
+ggsave("results/H3k27me3.vgdg.filteroptions.svg", width=6, height=5, dpi=200)
+```
+
+### H3K27me3 over time master plot
+
+```{r}
+h3k27me3 <- df %>%
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y = ratio_n, fill=capsid)) +
+  geom_boxplot() +
+  geom_point(position=position_dodge(.75)) +
+  ylab("H3K27ac on transgene") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("H3K27ac over time")
+h3k27me3
+
+df %>%
+  dplyr::filter(filter_type == "all_reads") %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=weeks, y = ratio_n, fill=capsid, label = mouse)) +
+  geom_boxplot() +
+  geom_point() +
+  geom_text(hjust=-.5) +
+  ylab("H3K27ac on transgene") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  facet_wrap(~capsid, scales = "free")
+```
+
+
+# Combine with H3K27me3 with H3K27ac
+
+
+```{r}
+h3k27ac <- read_csv("../cutandtag_03/h3k27ac.R.csv") %>% 
+  mutate(capsid = as.character(capsid), mouse = as.character(mouse))
+
+mdf <- bind_rows(
+  df %>% mutate(weeks = str_c(weeks, " weeks p.i.")),
+  h3k27ac) %>% 
+  mutate(weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+mdf
+```
+
+```{r}
+mdf %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("AAV", capsid), modification = str_c("H3", modification)) %>% 
+  ggplot(aes(x=AAV_genome_reads, y=mouse_genome_reads, fill=capsid, label=mouse)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  #geom_boxplot() +
+  #geom_bar(stat="summary", fun = mean) +
+  #geom_jitter(height=0, width=.1, shape=21) +
+  ggh4x::facet_grid2(capsid~modification, scales = "free", independent = "all") +
+  geom_point() +
+  #facet_grid(capsid~modification) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ylab("normalized counts on transgene") +
+  xlab("") +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(expand=expand_scale(mult=c(0,0.1)))
+```
+
+
+
+## vgdg normalisation problem
+
+```{r}
+library(ggh4x)
+
+# norm ratio
+mdf %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("AAV", capsid), modification = str_c("H3", modification)) %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid, label=mouse)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  #geom_boxplot() +
+  geom_bar(stat="summary", fun = mean) +
+  geom_jitter(height=0, width=.1, shape=21) +
+  #ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  facet_grid(capsid~modification, scales = "free") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  geom_text() +
+  ylab("normalized counts on transgene") +
+  xlab("") +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(expand=expand_scale(mult=c(0,0.1)))
+ggsave("results/ration.png", width = 6, height = 5, dpi = 200)
+ggsave("results/ration.svg", width = 6, height = 5, dpi = 200)
+
+
+# vg_dg
+mdf %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" ")) %>% 
+  ggplot(aes(x=weeks, y=1/vg_dg, fill=capsid, label = mouse)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  #geom_boxplot() +
+  geom_bar(stat="summary", fun = median) +
+  geom_jitter(height=0, width=.1, shape=21) +
+  ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  geom_text()
+
+# ratio raw
+mdf %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" ")) %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid, label = mouse)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  #geom_boxplot() +
+  geom_bar(stat="summary", fun = median) +
+  geom_jitter(height=0, width=.1, shape=21) +
+  ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  geom_text()
+
+```
+
+I notice that when I plot the normalized ratio and the reciprocal of the vg/dg measurements, the trend of the measurements is very similar. The raw ratios, that were not normalized to vg/dg look different except for the H3K27ac plot. This would imply that the information I am plotting is mostly coming from the vg/dg and less from the Cut and Tag experiment.
+
+This is probably because all of these values are correlated. Epitope coverage goes down over time for AAV9, as does transcription. vg/dg is also positively correlated with time for AAV9. It is the other way around for AAV2
+
+
+## Test random vgdg values
+
+To see if it really is the correlation of the values I will do the same with random vgdg normalisation values
+
+```{r}
+
+rnd_numbers <- mdf %>% 
+  select(capsid, weeks, mouse, tissue) %>% 
+  distinct() %>% 
+  mutate(rnd_vgdg = sample(10:30, 18))
+
+mdf_rnd <- left_join(mdf, rnd_numbers) %>% 
+  mutate(ratio_n = ratio / rnd_vgdg)
+
+
+# norm ratio
+mdf_rnd %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" ")) %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("random vgdg")
+
+# vg_dg
+mdf_rnd %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" ")) %>% 
+  ggplot(aes(x=weeks, y=1/rnd_vgdg, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("random vgdg")
+
+# ratio raw
+mdf_rnd %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" ")) %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))+
+  ggtitle("random vgdg")
+```
+
+With random vg/dg numbers the normalized ratio looks similar to the raw ratio. The 1/rnd_vgdg looks random as it should. Normalizing by random numbers is the same as not normalizing at all. 
+
+This proves that the vg/dg normalisation behaves that way simply because it also correlates with transcription as probably the histone modifications as well.
+
+It is the correct thing to consider the vgdg measurement in my calculations.
+
+```{r}
+mdf %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid, label = vg_dg)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))+
+  geom_text()
+
+mdf %>% 
+  filter(filter_type == "all_reads") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid, label = vg_dg)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  ggh4x::facet_grid2(capsid~modification, scales = "free_y", independent = "y") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  geom_text()
+```
+## Comparing levels of modifications
+
+```{r}
+mdf %>% 
+  filter(filter_type == "all_reads", capsid == "2") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  facet_grid(capsid~modification) +
+  scale_fill_manual(values = c("#1e81b0")) +
+  scale_y_log10()
+
+mdf %>% 
+  filter(filter_type == "all_reads", capsid == "9") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  facet_grid(capsid~modification) +
+  scale_fill_manual(values = c("#e28743")) +
+  scale_y_log10()
+
+mdf %>% 
+  filter(filter_type == "all_reads", capsid == "2") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  facet_grid(capsid~modification) +
+  scale_fill_manual(values = c("#1e81b0")) +
+  scale_y_log10()
+
+mdf %>% 
+  filter(filter_type == "all_reads", capsid == "9") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  facet_grid(capsid~modification) +
+  scale_fill_manual(values = c("#e28743")) +
+  scale_y_log10()
+
+mdf %>% 
+  filter(filter_type == "all_reads", modification == "K27ac") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  facet_grid(modification~capsid) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743")) +
+  scale_y_log10()
+
+mdf %>% 
+  filter(filter_type == "all_reads", modification == "K27me3") %>% 
+  mutate(capsid = str_c("capsid", capsid, sep=" "), mouse = factor(mouse)) %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+  #geom_bar(stat="identity", position=position_dodge()) +
+  geom_boxplot() +
+  geom_point() +
+  facet_grid(modification~capsid) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743")) +
+  scale_y_log10()
+```
+
+## Ratio K27ac and K27me3
+
+```{r}
+ratio_df <- mdf %>% 
+  filter(filter_type == "all_reads") %>% 
+  select(capsid, weeks, mouse, ratio_n, modification) %>% 
+  pivot_wider(values_from = ratio_n, names_from = modification) %>% 
+  mutate(ratio_mod = log2(K27me3 / K27ac))
+
+ratio_df %>% 
+  ggplot(aes(x=weeks, y=ratio_mod, fill=capsid, label = mouse)) +
+  geom_bar(stat="summary", position = position_dodge()) +
+  geom_jitter(position = position_jitterdodge(jitter.height = 0, jitter.width = .1, dodge.width = .9), shape = 21) +
+  geom_text(position = position_jitterdodge(jitter.height = 0, jitter.width = .1, dodge.width = .9)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743")) +
+  ylab("fold change K27me3 over K27ac") +
+  ylim(0, 15) +
+  theme_bw() +
+  theme(text = element_text(size = 15), axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_y_continuous(expand=expand_scale(mult=c(0,0.1)))
+
+ggsave("results/me3_ac_ratio.png", width = 6, height = 4)
+ggsave("results/me3_ac_ratio.svg", width = 6, height = 4)
+
+```
+
+
+# Conclusions
+
+1. the vgdg measurement should be considered in the quantification. It is also correlated with transcription and DNA presence and thus may be problematic... But I can not in good conscience leave it out.
+
+2. AAV9 accumulates more histone modifications on its genome. Speculation: This is likely a result of different speed of second-strand synthesis and episome formation, which leads to AAV9 del. genomes to be more chromatinized than AAV2. This is supported by the literature and the T5 assay.
+
+3. There is more H3K27me3 on the AAV delivered genomes. There are always more on AAV9 than AAV2 (see 2). This measurement is relative to the read levels on the mouse genome and thus independent of the overall abundance.
+
+4. Whereas K27ac is all over the genome. K27me3 is significantly less on the promoter.
+
+4. The ratio of inactivating and activating is different between AAV2 and AAV9. AAV9 has way more K27me3 compared to K27ac than AAV2 has.
+
+5. AAV9 time course: K27ac starts high and then depletes. K27me3 stays more or less on the same level.
+
+6. AAV2 time course: Both K27ac and K27me3 follow the same trajectory. Starts low, get higher and then a little down again. Speculation: This might also be a result of the differing infection kinetics between AAV2 and AAV9.
+
+These Histone modifications (K27me3, K27ac) provide a better explanation of the differing transcription levels than the CpG methylation could. Albeit the explanation is not perfect. The correlation is not perfect (see below). It is very possible that there are other histone modifications K4me3 or K9me3 that also play a major role here.
+
+
+*AAV9 is losing its activating histone modification K27ac between 2 and 6 weeks p.i.*
+
+
+# Correlation
+
+```{r}
+msdf <- read_delim("~/projects/meth_proj/mouse_experiments/AAV2_AAV9/master_info.csv", delim="\t") %>% 
+  dplyr::filter(tissue == "liver") %>% 
+  select(label, `vg/dg`, `vt/hkt`) %>% 
+  separate(label, c("capsid", "weeks", "mouse")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    activity = `vt/hkt` / `vg/dg`)
+
+
+mdf_comb <- left_join(
+  mdf,
+  msdf)
+
+
+
+mdf_ratio_comb <- left_join(
+  ratio_df,
+  msdf)
+```
+
+
+```{r}
+mdf_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  mutate(
+    modification = str_c("H3", modification)
+  ) %>% 
+  ggplot(aes(x=`vt/hkt`, y = ratio_n, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks), size = 4) +
+  #geom_smooth(method = "lm", fill=NA) +
+  stat_cor(method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  facet_wrap(~modification, scales = "free") +
+  theme_bw() +
+  theme(text = element_text(size = 15), legend.position = "none")
+ggsave("results/correlation.ration.transcription.png", width=5, height=4, dpi=200)
+ggsave("results/correlation.ration.transcription.svg", width=5, height=4, dpi=200)
+
+mdf_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=`vt/hkt`, y = ratio, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks)) +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  facet_wrap(~modification)
+ggsave("results/correlation.ratio.transcription.png", width=5, height=4, dpi=100)
+ggsave("results/correlation.ratio.transcription.svg", width=5, height=4, dpi=100)
+
+
+mdf_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=`vt/hkt`, y = `vg/dg`, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks)) +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  facet_wrap(~modification)
+
+
+
+```
+
+
+
+```{r}
+mdf_ratio_comb %>% 
+  #dplyr::filter(weeks != "6 weeks p.i.") %>% 
+  ggplot(aes(x=`vt/hkt`, y = ratio_mod, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks), size = 4) +
+  geom_smooth(data = subset(mdf_ratio_comb, ratio_mod < 3.5), method = "lm", fill = NA) +
+  stat_cor(data = subset(mdf_ratio_comb, ratio_mod < 3.5), method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  theme_bw() +
+  theme(text = element_text(size = 15))
+ggsave("results/correlation.modratio.transcription.png", width=6, height=4, dpi=200)
+ggsave("results/correlation.modratio.transcription.svg", width=6, height=4, dpi=200)
+
+mdf_ratio_comb %>% 
+  ggplot(aes(x=activity, y = ratio_mod, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks)) +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+
+```
+
+
+
+

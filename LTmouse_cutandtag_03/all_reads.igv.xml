@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.fasta" locus="NC_000080.7:0-125139656" nextAutoscaleGroup="2" version="8">
+    <Resources>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-12-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-2-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-6-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-12-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_961_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_262_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_962_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.bed" type="bed"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_261_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-12-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bw" type="bw"/>
+    </Resources>
+    <Panel height="630" name="DataPanel" width="1845">
+        <Track attributeKey="K27ac_2-2-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="102,153,255" displayMode="SQUISHED" fontSize="10" height="33" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bw" name="K27ac_2-2-1_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_2-2-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="102,153,255" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-2-2_liver.ALL.bw" name="K27ac_2-2-2_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_2-2-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="102,153,255" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-2-3_liver.ALL.bw" name="K27ac_2-2-3_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_261_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="0,153,255" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_261_liver.ALL.bw" name="K27ac_261_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_262_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="0,153,255" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_262_liver.ALL.bw" name="K27ac_262_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_2-6-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="0,153,255" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-6-3_liver.ALL.bw" name="K27ac_2-6-3_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_2-12-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-12-1_liver.ALL.bw" name="K27ac_2-12-1_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_2-12-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-12-2_liver.ALL.bw" name="K27ac_2-12-2_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_2-12-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_2-12-3_liver.ALL.bw" name="K27ac_2-12-3_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_9-2-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="255,153,51" displayMode="SQUISHED" fontSize="10" height="33" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-2-1_liver.ALL.bw" name="K27ac_9-2-1_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_9-2-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="255,153,51" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-2-2_liver.ALL.bw" name="K27ac_9-2-2_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_9-2-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="255,153,51" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-2-3_liver.ALL.bw" name="K27ac_9-2-3_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_961_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="204,153,0" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_961_liver.ALL.bw" name="K27ac_961_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_962_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="204,153,0" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/data/alignment/cmv_mouse/K27ac_962_liver.ALL.bw" name="K27ac_962_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_9-6-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="204,153,0" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-6-3_liver.ALL.bw" name="K27ac_9-6-3_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_9-12-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="153,51,0" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-12-1_liver.ALL.bw" name="K27ac_9-12-1_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_9-12-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="153,51,0" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-12-2_liver.ALL.bw" name="K27ac_9-12-2_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="K27ac_9-12-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.DataSourceTrack" color="153,51,0" displayMode="SQUISHED" fontSize="10" height="34" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_03/data/alignment/cmv_mouse/K27ac_9-12-3_liver.ALL.bw" name="K27ac_9-12-3_liver.ALL.bw" renderer="BAR_CHART" visible="true" windowFunction="mean">
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="2.1756315" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <Panel height="7390" name="FeaturePanel" width="1845">
+        <Track attributeKey="Reference sequence" clazz="org.broad.igv.track.SequenceTrack" displayMode="EXPANDED" fontSize="10" id="Reference sequence" name="Reference sequence" sequenceTranslationStrandValue="POSITIVE" shouldShowTranslation="true" visible="true"/>
+        <Track attributeKey="pPl04_mouse.bed" clazz="org.broad.igv.track.FeatureTrack" displayMode="EXPANDED" fontSize="10" groupByStrand="false" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.bed" name="pPl04_mouse.bed" visible="true"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.7850931677018633"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>

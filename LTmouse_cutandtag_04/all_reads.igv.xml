@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Session genome="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.fasta" locus="pPl04:0-6585" nextAutoscaleGroup="2" version="8">
+    <Resources>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-12-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-6-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-6-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-12-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-6-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-2-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-2-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-2-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-2-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.bed" type="bed"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-2-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-12-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-2-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-6-2_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-12-3_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-12-1_liver.ALL.bw" type="bw"/>
+        <Resource path="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-12-2_liver.ALL.bw" type="bw"/>
+    </Resources>
+    <Panel height="349" name="DataPanel" width="1342">
+        <Track attributeKey="Overlay" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.MergedTracks" displayMode="SQUISHED" fontSize="10" height="54" id="7c4eb76b-cb4f-4811-b0dc-992c9ffff4fa" name="AAV2 - 2 weeks" renderer="BAR_CHART" visible="true">
+            <Track altColor="51,51,255" attributeKey="K27me3_2-2-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="51,51,255" displayMode="SQUISHED" fontSize="10" height="54" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-2-1_liver.ALL.bw" name="K27me3_2-2-1_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="51,51,255" attributeKey="K27me3_2-2-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="51,51,255" displayMode="SQUISHED" fontSize="10" height="54" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-2-2_liver.ALL.bw" name="K27me3_2-2-2_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="51,51,255" attributeKey="K27me3_2-2-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="51,51,255" displayMode="SQUISHED" fontSize="10" height="54" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-2-3_liver.ALL.bw" name="K27me3_2-2-3_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="37.649887" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="Overlay" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.MergedTracks" displayMode="SQUISHED" fontSize="10" height="55" id="186bea35-bb42-4523-8c56-d88e46b2d423" name="AAV9 - 2 weeks" renderer="BAR_CHART" visible="true">
+            <Track altColor="255,153,0" attributeKey="K27me3_9-2-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="255,153,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-2-1_liver.ALL.bw" name="K27me3_9-2-1_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="255,153,0" attributeKey="K27me3_9-2-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="255,153,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-2-2_liver.ALL.bw" name="K27me3_9-2-2_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="255,153,0" attributeKey="K27me3_9-2-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="255,153,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-2-3_liver.ALL.bw" name="K27me3_9-2-3_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="37.649887" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="Overlay" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.MergedTracks" displayMode="SQUISHED" fontSize="10" height="55" id="8bfdf9dd-8a7e-43db-be30-896e68887449" name="AAV2 - 6 weeks" renderer="BAR_CHART" visible="true">
+            <Track altColor="0,0,255" attributeKey="K27me3_2-6-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="0,0,255" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-6-1_liver.ALL.bw" name="K27me3_2-6-1_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="0,0,255" attributeKey="K27me3_2-6-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="0,0,255" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-6-2_liver.ALL.bw" name="K27me3_2-6-2_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="37.649887" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="Overlay" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.MergedTracks" displayMode="SQUISHED" fontSize="10" height="55" id="bc456ca1-7c5e-4278-a180-306b10ae73d2" name="AAV9 - 6 weeks" renderer="BAR_CHART" visible="true">
+            <Track altColor="255,204,0" attributeKey="K27me3_9-6-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="255,204,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-6-1_liver.ALL.bw" name="K27me3_9-6-1_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="255,204,0" attributeKey="K27me3_9-6-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="255,204,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-6-2_liver.ALL.bw" name="K27me3_9-6-2_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="37.649887" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="Overlay" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.MergedTracks" displayMode="SQUISHED" fontSize="10" height="55" id="82d3ae9d-0c85-46f2-84c6-f8a320015754" name="AAV2 - 12 weeks" renderer="BAR_CHART" visible="true">
+            <Track altColor="0,0,204" attributeKey="K27me3_2-12-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="0,0,204" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-12-1_liver.ALL.bw" name="K27me3_2-12-1_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="0,0,204" attributeKey="K27me3_2-12-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="0,0,204" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-12-2_liver.ALL.bw" name="K27me3_2-12-2_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="0,0,204" attributeKey="K27me3_2-12-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="0,0,204" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_2-12-3_liver.ALL.bw" name="K27me3_2-12-3_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="37.649887" minimum="0.0" type="LINEAR"/>
+        </Track>
+        <Track attributeKey="Overlay" autoScale="false" autoscaleGroup="1" clazz="org.broad.igv.track.MergedTracks" displayMode="SQUISHED" fontSize="10" height="55" id="27a5afb1-502f-4fac-9e8c-cc612b632d6f" name="AAV9 - 12 weeks" renderer="BAR_CHART" visible="true">
+            <Track altColor="204,153,0" attributeKey="K27me3_9-12-1_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="204,153,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-12-1_liver.ALL.bw" name="K27me3_9-12-1_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="204,153,0" attributeKey="K27me3_9-12-2_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="204,153,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-12-2_liver.ALL.bw" name="K27me3_9-12-2_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <Track altColor="204,153,0" attributeKey="K27me3_9-12-3_liver.ALL.bw" autoScale="false" autoscaleGroup="1" color="204,153,0" displayMode="SQUISHED" fontSize="10" height="55" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/alignment/cmv_mouse/K27me3_9-12-3_liver.ALL.bw" name="K27me3_9-12-3_liver.ALL.bw" renderer="LINE_PLOT" visible="true" windowFunction="mean"/>
+            <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="37.649887" minimum="0.0" type="LINEAR"/>
+        </Track>
+    </Panel>
+    <Panel height="49" name="FeaturePanel" width="1342">
+        <Track attributeKey="Reference sequence" clazz="org.broad.igv.track.SequenceTrack" displayMode="EXPANDED" fontSize="10" id="Reference sequence" name="Reference sequence" sequenceTranslationStrandValue="POSITIVE" shouldShowTranslation="true" visible="true"/>
+        <Track attributeKey="pPl04_mouse.bed" clazz="org.broad.igv.track.FeatureTrack" displayMode="EXPANDED" featureVisibilityWindow="8857941" fontSize="10" groupByStrand="false" height="29" id="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.bed" name="pPl04_mouse.bed" visible="true"/>
+    </Panel>
+    <PanelLayout dividerFractions="0.8666666666666667"/>
+    <HiddenAttributes>
+        <Attribute name="DATA FILE"/>
+        <Attribute name="DATA TYPE"/>
+        <Attribute name="NAME"/>
+    </HiddenAttributes>
+</Session>

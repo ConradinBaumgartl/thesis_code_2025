@@ -1,0 +1,24 @@
+rule extract_feature:
+    input:
+        fast5="/home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/episome_005/data/guppy_modifications/5mC/rebasecalled/run4_fast5/workspace/fast5_pass/{sample}_single",
+        ref="data/combined.fasta"
+    output:
+        "deepsignal_results/{sample}_deepsignal-feature.tsv"
+    shell:
+        "tombo resquiggle --dna {input.fast5} {input.ref} --processes 10 --overwrite && deepsignal extract --fast5_dir {input.fast5} --reference_path {input.ref} --is_dna true --write_path {output} --nproc 10"
+
+rule call_modification:
+    input:
+        "deepsignal_results/{sample}_deepsignal-feature.tsv",
+    output:
+        "deepsignal_results/{sample}_deepsignal-prob.tsv"
+    shell:
+        "deepsignal call_mods --input_path {input} --is_gpu yes --nproc 10 --model_path data/model.CpG.R9.4_1D.human_hx1.bn17.sn360.v0.1.7+/bn_17.sn_360.epoch_9.ckpt --result_file {output}"
+
+rule calculate_frequency:
+    input:
+        "deepsignal_results/{sample}_deepsignal-prob.tsv"
+    output:
+        "deepsignal_results/{sample}_deepsignal-freq-perCG-raw.tsv"
+    shell:
+        "python script_in_snakemake/call_modification_frequency.py --input_path {input} --result_file {output} --prob_cf 0"

@@ -1,0 +1,364 @@
+# Dependoparvovirus separately
+
+I have noticed that in the dependoparvoviurs dataset there are a very high number of sequences that are titled goose something. This made me question my choice to only look for sequences that are annotated with the string "complete genome". Here I re-download the sequences from the search of all sequences in NCBI nucleotide "dependoparvovirus[organism]". I keep sequences with sizes >1000, and remove completely duplicated sequences. A lot of those sequences are assemblies from metagenomic studies. It may be that some of the smaller sequences are part of larger sequences.
+
+After filtering by size and removing duplicates I am left with ~1300 sequences for dependoparvovirus and 203 sequences for dependoparvoviruses and complete genomes.
+
+```{bash}
+Rscript Periodicity6_single.R \
+../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/dependoparvovirus.size.rmdup.fasta \
+../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/curve_fit_single/ \
+Parvoviridae \
+dependoparvovirus
+
+Rscript Periodicity6_single.R \
+../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/dependoparvovirus_extended.size.rmdup.fasta \
+../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/curve_fit_single/ \
+Parvoviridae \
+dependoparvovirus_extended
+```
+
+
+Additionally I have modified the periodicitiy script to do the analysis on every sequence individually ("_single"). I wanted to see if there is a big influence by the high number of anseriform dependoparvoviruses. Not all sequences have a descriptive name, therefore I wrote a script that goes through the ncbi entries of all sequences found and extracts the host if there is one (read_genebank.ipynb). Only about 25% of all dependoparvovirus sequences have an annotated host.
+
+```{r}
+library(tidyverse)
+library(ggExtra)
+library(ggpubr)
+library(ggrepel)
+
+dependo_extended_annot <- read_csv("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/dependoparvovirus_extended.hosts.csv")
+
+dependo_extended_annot %>% 
+  pull(host_cat) %>% unique()
+
+annotate_dependo <- function(df, annotation=dependo_extended_annot){
+  return(
+    merge(
+      df,
+      annotation,
+      by="sequence")
+  )
+}
+
+### Pick one sequence per host ###
+# only select from sequences that are of sufficient size
+best_sequences <- dependo_extended_annot %>%
+  dplyr::filter(sequence_length > 2000)
+for (i in c(1, 2, 3, 4, 5)){
+  set.seed(i)
+  # randomize the df
+  rand <- sample(nrow(best_sequences)) 
+  dependo_extended_annot_rand <- best_sequences[rand,]
+  # select one sequence from every possible host
+  one_each <- dependo_extended_annot_rand %>% 
+    group_by(host_cat) %>% 
+    slice(1) %>% 
+    pull(sequence)
+  # write them to file
+  fileConn<-file(paste0("../results/dinucleotide_periodicity_TAX/Parvoviridae/onehost_sequence_", i, ".txt"))
+  writeLines(one_each, fileConn)
+  close(fileConn)
+}
+```
+
+
+## Complete genome
+
+### read
+
+```{r}
+df_gof <- read_csv("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/curve_fit_single/dependo.SINGLE.CURVE.csv") %>% 
+  select(-...1)
+
+df_gof_annot <- annotate_dependo(df_gof)
+
+sprintf(
+  "Out of %s sequences with 'complete' genome, I can annotate %s",
+  df_gof %>% pull(sequence) %>% unique() %>% length(),
+  df_gof_annot %>% pull(sequence) %>% unique() %>% length()
+)
+df_gof_annot %>% dplyr::filter(dinucleotide == "YY") %>% pull(host_cat) %>% table()
+
+
+df_hist <- read_csv("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/curve_fit_single/dependo.SINGLE.HIST.csv") %>% 
+  select(-...1) %>% 
+  gather(key = "curve", value = "counts", -c(distance, dinucleotide, sequence))
+
+df_hist_annot <- annotate_dependo(df_hist)
+
+sprintf(
+  "Out of %s sequences with 'complete' genome, I can annotate %s",
+  df_hist %>% pull(sequence) %>% unique() %>% length(),
+  df_hist_annot %>% pull(sequence) %>% unique() %>% length()
+)
+```
+
+The first observation is that most complete available sequences from dependoparvoviruses stem from goose/duck (anseriformes) or primates.
+
+### plot
+
+```{r}
+df_gof_annot %>% 
+  dplyr::filter(host_cat %in% c("primate", "anseriform")) %>% 
+  ggplot(aes(x=period, y=nGOF, color=host_cat)) +
+  geom_point(alpha=.3, size = 1) +
+  facet_wrap(~dinucleotide, ncol = 2) +
+  geom_hline(yintercept = 45) +
+  ggtitle("Complete genomes only") +
+  xlim(0, 30) +
+  ylim(0, 100)
+
+df_gof_annot %>% 
+  dplyr::filter(host_cat %in% c("primate", "anseriform"), dinucleotide %in% c("YY", "AA", "SS")) %>% 
+  ggplot(aes(x=sequence_length, y=nGOF, color=host_cat)) +
+  geom_point(alpha=.3, size = 1) +
+  facet_wrap(~dinucleotide, ncol = 2) +
+  geom_hline(yintercept = 45) +
+  ggtitle("Complete genomes only")
+
+df_hist_annot %>%
+  dplyr::filter(dinucleotide %in% c("YY", "AA", "SS"), host_cat %in% c("anseriform", "primate")) %>% 
+  ggplot(aes(x=distance, y=counts, color=curve, unit=sequence)) +
+  geom_line(alpha = .1) +
+  facet_grid(dinucleotide~host_cat) +
+  xlim(0, 50) +
+  ggtitle("Complete Genomes only")
+```
+
+
+## Extended
+
+### read
+
+```{r}
+df_gof <- read_csv("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/curve_fit_single/dependo.SINGLE.CURVE.csv")
+
+df_gof_annot <- annotate_dependo(df_gof)
+
+sprintf(
+  "GOF: Out of %s sequences annotated with the term dependoparvovirus in its Organism field, I can annotate %s with its host",
+  df_gof %>% pull(sequence) %>% unique() %>% length(),
+  df_gof_annot %>% pull(sequence) %>% unique() %>% length()
+)
+
+df_gof_annot %>% 
+  group_by(host_cat, dinucleotide) %>% 
+  summarise(n = n())
+
+# how many of each host do we have?
+df_gof_annot %>% dplyr::filter(dinucleotide == "YY") %>% pull(host_cat) %>% table()
+
+
+
+df_hist <- read_csv("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/curve_fit_single/dependo.SINGLE.HIST.csv") %>% 
+  select(-...1) %>% 
+  gather(key = "curve", value = "counts", -c(sequence, distance, dinucleotide))
+
+df_hist_annot <- annotate_dependo(df_hist)
+
+sprintf(
+  "HIST: Out of %s sequences annotated with the term dependoparvovirus in its Organism field, I can annotate %s with its host",
+  df_hist %>% pull(sequence) %>% unique() %>% length(),
+  df_hist_annot %>% pull(sequence) %>% unique() %>% length())
+```
+
+### plot extended
+
+```{r}
+df_gof_annot %>% 
+  ggplot(aes(x=period, y=nGOF, color=dinucleotide)) +
+  geom_point(alpha=1, size = 1) +
+  facet_wrap(~host_cat, ncol = 2) +
+  geom_hline(yintercept = 45) +
+  xlim(0, 30) +
+  ylim(0, 100) +
+  ggtitle("Dependoparvovirus sequences")
+
+df_gof_annot %>% 
+  ggplot(aes(x=period, y=nGOF, color=dinucleotide)) +
+  geom_point(alpha=1, size = 1) +
+  facet_wrap(~host_cat, ncol = 2) +
+  geom_hline(yintercept = 45) +
+  xlim(0, 30) +
+  ylim(0, 100) +
+  ggtitle("Dependoparvovirus sequences")
+
+df_gof_annot %>% 
+  dplyr::filter(host_cat %in% c("anseriform", "primate")) %>% 
+  ggplot(aes(x=period, y=nGOF, color=host_cat)) +
+  geom_point(alpha=1, size = 1) +
+  facet_wrap(~dinucleotide, ncol = 2) +
+  geom_hline(yintercept = 45) +
+  xlim(0, 30) +
+  ylim(0, 100) +
+  ggtitle("Dependoparvovirus sequences")
+
+df_hist_annot %>%
+  dplyr::filter(
+    host_cat %in% c("anseriform", "primate"),
+    dinucleotide %in% c("YY", "AA")) %>% 
+  ggplot(aes(x=distance, y=counts, color=curve, unit=sequence)) +
+  geom_line(alpha = .11) +
+  facet_grid(dinucleotide~host_cat) +
+  xlim(0, 50) +
+  ggtitle("Dependoparvovirus sequences")
+
+p <- df_gof_annot %>%
+  ggplot(aes(x=sequence_length, y=nGOF)) +
+  geom_point(alpha=1, size = 1) +
+  geom_smooth(method = "lm") +
+  ggpubr::stat_cor() +
+  ylim(0, 100)
+
+ggMarginal(p, type = "histogram")
+```
+
+Again most of the annotated sequences are from either duck/goose, primate, or bat. Looking at all dependoparvovirus sequences is the same as only looking at goose and human dependoparvoviruses, even though more hosts have been described. A single genome of dependoparvoviruses is very short. The Goodness of fit (at least for AA and YY) correlates with the length of the genome. Since most full length dependoparvovirus genomes are mostly from duck/goose and primates, the best fitted curves will come from those genomes. 
+
+Whatever way you start looking into dependoparvoviral sequences, you will be biased towards the ones that have been discovered and annotated. That happens to be mostly bird AAVs and primate AAVs.
+
+Generally anseriform AAV have a higher YY periodicity, and primate ones have a AA periodicity. Both at a period of 15. Judging from a single dendrogram I made with ClustalOmega and the full length DNA sequences, most of the sequences I am testing are closely related to each other. IE all goose parvoviruses are very similar and all primate viruses are very similar. 
+
+Looking at individual sequences like this is very noisy also with the curve fitting. This is the reason I have moved away from doing it like this and do it mostly on genus level. This analysis has shown me that there is still significant bias in this. I should also do an analysis even higher up on the family level.
+
+## One from each host
+
+Though there are 1300 sequences annotated with dependoparvovirus, the diversity is not as great as it seems. Most of them are either from human or from goose origin, meaning that most of the sequences are very closely related to each other among these 2 subgroups.
+
+To get a more diverse picture I select one sequence from every annotatable host and run the periodicity analysis on that.
+
+I still can see the 15-bp YY periodicity also when selecting genomes from 13 different hosts. The AA periodicity is very specific to primate sequences and does not show up in this dataset. 10-bp SS periodicity is also very strong.
+
+```{bash}
+for i in 1 2 3 4 5
+do
+  seqkit grep -n -f ../results/dinucleotide_periodicity_TAX/Parvoviridae/onehost_sequence_${i}.txt ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/dependoparvovirus_extended.fasta > ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/dependoparvovirus_onehosteach_${i}.fasta
+  
+  
+  Rscript Periodicity6.R \
+    ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/dependoparvovirus_onehosteach_${i}.fasta \
+    ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/curve_fit/dependoparvovirus_onehosteach_${i} \
+    dependoparvovirus \
+    Parvoviridae
+done
+```
+
+```{r}
+onephost_hist <- lapply(c("1", "2", "3", "4", "5"), function(x){
+  df <- read_csv(paste0("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/curve_fit/dependoparvovirus_onehosteach_", x ,".CURVE.csv")) %>% 
+    mutate(replicate = x)
+  return(df)
+}) %>% bind_rows()
+
+onephost_hist %>% 
+  group_by(dinucleotide) %>% 
+  summarise(period = median(period), nGOF = median(nGOF)) %>% 
+  ggplot(aes(x=period, y=nGOF, label=dinucleotide)) +
+  geom_point() +
+  geom_text_repel() +
+  xlim(0, 30)
+
+onephost_curve <- lapply(c("1", "2", "3", "4", "5"), function(x){
+  df <- read_csv(paste0("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/curve_fit/dependoparvovirus_onehosteach_", x ,".HIST.csv")) %>% 
+    mutate(replicate = x)
+  return(df)
+}) %>% bind_rows()
+
+onephost_curve %>% 
+  group_by(distance, dinucleotide) %>% 
+  summarise(norm_counts = median(norm_counts)) %>% 
+  dplyr::filter(dinucleotide %in% c("YY", "SS", "AA", "GG")) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color=dinucleotide)) +
+  geom_line(linewidth=1.5) +
+  xlim(0, 65) +
+  facet_wrap(~dinucleotide)
+```
+
+
+
+
+
+
+# what does this really look like man? - Cross Distances
+
+I still have no idea where and how exactly the pattern looks like and I want to find out.
+
+Therefore I measure the position of different dinucleotides to each other, with different anchoring dinucleotides. For example: I will get the distances of every YY dinucleotide to other YY, RR, SS, and WW dinucs. The YY to YY distances will be the same as the autocorrelations I have calculated before, but the other things I have never done on a dependoparvovirus scale.
+
+```{bash}
+Rscript Periodicity6_crossDistances.R \
+  ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/dependoparvovirus.size.rmdup.fasta \
+  ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus/curve_fit/dependoparvovirus \
+  Parvoviridae \
+  dependoparvovirus
+  
+Rscript Periodicity6_crossDistances.R \
+  ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/dependoparvovirus_extended.size.rmdup.fasta \
+  ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/curve_fit/dependoparvovirus_extended \
+  Parvoviridae \
+  dependoparvovirus
+
+for i in 1 2 3 4 5
+do
+  Rscript Periodicity6_crossDistances.R \
+    ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/dependoparvovirus_onehosteach_${i}.fasta \
+    ../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/curve_fit/dependoparvovirus_onehosteach_${i} \
+    Parvoviridae \
+    dependoparvovirus
+done
+```
+
+## One host each - 13 sequences
+
+```{r}
+xdist_hist <- lapply(c("1", "2", "3", "4", "5"), function(x){
+  df <- read_csv(paste0("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_onehosteach/curve_fit/dependoparvovirus_onehosteach_", x ,".Xdist.HIST.csv")) %>% 
+    mutate(replicate = x)
+  return(df)
+}) %>% bind_rows() %>% 
+  unite("dinuc", c(dinuc1, dinuc2), sep="_")
+
+xdist_hist %>% 
+  head()
+
+xdist_hist %>% 
+  filter(dinuc %in% c("YY_YY", "YY_RR")) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc, unit=replicate)) + 
+  geom_line() +
+  xlim(0, 50) +
+  ylim(-1e-3, 1e-3)
+
+xdist_hist %>% 
+  filter(dinuc %in% c("SS_SS", "SS_WW")) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc, unit=replicate)) + 
+  geom_line() +
+  xlim(0, 50) +
+  ylim(-1e-3, 1e-3)
+```
+## Cross Distance
+
+```{r}
+xdist_hist <- read_csv(paste0("../results/dinucleotide_periodicity_TAX/Parvoviridae/dependoparvovirus_extended/curve_fit/dependoparvovirus_extended.Xdist.HIST.csv")) %>%
+  unite("dinuc", c(dinuc1, dinuc2), sep="_")
+
+xdist_hist %>% 
+  head()
+
+xdist_hist %>% 
+  filter(dinuc %in% c("YY_YY", "YY_RR")) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc)) + 
+  geom_line(linewidth=1.5) +
+  xlim(0, 50) +
+  ylim(-5e-4, 5e-4)
+
+xdist_hist %>% 
+  filter(dinuc %in% c("SS_SS", "SS_WW")) %>% 
+  ggplot(aes(x=distance, y=norm_counts, color=dinuc)) + 
+  geom_line() +
+  xlim(0, 50) +
+  ylim(-5e-4, 5e-4)
+```
+
+
+

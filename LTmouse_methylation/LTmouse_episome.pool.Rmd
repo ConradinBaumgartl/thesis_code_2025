@@ -1,0 +1,121 @@
+## Pooled samples
+
+Especially the AAV2 samples have a very low coverage on the transgene. I will pool all mice from the same timepoint to get some more power out of the low read samples.
+
+*Very important: remove unmapped reads!!*
+
+```{bash}
+reference=genomes/pPl04.linearized.fasta
+
+for capsid in 2 9
+do
+  for timepoint in 2 6 12
+  do
+    samtools merge -@ 8 data/aligned_pooled/${capsid}_${timepoint}.complete.TMP.bam data/aligned_demux/${capsid}_${timepoint}_*.bam
+    samtools index data/aligned_pooled/${capsid}_${timepoint}.complete.TMP.bam
+    samtools view -b -h -F 2308 data/aligned_pooled/${capsid}_${timepoint}.complete.TMP.bam > data/aligned_pooled/${capsid}_${timepoint}.complete.bam
+    samtools index data/aligned_pooled/${capsid}_${timepoint}.complete.bam
+    rm data/aligned_pooled/${capsid}_${timepoint}.complete.TMP.bam data/aligned_pooled/${capsid}_${timepoint}.complete.TMP.bam.bai
+      modbam2bed \
+    --aggregate \
+    --combine \
+    --cpg \
+    --extended \
+    -t 16 \
+    $reference data/aligned_pooled/${capsid}_${timepoint}.complete.bam > data/aligned_pooled/${capsid}_${timepoint}.complete.modbed
+  done
+done
+```
+
+### Numbers
+
+```{bash}
+for file in data/aligned_pooled/*.complete.bam
+do
+  samtools idxstats $file > ${file/.bam/.nreads}
+done
+```
+
+### more info
+```{bash}
+aln_bases_out='data/aligned_pooled/aligned_bases.csv'
+touch $aln_bases_out
+for file in data/aligned_pooled/*.complete.bam
+do
+  samtools stats $file | grep ^RL > ${file/.bam/.hist}
+  alnbases=$(samtools stats $file | grep "bases mapped (cigar):" | awk '{print $5}')
+  f=$(basename $file)
+  echo ${alnbases},${f/.complete.bam/} >> $aln_bases_out
+done
+```
+
+
+```{r}
+path <- "data/aligned_pooled/"
+hist <- lapply(list.files(path, pattern=".hist"), function(file){
+  tmp <- read_delim(paste0(path, file), col_names = c("field", "length", "count"))
+  
+  read_counts <- c()
+  counts <- pull(tmp, count)
+  lengths <- pull(tmp, length)
+  for (i in seq(nrow(tmp))){
+    for (j in seq(counts[i])){
+      read_counts <- append(read_counts, lengths[i])
+    }
+  }
+  
+  out <- tibble(read_counts) %>% 
+    mutate(sample = str_split(file, "\\.")[[1]][1]) %>% 
+    separate(sample, c("capsid", "weeks")) %>% 
+    mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+    dplyr::filter(capsid != "unclassified")
+  return(out)
+}) %>% bind_rows()
+
+hist %>% 
+  ggplot(aes(x=read_counts, fill=capsid)) +
+  geom_histogram() +
+  facet_grid(capsid~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  xlim(0, 6000)
+
+hist %>% 
+  ggplot(aes(x=read_counts)) +
+  geom_density() +
+  facet_grid(capsid~weeks) +
+  xlim(0, 6000)
+```
+
+
+
+```{r}
+cov <- read_csv("data/aligned_pooled/aligned_bases.csv", col_names = c("aligned_bases", "sample")) %>% 
+  separate(sample, c("sample", "x1", "subreplicate"), "\\.") %>% 
+  separate(sample, c("capsid", "weeks")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    coverage = aligned_bases / 4133
+    ) %>% 
+  dplyr::filter(capsid != "unclassified")
+
+
+cov %>% 
+  ggplot(aes(x=capsid, y=coverage, fill=capsid, label = round(coverage))) +
+  geom_bar(stat="identity") +
+  geom_text() +
+  facet_wrap(~weeks) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("pooled coverage")
+```
+
+
+### Coverage
+
+```{bash}
+for file in data/aligned_pooled/*complete.bam
+do
+  bamCoverage -bs 10 -p 8 --region pPl04_linearized --normalizeUsing None --bam $file -o ${file/.bam/.NONE.bigwig}
+  bamCoverage -bs 10 -p 8 --region pPl04_linearized --normalizeUsing CPM --bam $file -o ${file/.bam/.CPM.bigwig}
+done
+```

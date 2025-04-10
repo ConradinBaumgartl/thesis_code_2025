@@ -1,0 +1,143 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 8
+Rules claiming more threads will be scaled down.
+Job stats:
+job           count    min threads    max threads
+----------  -------  -------------  -------------
+all               1              1              1
+bam_to_bed        8              1              1
+genomecov         8              1              1
+sort              6              1              1
+total            23              1              1
+
+Select jobs to execute...
+
+[Thu Aug 29 13:36:57 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_962_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam
+    jobid: 119
+    reason: Missing output files: data/alignment/cmv/K27ac_962_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 13:36:57 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SORTED.bam
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bed
+    jobid: 106
+    reason: Updated input files: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SORTED.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 13:36:57 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_261_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam
+    jobid: 110
+    reason: Missing output files: data/alignment/cmv/K27ac_261_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 13:36:58 2024]
+rule sort:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SORTED.bam
+    jobid: 101
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SORTED.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 13:36:58 2024]
+rule bam_to_bed:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SORTED.bam
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bed
+    jobid: 103
+    reason: Updated input files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SORTED.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 13:36:59 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_961_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam
+    jobid: 116
+    reason: Missing output files: data/alignment/cmv/K27ac_961_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 13:37:00 2024]
+rule sort:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bam
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SORTED.bam
+    jobid: 98
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SORTED.bam
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Thu Aug 29 13:37:02 2024]
+rule sort:
+    input: data/alignment/cmv/K27ac_262_liver.ALL.bam
+    output: data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam
+    jobid: 113
+    reason: Missing output files: data/alignment/cmv/K27ac_262_liver.ALL.SORTED.bam
+    wildcards: genome=cmv, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+[Thu Aug 29 14:32:31 2024]
+Finished job 106.
+1 of 23 steps (4%) done
+Select jobs to execute...
+
+[Thu Aug 29 14:32:32 2024]
+rule genomecov:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bed
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph
+    jobid: 105
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph; Input files updated by another job: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bed
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+[Thu Aug 29 14:33:13 2024]
+Finished job 103.
+2 of 23 steps (9%) done
+Select jobs to execute...
+
+[Thu Aug 29 14:33:14 2024]
+rule genomecov:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bed
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph
+    jobid: 102
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph; Input files updated by another job: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bed
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+[Thu Aug 29 14:35:59 2024]
+Finished job 113.
+3 of 23 steps (13%) done
+[Thu Aug 29 14:40:19 2024]
+Finished job 110.
+4 of 23 steps (17%) done
+[Thu Aug 29 14:43:39 2024]
+Finished job 101.
+5 of 23 steps (22%) done
+[Thu Aug 29 14:44:04 2024]
+Finished job 116.
+6 of 23 steps (26%) done
+[Thu Aug 29 14:45:16 2024]
+Finished job 119.
+7 of 23 steps (30%) done
+[Thu Aug 29 14:45:35 2024]
+Finished job 98.
+8 of 23 steps (35%) done
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2024-08-29T133656.454300.snakemake.log

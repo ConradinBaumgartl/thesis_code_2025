@@ -1,0 +1,129 @@
+# Mice
+
+Mice were injected with a single-stranded construct: CMV-eGFP-BGHpA_stuffer, packaged in either AAV2 or AAV9. 3 Groups of 9 mice each. In every group there are 4 mice each injected with 5e11 AAV2 and AAV9, as well as 1 mouse injected with PBS. Group 1 was sacrificed after 2 weeks, Group 2 after 6 weeks, and Group 3 12 weeks post injection.
+
+# Sample processing
+
+These samples are 16 mouse livers. This is the maximum number of samples I can have with the Active Motif Kit (4 barcodes each i7 and i5). 3 mice each with AAV2 and AAV9 from 2 weeks and 12 weeks. For the 6-weeks timepoint we have fewer mice with 2 each.
+
+## Samples 
+
+Used mice from all different groups. Samples from multiple mice each. E.g. 2-6-1 = AAV2, 6 weeks p.i., mouse nr 1
+
+Samples CT14 to CT19 were prepared in the first batch on 5.9.24
+
+Samples CT20 to CT27 were prepared in the second batch on 9.9.24
+
+
+## Library preparation
+
+Followed the ActiveMotif Cut and Tag IT Tissue Kit to extract chromatin and perform the Cut and Tag method.
+
+Quantified the nuclei suspension on a Luna Cell Counter and used ~250000 Nuclei for Library prep.
+
+Used the Rabbit@H3K27ac primary ab and GuineaPig@Rabbit sevondary ab, all from the kit.
+
+The used index primers (from the kit) are noted in the table below, as well as Bioanalyzer results of the finished libraries.
+
+Pooled 100 fmol of every sample into the final library that was was cleaned once more 1:1 with AmpureXP and then handed to David Ibberson.
+
+
+| CT   | mouse  | i7 | i5 | peak (bp) | ng/µL | nM |
+|------|--------|----|----|-----------|-------|----|
+| CT28 | 2-2-1  | 1  | 1  | 318       | 8.8   | 45 |
+| CT29 | 2-2-2  | 2  | 2  | 316       | 5.2   | 27 |
+| CT30 | 9-2-1  | 3  | 3  | 318       | 11.8  | 60 |
+| CT31 | 9-2-2  | 4  | 4  | 324       | 8.3   | 42 |
+| CT34 | 2-2-3  | 1  | 4  | 344       | 2.9   | 14 |
+| CT35 | 9-2-3  | 4  | 1  | 347       | 3.1   | 15 |
+| CT36 | 2-6-1  | 2  | 3  | 318       | 8.1   | 41 |
+| CT37 | 2-6-2  | 3  | 2  | 329       | 3.0   | 40 |
+| CT38 | 9-6-1  | 3  | 4  | 340       | 3.4   | 16 |
+| CT39 | 9-6-2  | 4  | 3  | 340       | 4.5   | 22 |
+| CT40 | 2-12-1 | 1  | 3  | 318       | 4.5   | 23 |
+| CT41 | 2-12-2 | 3  | 1  | 335       | 10.7  | 52 |
+| CT42 | 2-12-3 | 2  | 4  | 343       | 5.6   | 27 |
+| CT43 | 9-12-1 | 4  | 2  | 347       | 3.5   | 16 |
+| CT44 | 9-12-2 | 1  | 2  | 323       | 2.2   | 11 |
+| CT45 | 9-12-3 | 2  | 1  | 339       | 4.9   | 24 |
+
+
+## Sequencing
+
+Sequencing was performed by the Deep Sequencing Core and David Ibberson. Was run on 28.11.2024 on the NextSeq2000.
+
+Demultiplexing performed by David.
+
+
+# Sample renaming
+
+```{bash}
+declare -A barcode_dict=(
+  ["CT28"]="K27me3_2-2-1_liver"
+  ["CT29"]="K27me3_2-2-2_liver"
+  ["CT30"]="K27me3_9-2-1_liver"
+  ["CT31"]="K27me3_9-2-2_liver"
+  ["CT34"]="K27me3_2-2-3_liver"
+  ["CT35"]="K27me3_9-2-3_liver"
+  ["CT36"]="K27me3_2-6-1_liver"
+  ["CT37"]="K27me3_2-6-2_liver"
+  ["CT38"]="K27me3_9-6-1_liver"
+  ["CT39"]="K27me3_9-6-2_liver"
+  ["CT40"]="K27me3_2-12-1_liver"
+  ["CT41"]="K27me3_2-12-2_liver"
+  ["CT42"]="K27me3_2-12-3_liver"
+  ["CT43"]="K27me3_9-12-1_liver"
+  ["CT44"]="K27me3_9-12-2_liver"
+  ["CT45"]="K27me3_9-12-3_liver"
+)
+
+for R in R1 R2
+do
+  for key in ${!barcode_dict[@]}
+  do
+    infile=~/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/raw_data/${key}_${R}.fastq.gz
+    outfile=~/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_04/data/raw_data/${barcode_dict[$key]}_${R}.fastq.gz
+    mv $infile $outfile
+  done
+done
+```
+
+
+
+| file                                          | format | type | num_seqs   | sum_len       | min_len | avg_len | max_len |
+|-----------------------------------------------|--------|------|------------|---------------|---------|---------|---------|
+| data/raw_data/K27me3_2-12-1_liver_R1.fastq.gz | FASTQ  | DNA  | 23,230,646 | 1,417,069,406 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-12-1_liver_R2.fastq.gz | FASTQ  | DNA  | 23,230,646 | 1,417,069,406 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-12-2_liver_R1.fastq.gz | FASTQ  | DNA  | 28,854,269 | 1,760,110,409 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-12-2_liver_R2.fastq.gz | FASTQ  | DNA  | 28,854,269 | 1,760,110,409 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-12-3_liver_R1.fastq.gz | FASTQ  | DNA  | 31,543,228 | 1,924,136,908 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-12-3_liver_R2.fastq.gz | FASTQ  | DNA  | 31,543,228 | 1,924,136,908 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-2-1_liver_R1.fastq.gz  | FASTQ  | DNA  | 26,002,443 | 1,586,149,023 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-2-1_liver_R2.fastq.gz  | FASTQ  | DNA  | 26,002,443 | 1,586,149,023 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-2-2_liver_R1.fastq.gz  | FASTQ  | DNA  | 23,605,424 | 1,439,930,864 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-2-2_liver_R2.fastq.gz  | FASTQ  | DNA  | 23,605,424 | 1,439,930,864 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-2-3_liver_R1.fastq.gz  | FASTQ  | DNA  | 29,436,656 | 1,795,636,016 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-2-3_liver_R2.fastq.gz  | FASTQ  | DNA  | 29,436,656 | 1,795,636,016 | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-6-1_liver_R1.fastq.gz  | FASTQ  | DNA  | 13,808,299 | 842,306,239   | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-6-1_liver_R2.fastq.gz  | FASTQ  | DNA  | 13,808,299 | 842,306,239   | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-6-2_liver_R1.fastq.gz  | FASTQ  | DNA  | 12,343,977 | 752,982,597   | 61      | 61      | 61      |
+| data/raw_data/K27me3_2-6-2_liver_R2.fastq.gz  | FASTQ  | DNA  | 12,343,977 | 752,982,597   | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-12-1_liver_R1.fastq.gz | FASTQ  | DNA  | 27,334,268 | 1,667,390,348 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-12-1_liver_R2.fastq.gz | FASTQ  | DNA  | 27,334,268 | 1,667,390,348 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-12-2_liver_R1.fastq.gz | FASTQ  | DNA  | 24,181,157 | 1,475,050,577 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-12-2_liver_R2.fastq.gz | FASTQ  | DNA  | 24,181,157 | 1,475,050,577 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-12-3_liver_R1.fastq.gz | FASTQ  | DNA  | 24,456,538 | 1,491,848,818 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-12-3_liver_R2.fastq.gz | FASTQ  | DNA  | 24,456,538 | 1,491,848,818 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-2-1_liver_R1.fastq.gz  | FASTQ  | DNA  | 22,352,635 | 1,363,510,735 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-2-1_liver_R2.fastq.gz  | FASTQ  | DNA  | 22,352,635 | 1,363,510,735 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-2-2_liver_R1.fastq.gz  | FASTQ  | DNA  | 28,402,372 | 1,732,544,692 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-2-2_liver_R2.fastq.gz  | FASTQ  | DNA  | 28,402,372 | 1,732,544,692 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-2-3_liver_R1.fastq.gz  | FASTQ  | DNA  | 31,694,373 | 1,933,356,753 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-2-3_liver_R2.fastq.gz  | FASTQ  | DNA  | 31,694,373 | 1,933,356,753 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-6-1_liver_R1.fastq.gz  | FASTQ  | DNA  | 51,959,386 | 3,169,522,546 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-6-1_liver_R2.fastq.gz  | FASTQ  | DNA  | 51,959,386 | 3,169,522,546 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-6-2_liver_R1.fastq.gz  | FASTQ  | DNA  | 28,094,033 | 1,713,736,013 | 61      | 61      | 61      |
+| data/raw_data/K27me3_9-6-2_liver_R2.fastq.gz  | FASTQ  | DNA  | 28,094,033 | 1,713,736,013 | 61      | 61      | 61      |
+
+
+I have a very good number of reads. Only 261 and 262 are ~50% of what they should be. But they also still have enough.

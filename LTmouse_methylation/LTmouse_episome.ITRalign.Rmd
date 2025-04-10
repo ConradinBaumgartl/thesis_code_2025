@@ -1,0 +1,475 @@
+# Why
+
+At ASGCT 2024 there was a talk from Suk Namkung from Gao's Lab that was talking about the recombination events in the AAV ITR. He explained it to me afterwards. Apparently he aligned the individual ITR sub-sequences to the reads themselves to get an idea about the abundance of each. 
+
+I have data from mouse livers and multiple timepoints. It would be very interesting to have a look at this.
+
+
+# Plan
+
+I want to create a reference from all of the nanopore reads that are probably full length and circular and then align different ITR sub-sequences. Counting should give me an idea about what regions are mostly removed during recombination.
+
+
+# Create the references.
+
+I will use the reads that I have already aligned and filtered to the transgene genome.
+
+Also orient them all to be the same way around which is "reverse" according to the transgene.
+
+```{bash}
+
+for file in data/aligned_demux/*.bam
+do
+  n=$(basename $file)
+  samtools fasta -f 16 $file > genomes/episome_refs/${n/.filt.bam/.REV.fasta}
+  samtools fasta -F 16 $file > genomes/episome_refs/${n/.filt.bam/.FWD.fasta}
+  
+  seqkit seq -r -p genomes/episome_refs/${n/.filt.bam/.FWD.fasta} > genomes/episome_refs/${n/.filt.bam/.FWD.RC.fasta}
+  
+  cat genomes/episome_refs/${n/.filt.bam/.REV.fasta} genomes/episome_refs/${n/.filt.bam/.FWD.RC.fasta} > genomes/episome_refs/${n/.filt.bam/.ORIENT.fasta}
+  
+  rm genomes/episome_refs/${n/.filt.bam/.REV.fasta} genomes/episome_refs/${n/.filt.bam/.FWD.fasta} genomes/episome_refs/${n/.filt.bam/.FWD.RC.fasta}
+done
+
+```
+
+
+# Align
+
+```{bash}
+for file in genomes/episome_refs/?_*_?.ORIENT.fasta
+do
+  n=$(basename ${file/.fasta/})
+  blastn -query $file -subject genomes/itr.03.fasta -gapopen 0 -gapextend 2 -word_size 9 -reward 1 -penalty -2 -outfmt 6 > data/aligned.ITRparts/${n}.blastn.tsv
+done
+```
+
+
+# Read table
+
+```{r}
+library(tidyverse)
+
+p <- "data/aligned.ITRparts/"
+
+df <- lapply(list.files(p, pattern = ".ORIENT.blastn.tsv"), function(file){
+  name <- str_split(file, "\\.")[[1]][1]
+  tmp <- read_delim(paste0(p, file), col_names = str_split("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore", " ")[[1]]) %>% 
+    mutate(mouse = name)
+  return(tmp)
+}) %>% bind_rows() %>% 
+  separate(mouse, c("capsid", "weeks", "repl")) %>% 
+  unite("mouse", c(capsid, weeks)) %>% 
+  select(-repl)
+
+df %>% head()
+
+df %>% 
+  dplyr::filter(qseqid == "2776446e-44a8-4d05-ba2d-66731e4c43d2")
+```
+
+
+```{r}
+df %>% dplyr::filter(evalue < 0.05, sseqid == "B-loop", pident < 100)
+
+df %>% dplyr::filter(evalue < 0.05, qseqid == "79007101-a731-476c-9614-3cebd28ced3b")
+
+df %>% dplyr::filter(evalue < 0.05)
+```
+
+# How many ITR parts per read?
+
+```{r}
+depth <- df %>% 
+  group_by(mouse) %>% 
+  summarise(depth = length(unique(qseqid)))
+depth
+
+quick_counts <- df %>% 
+  dplyr::filter(evalue < 0.05) %>% 
+  group_by(mouse) %>% 
+  count(sseqid)
+quick_counts
+
+norm_quick_counts <- left_join(quick_counts, depth) %>% 
+  mutate(nnorm = n / depth) %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i.")) %>% 
+  mutate(weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+norm_quick_counts %>% 
+  ggplot(aes(x=sseqid, y=nnorm)) +
+  geom_boxplot() +
+  facet_grid(capsid~weeks)
+
+norm_quick_counts %>% 
+  ggplot(aes(x=sseqid, y=nnorm)) +
+  geom_boxplot() +
+  facet_grid(~capsid)
+```
+
+How many of each per read?
+
+Is this number dependent on the number of reads?
+
+```{r}
+df %>% 
+  dplyr::filter(evalue < 0.05) %>% 
+  group_by(mouse, qseqid) %>% 
+  count(sseqid) %>% 
+  ggplot(aes(x=sseqid, y=n)) +
+  geom_violin() +
+  facet_wrap(~mouse)
+```
+
+# Localisation - raw
+
+```{r}
+cap9 <- df %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  dplyr::filter(evalue < 0.05, capsid == "9")
+
+cap9 %>% 
+  ggplot(aes(x=qstart, y=qseqid, color=sseqid)) +
+  geom_point(size=.1) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+cap9 %>% 
+  ggplot(aes(x=qstart, y=qseqid, color=sseqid)) +
+  geom_point(size=.1) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  xlim(500, 1000)
+
+cap9 %>% 
+  ggplot(aes(x=qstart, color=sseqid)) +
+  geom_density(adjust=.01) +
+  xlim(500, 1000)
+
+```
+
+The sequencing data always starts from the cut introduced between the promoter and the YFP. The plus strand reads contain the entire transgene before they encounter the ITR. The minus strand reads only sequence the promoter and then encounter the ITR. The qstart at ~650 are the negative strand reads, the qstart cluster at 3100 are the positive strand reads. 
+
+It is interesting to see that they mostly start with a D followed by an A sequence. This goes for positive and negative strand. It indicates that the recombined ITR starts and ends with a D/A. Basic structure: D-A...A-D. What is in between the ends is not so clearly defined. The size of the recombined portion differs greatly, which is why the A-D coordinates of distal end of the ITR do not "sync" back up.
+
+**Addendum** I have since changed the orientation of the reads to be the same through out
+
+# Figure out size of recombination
+
+I measure the size per read by comparing the D-sequence coordinates in every read. Because there are multiple D-, A-, B-sequences (etc) in every read I have to number them to pull them apart. There can be up to 6 A-sequences per read, but only 4 D-sequences.
+
+Would it be better to compare flanking sequences of the transgene, instead of ITR sequences that are prone to recombination?
+
+```{r}
+df_info <- df %>% 
+  dplyr::filter(evalue < 0.05) %>%
+  select(qseqid, sseqid, qstart, mouse) %>% 
+  group_by(qseqid, sseqid) %>% 
+  mutate(rown = row_number(), sseqid = str_c(sseqid, rown, sep = "_")) %>% 
+  select(-rown) %>% 
+  pivot_wider(names_from = sseqid, values_from = qstart) %>% 
+  mutate(itr_length = abs(D_1-D_2) + 21) %>% # also add the length of the D-sequence
+  ungroup()
+
+df_info %>% head()
+
+df_info %>% 
+  ggplot(aes(x=itr_length)) +
+  geom_histogram(binwidth=5)
+
+df_info %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  dplyr::filter(capsid == "9") %>% 
+  nrow()
+
+df_info %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  dplyr::filter(capsid == "9", itr_length < 1000) %>% 
+  nrow()
+
+itrhist <- df_info %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  dplyr::filter(capsid == "9", itr_length < 1000) %>% 
+  ggplot(aes(x=itr_length)) +
+  geom_histogram(aes(y=after_stat(density)), binwidth=5) +
+  geom_density(adjust = .5, linewidth=1.66, colour="red") +
+  xlim(0, 300) +
+  theme_bw() +
+  theme(text = element_text(size = 15)) +
+  xlab("ITR length")
+ggsave("plots/ITRrecombination/itrsize.cap9.png", dpi = 300, width = 4, height = 5, plot = itrhist)
+ggsave("plots/ITRrecombination/itrsize.cap9.svg", dpi = 300, width = 4, height = 5, plot = itrhist)
+
+df_info %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=itr_length)) +
+  geom_histogram(aes(y=..density..), binwidth=5) +
+  geom_density(adjust = .5, linewidth=1.66, colour="red") +
+  xlim(0, 400) +
+  facet_grid(capsid~weeks)
+```
+
+The ITR sizes can differ greatly between 50 and 300 bp, but there are 2 major peaks. One at the expected ~165 and one that is at ~90 bp. A quick look suggests that the 90 bp ITR recombination probably does no longer contain the loops. But together the loops only have a size of ~40. Therefore a deletion should only lower the length to 100. There must be former deletions in another sequence.
+
+Splitting by Capsid and timepoint:
+
+* AAV2 has too little reads to gain a meaningful idea from it.
+
+* AAV9 after 2 weeks appears to have a third strong peak at ~190 bp that is not present in the other reads.
+
+# Localisation - ranked
+
+```{r}
+library(ggpubr)
+
+df_add <- merge(
+  df %>% 
+    dplyr::filter(evalue < 0.05),
+  df_info %>% 
+    select(qseqid, itr_length),
+  by = "qseqid") %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  dplyr::filter(capsid == "9") %>% 
+  arrange(itr_length, qseqid, qstart) %>% 
+  dplyr::filter(itr_length < 1000)
+
+# make a rank number instead of the sequence names
+size_rank <- df_add %>% 
+  distinct(qseqid) %>% 
+  mutate(n = row_number())
+# add the number to the df
+df_add <- merge(df_add, size_rank, by="qseqid") %>% 
+  mutate(sseqid = ifelse((sstart - send)<0, str_c(sseqid, "_fwd"), str_c(sseqid, "_rev"))) %>% 
+  mutate(sseqid = ifelse(str_detect(sseqid, "B-loop"), "B-loop", sseqid)) %>% 
+  mutate(sseqid = ifelse(str_detect(sseqid, "C-loop"), "C-loop", sseqid))
+
+
+recomb <- df_add %>% 
+  mutate(sseqid = factor(sseqid, levels = c("A_rev", "A_fwd", "B-loop", "C-loop", "D_rev", "D_fwd"))) %>% 
+  ggplot() +
+  geom_point(aes(x=qstart, y=n, color=sseqid), size=.5) +
+  xlim(600, 1000) +
+  scale_color_brewer(palette = "Paired") +
+  theme_bw() +
+  theme(text=element_text(size = 15),
+        axis.text.y=element_blank(),
+      axis.ticks.y=element_blank()) +
+  xlab("start position") +
+  ylab("reads ordered by ITR length")
+ggsave("plots/ITRrecombination/loc.dsequence.cap9.png", dpi = 300, height=6, width = 7, plot = recomb)
+ggsave("plots/ITRrecombination/loc.dsequence.cap9.svg", dpi = 300, height=6, width = 7, plot = recomb)
+
+ggarrange(itrhist, recomb, widths = c(4, 6))
+ggsave("plots/ITRrecombination/figure.png", width = 10, height = 5, dpi =300)
+ggsave("plots/ITRrecombination/figure.svg", width = 10, height = 5, dpi =300)
+
+```
+
+Plotting the ITR recombination this way gives a nice picture. Together with the histogram it tells us what is happening. Here the ITRs are ordered by their size, determined by D-sequence distance. The right hand side of the D-sequence moves further to the right as the ITRs become larger. There are 2 spots where the "line" of right-hand D-sequences becomes more vertical opposed to diagonal. One represents the ITRs of about 70 bp in length and the other the other peak of ~145 bp.
+
+From small to large:
+
+* because of my definition, the smallest ones are only 2 D-sequences
+
+* 70 bp ITR peak contains D-a-A-D where "a" is some sort of a truncated A-sequence. The theoretical size of a non-loop ITR would be D-A-A-D: 21+41+41 = 99 bp. There might be a consistent pattern here. Need to extract those and do an MSA. *update: it is D-A-A'-D', see below*
+
+* in between the 2 peak sizes there is a consistent rise of ITR length with no other sequences detectable
+
+* as far as I can tell the 145 bp ITRs contain a complete ITR: D-A-B/C-B/C-A-D
+
+* the larger sequences often have multiple B and C loops
+
+* the largest ones even have a 3rd A sequence in between B/C loops.
+
+
+```{r}
+# split by weeks and capsid
+df_add %>% 
+  ggplot(aes(x=qstart, y=n, color=sseqid)) +
+  geom_point(size=.3) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  xlim(600, 1000) +
+  ggtitle("Reverse reads") +
+  facet_grid(capsid~weeks)
+
+df_add %>% 
+  dplyr::filter(weeks == "2") %>% 
+  ggplot(aes(x=qstart, y=n, color=sseqid)) +
+  geom_point(size=.3) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  xlim(600, 1000) +
+  ggtitle("Reverse reads - AAV9 2 weeks")
+
+df_add %>% 
+  dplyr::filter(weeks == "2") %>% 
+  ggplot(aes(x=itr_length)) +
+  geom_histogram(binwidth=5) +
+  xlim(0, 250)
+```
+
+
+
+# What are the 70bp ITRs exactly?
+
+```{r}
+out <- file("genomes/episome_refs/70bp_itrs.cap9.names")
+
+df_add %>% 
+  dplyr::filter(
+    itr_length > 60, 
+    itr_length < 80,
+    qstart < 1000
+  ) %>% 
+  arrange(itr_length) %>% 
+  distinct(qseqid) %>% pull() %>% 
+  writeLines(out)
+close(out)
+```
+
+```{bash}
+cat genomes/episome_refs/9*.fasta > genomes/episome_refs/allcap9.fasta
+
+seqtk subseq genomes/episome_refs/allcap9.fasta genomes/episome_refs/70bp_itrs.cap9.names > genomes/episome_refs/70bp_itrs.cap9.fasta
+
+awk '{ print $1, 650, 750}' genomes/episome_refs/70bp_itrs.cap9.names > genomes/episome_refs/70bp_itrs.cap9.names.regions.bed
+
+seqtk subseq genomes/episome_refs/70bp_itrs.cap9.fasta genomes/episome_refs/70bp_itrs.cap9.names.regions.bed > genomes/episome_refs/70bp_itrs.cap9.itr.fasta
+
+clustalo -i genomes/episome_refs/70bp_itrs.cap9.itr.fasta --auto --force --output-order=input-order -o genomes/episome_refs/70bp_itrs.cap9.itr.MSA
+```
+
+Just by eye, it looks like this generally:
+
+D-A-A'-D'
+
+The border between A and A' is not clearly defined.
+
+
+# Localisation by flanking regions
+
+```{r}
+# number of reads in all AAV9 reads
+df %>% 
+  dplyr::filter(str_detect(mouse, "9_")) %>% 
+  distinct(qseqid) %>% 
+  nrow()
+  
+df_add %>% 
+  dplyr::filter(capsid == "9") %>% 
+  distinct(qseqid) %>% nrow()
+```
+
+There are 2263 reads of all AAV9 samples. Out of which I can detect a proper D-sequences in 1463 reads. That is 65% of all reads. Can I get a better recovery when I do not use ITR sequences for determining the ITR?
+
+## blast
+
+```{bash}
+for file in genomes/episome_refs/?_*_?.ORIENT.fasta
+do
+  n=$(basename ${file/.fasta/})
+  blastn -query $file -subject genomes/itr.04.fasta -gapopen 0 -gapextend 2 -word_size 9 -reward 1 -penalty -2 -outfmt 6 > data/aligned.ITRparts/${n}.FLANK.blastn.tsv
+done
+```
+
+## data
+
+```{r}
+p <- "data/aligned.ITRparts/"
+
+dff <- lapply(list.files(p, pattern = ".ORIENT.FLANK.blastn.tsv"), function(file){
+  name <- str_split(file, "\\.")[[1]][1]
+  tmp <- read_delim(paste0(p, file), col_names = str_split("qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore", " ")[[1]]) %>% 
+    mutate(mouse = name)
+  return(tmp)
+}) %>% bind_rows() %>% 
+  separate(mouse, c("capsid", "weeks", "repl")) %>% 
+  unite("mouse", c(capsid, weeks)) %>% 
+  select(-repl)
+
+dff %>% head()
+
+dff %>% 
+  dplyr::filter(qseqid == "2776446e-44a8-4d05-ba2d-66731e4c43d2")
+```
+## size
+
+```{r}
+dff_info <- dff %>% 
+  dplyr::filter(evalue < 0.05) %>%
+  select(qseqid, sseqid, qstart, mouse) %>% 
+  group_by(qseqid, sseqid) %>% 
+  mutate(rown = row_number(), sseqid = str_c(sseqid, rown, sep = "_")) %>% 
+  select(-rown) %>% 
+  pivot_wider(names_from = sseqid, values_from = qstart) %>% 
+  mutate(itr_length = abs(flank_stuffer_1-flank_cmv_1)) %>% 
+  ungroup()
+
+dff_info %>% head()
+
+dff_info %>% 
+  dplyr::filter(str_detect(mouse, "9_"), itr_length < 1000) %>% 
+  select(itr_length) %>% 
+  drop_na() %>% 
+  nrow()
+
+dff_info %>% 
+  dplyr::filter(str_detect(mouse, "9_"), itr_length < 1000) %>% 
+  mutate(itr_length = itr_length - 112 - 90) %>% 
+  ggplot(aes(x=itr_length)) +
+  geom_histogram(aes(y=..density..), binwidth=5) +
+  geom_density(adjust = .5, linewidth=1.66, colour="red") +
+  xlim(0, 500)
+
+```
+
+Now I get 1824 reads where I can find the ITR region.
+
+## Localisation - ranked
+
+```{r}
+dff_add <- merge(
+  dff %>% 
+    dplyr::filter(evalue < 0.05),
+  dff_info %>% 
+    select(qseqid, itr_length),
+  by = "qseqid") %>% 
+  separate(mouse, c("capsid", "weeks")) %>% 
+  dplyr::filter(capsid == "9") %>% 
+  arrange(itr_length, qseqid, qstart) %>% 
+  dplyr::filter(itr_length < 1000)
+
+# make a rank number instead of the sequence names
+size_rank <- dff_add %>% 
+  distinct(qseqid) %>% 
+  mutate(n = row_number())
+# add the number to the df
+dff_add <- merge(dff_add, size_rank, by="qseqid") %>% 
+  mutate(sseqid = ifelse((sstart - send)<0, str_c(sseqid, "_fwd"), str_c(sseqid, "_rev"))) %>% 
+  mutate(sseqid = ifelse(str_detect(sseqid, "B-loop"), "B-loop", sseqid)) %>% 
+  mutate(sseqid = ifelse(str_detect(sseqid, "C-loop"), "C-loop", sseqid)) %>% 
+  mutate(sseqid = ifelse(str_detect(sseqid, "flank_stuffer"), "flank_stuffer", sseqid)) %>%
+  mutate(sseqid = ifelse(str_detect(sseqid, "flank_cmv"), "flank_cmv", sseqid))
+
+
+
+dff_add %>% 
+  #mutate(sseqid = factor(sseqid, levels = c("A_rev", "A_fwd", "B-loop", "C-loop", "D_rev", "D_fwd"))) %>% 
+  ggplot() +
+  geom_point(aes(x=qstart, y=n, color=sseqid), size=.5) +
+  theme(axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank()) +
+  xlim(500, 1200) +
+  scale_color_brewer(palette = "Paired") +
+  theme_bw()
+```
+
+While I do gather more reads with this method the overall picture looks the same. The previous version is also more easily understandable, so I think I will stay with that.

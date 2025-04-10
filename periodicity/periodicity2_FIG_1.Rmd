@@ -1,0 +1,475 @@
+# Dependoparvovirus separately
+
+The previous plots of AAV were all made in python and a _slightly_ different methodology. Here I am doing the same sine fitting method for the original 13 AAV serotypes - every sequence individually.
+
+# Random genome fragments
+
+I want to show in the paper that the dinucleotide periodicity in AAV is very strong because you can already see it in 4kb sequence stretches. I take 13 times 4.5kb stretches from yeast to compare with. These are all from only Coding sequences of yeast strain S288C.
+
+## get all the yeast sequences in one string
+
+```{bash}
+awk '!/^>/ {printf "%s",$0} END {print ""}' ../results/dinucleotide_periodicity_AAVserotypes/aav13/S288C.size.rmdup.fasta \
+> ../results/dinucleotide_periodicity_AAVserotypes/aav13/S288C.allinone.fasta
+
+awk '!/^>/ {printf "%s",$0} END {print ""}' ../sequences/human/CDS_human.size.rmdup.fasta \
+> ../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_human.allinone.fasta
+
+#celegans
+awk '!/^>/ {printf "%s",$0} END {print ""}' ../sequences/celegans/celegans.WBcel235.CDS.size.rmdup.fasta \
+> ../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_celegans.allinone.fasta
+```
+
+## get 13 random sequences
+
+```{r}
+library(Biostrings)
+library(tidyverse)
+
+get_random_sequences <- function(allinone, output, region_name_prefix, max_number, number_sequences = 13, sequences_length = 4500, add_reverse = TRUE, seed){
+  set.seed(seed)
+  starts <- sample(seq(max_number), number_sequences) # get random start positions
+  ends <- starts + sequences_length # add the end position
+  y <- readr::read_file(allinone)
+  rnd_sequences <- rep(0, number_sequences) # init random sequences
+  i <- 1
+  for (coord in paste(starts, ends)){
+    start_end <- str_split(coord, " ")[[1]]
+    rnd_sequences[i] <- substring(y, start_end[1], start_end[2])
+    i <- i + 1
+  }
+  rnd_sequences <- DNAStringSet(rnd_sequences) # DNA string set
+  if (add_reverse){
+    rnd_sequences <- DNAStringSet(c(rnd_sequences, reverseComplement(rnd_sequences)))
+    names(rnd_sequences) <- c(paste(region_name_prefix, starts, ends, sep="_"), paste(region_name_prefix, starts, ends, "RC", sep="_"))
+  } else {
+    names(rnd_sequences) <- paste(region_name_prefix, starts, ends, sep="_") # define names
+  }
+  Biostrings::writeXStringSet(rnd_sequences, output) # write output
+}
+
+# YEAST
+get_random_sequences(
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/S288C.allinone.fasta",
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/S288C.rndsequences.1.fasta",
+  "yeast-CDS-S288C", 7e6, seed=19940902
+)
+
+# HUMAN
+get_random_sequences(
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_human.allinone.fasta",
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_human.rndsequences.1.fasta",
+  "human-CDS-hg19", 5.3e7, seed=19940902
+)
+
+# celegans
+get_random_sequences(
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_celegans.allinone.fasta",
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_celegans.rndsequences.1.fasta",
+  "celegans-CDS", 9e6, seed=19940902
+)
+
+# completely random DNA
+get_random_sequences(
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/rndDNA.allinone.fasta",
+  "../results/dinucleotide_periodicity_AAVserotypes/aav13/rndDNA.rndsequences.1.fasta",
+  "random-DNA", 6.5e6, seed=19940902
+)
+```
+
+
+```{bash}
+# YEAST
+Rscript Periodicity6_single.noRC.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/S288C.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/ \
+Yeast \
+S288C
+
+Rscript Periodicity6_single.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/S288C.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/ \
+Yeast \
+S288C
+
+# HUMAN
+Rscript Periodicity6_single.noRC.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_human.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/ \
+mammalia \
+human
+
+Rscript Periodicity6_single.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_human.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/ \
+mammalia \
+human
+
+# celegans
+Rscript Periodicity6_single.noRC.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_celegans.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/ \
+nematoda \
+celegans
+
+Rscript Periodicity6_single.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/CDS_celegans.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/ \
+nematoda \
+celegans
+
+
+# completely random DNA
+Rscript Periodicity6_single.noRC.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/rndDNA.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/ \
+rndDNA \
+rndDNA
+
+Rscript Periodicity6_single.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/rndDNA.rndsequences.1.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/ \
+rndDNA \
+rndDNA
+
+```
+
+# reverse separate
+
+## do the calc
+
+```{bash}
+Rscript Periodicity6_single.noRC.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/AAV_serotypes.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/ \
+Parvoviridae \
+dependoparvovirus
+```
+
+## Read data
+
+```{r}
+library(tidyverse)
+library(ggExtra)
+library(ggpubr)
+library(ggrepel)
+
+df_aav <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/dependoparvovirus.SINGLE.HIST.csv") %>% select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"), species = "AAV")
+
+df_yeast <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/S288C.SINGLE.HIST.csv") %>% select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"), species = "yeast")
+
+df_human <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/human.SINGLE.HIST.csv") %>% select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"), species = "human")
+
+df_rnd <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/rndDNA.SINGLE.HIST.csv") %>% select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"), species = "random_DNA")
+
+df_celegans <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/celegans.SINGLE.HIST.csv") %>% select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"), species = "c. elegans")
+
+df.noRC <- rbind(df_aav, df_yeast, df_human, df_rnd, df_celegans) %>% 
+  mutate(species = factor(species, levels = c("AAV", "c. elegans", "human", "yeast", "random_DNA")))
+```
+
+## Curves
+
+```{r}
+df_aav %>% 
+  gather(-c(distance, dinucleotide, sequence, orientation, species), key="curve", value="value") %>% 
+  dplyr::filter(dinucleotide %in% c("YY", "SS", "WW", "RR")) %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("YY", "SS", "WW", "RR"))) %>% 
+  ggplot(aes(x=distance, y=value, color=curve, unit=sequence)) +
+  geom_line(alpha=.5) +
+  facet_grid(orientation~dinucleotide) +
+  xlim(0, 50)
+
+df_aav %>% 
+  dplyr::filter(dinucleotide %in% c("YY", "SS", "WW", "RR")) %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("YY", "SS", "WW", "RR"))) %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3, color="blue") +
+  facet_grid(orientation~dinucleotide) +
+  theme(text = element_text(size = 15)) +
+  theme_bw() +
+  xlim(0, 50)
+
+df_aav %>% 
+  dplyr::filter(dinucleotide %in% c("GG", "AA", "TT", "CC")) %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("GG", "AA", "TT", "CC"))) %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3, color="blue") +
+  facet_grid(orientation~dinucleotide) +
+  theme(text = element_text(size = 15)) +
+  theme_bw() +
+  xlim(0, 50)
+
+df_aav %>% 
+  dplyr::filter(dinucleotide %in% c("YY", "RR")) %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("YY", "SS", "WW", "RR"))) %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3, color="blue") +
+  facet_grid(orientation~dinucleotide) +
+  xlim(0, 50) +
+  theme(text = element_text(size=15)) +
+  theme_bw()
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_separate.aav.png", width = 4, height = 3)
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_separate.aav.svg", width = 4, height = 3)
+
+
+df_aav %>% 
+  dplyr::filter(dinucleotide %in% c("YY", "SS", "WW", "RR")) %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("YY", "SS", "WW", "RR"))) %>% 
+  ggplot(aes(x=distance, y=pred_alg)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3, color="blue") +
+  facet_grid(orientation~dinucleotide) +
+  xlim(0, 50)
+```
+
+```{r}
+fwd_p1 <- df.noRC %>% 
+  dplyr::filter(dinucleotide %in% c("GG", "AA", "TT", "CC"), orientation == "forward") %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("GG", "AA", "TT", "CC"))) %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3) +
+  facet_grid(species~dinucleotide) +
+  theme(text = element_text(size = 15)) +
+  theme_bw() +
+  xlim(0, 50) +
+  ggtitle("forward")
+
+rev_p1 <-df.noRC %>% 
+  dplyr::filter(dinucleotide %in% c("GG", "AA", "TT", "CC"), orientation == "reverse") %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("GG", "AA", "TT", "CC"))) %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3) +
+  facet_grid(species~dinucleotide) +
+  theme(text = element_text(size = 15)) +
+  theme_bw() +
+  xlim(0, 50) +
+  ggtitle("reverse")
+
+fwd_p2 <- df.noRC %>% 
+  dplyr::filter(dinucleotide %in% c("YY", "SS", "WW", "RR"), orientation == "forward") %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("YY", "SS", "WW", "RR"))) %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3) +
+  facet_grid(species~dinucleotide) +
+  theme(text = element_text(size = 15)) +
+  theme_bw() +
+  xlim(0, 50) +
+  ggtitle("forward")
+
+rev_p2 <- df.noRC %>% 
+  dplyr::filter(dinucleotide %in% c("YY", "SS", "WW", "RR"), orientation == "reverse") %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("YY", "SS", "WW", "RR"))) %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit=sequence), color="grey", alpha=.5) +
+  geom_smooth(method = "loess", span=.3) +
+  facet_grid(species~dinucleotide) +
+  theme(text = element_text(size = 15)) +
+  theme_bw() +
+  xlim(0, 50) +
+  ggtitle("reverse")
+
+ggarrange(fwd_p1, rev_p1)
+ggarrange(fwd_p2, rev_p2)
+
+
+```
+
+
+## GOF
+
+```{r}
+df_aav_curve <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single.noRC/dependo.SINGLE.CURVE.csv") %>% select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"))
+
+df_aav_curve %>% 
+  dplyr::filter(period < 100, dinucleotide %in% c("YY", "SS", "WW", "RR")) %>% 
+  ggplot(aes(x=period, y=1/nGOF, color=dinucleotide, label=sequence)) +
+  geom_point() +
+  facet_wrap(~orientation) +
+  geom_text(color="black", size=2)
+
+df_aav_curve %>% 
+  dplyr::filter(period < 100, dinucleotide %in% c("YY", "RR")) %>% 
+  ggplot(aes(x=period, y=1/nGOF, color=dinucleotide, label=sequence)) +
+  geom_point() +
+  facet_grid(dinucleotide~orientation) +
+  geom_text(color="black", size=2)
+
+```
+
+The only pattern that is visible on both strands is the pattern for YY/RR.
+
+The pattern for WW and SS are of course the same on the opposite strand, but they do not show the same periodicity as YY/RR. WW has a very deep valley between peaks at 15 and 30 but does not have a peak at 45.
+
+The single GG dinucleotide has a strong periodicity on one strand but not on the other. But the same is not true for SS. 
+
+The analysis of GOF for the single sequences does not portray YY/RR different from all the others.
+
+# analyse forward and reverse together
+
+```{bash}
+Rscript Periodicity6_single.R \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/AAV_serotypes.fasta    \
+../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/ \
+Parvoviridae \
+dependoparvovirus
+```
+
+## Read Data
+
+```{r}
+library(tidyverse)
+library(ggExtra)
+library(ggpubr)
+library(ggrepel)
+
+df_aav_s <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/dependoparvovirus.SINGLE.HIST.csv") %>%
+  select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward")) %>% 
+  dplyr::filter(dinucleotide != "RR", orientation == "forward") %>% 
+  mutate(
+    orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"),
+    dinucleotide = ifelse(dinucleotide %in% c("RR", "YY"), "YY/RR", dinucleotide),
+    organism = "AAV")
+
+df_yeast_s <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/S288C.SINGLE.HIST.csv") %>%
+  select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward")) %>% 
+  dplyr::filter(dinucleotide != "RR", orientation == "forward") %>% 
+  mutate(
+    orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"),
+    dinucleotide = ifelse(dinucleotide %in% c("RR", "YY"), "YY/RR", dinucleotide), 
+    organism = "yeast")
+
+df_human_s <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/human.SINGLE.HIST.csv") %>%
+  select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward")) %>% 
+  dplyr::filter(dinucleotide != "RR", orientation == "forward") %>% 
+  mutate(
+    orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"),
+    dinucleotide = ifelse(dinucleotide %in% c("RR", "YY"), "YY/RR", dinucleotide), 
+    organism = "human")
+
+df_celegans_s <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/celegans.SINGLE.HIST.csv") %>%
+  select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward")) %>% 
+  dplyr::filter(dinucleotide != "RR", orientation == "forward") %>% 
+  mutate(
+    orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"),
+    dinucleotide = ifelse(dinucleotide %in% c("RR", "YY"), "YY/RR", dinucleotide), 
+    organism = "c. elegans")
+
+df_rnd_s <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/rndDNA.SINGLE.HIST.csv") %>%
+  select(-...1) %>% 
+  mutate(orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward")) %>% 
+  dplyr::filter(dinucleotide != "RR", orientation == "forward") %>% 
+  mutate(
+    orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"),
+    dinucleotide = ifelse(dinucleotide %in% c("RR", "YY"), "YY/RR", dinucleotide), 
+    organism = "random DNA")
+
+df.RC <- rbind(df_aav_s, df_yeast_s, df_human_s, df_rnd_s, df_celegans_s) %>% 
+  mutate(species = factor(organism, levels = c("AAV", "c. elegans", "human", "yeast", "random DNA"))) %>% 
+  select(-organism)
+```
+
+## Curves
+
+```{r}
+df_aav_s %>% 
+  gather(-c(distance, dinucleotide, sequence, orientation, organism), key="curve", value="value") %>% 
+  dplyr::filter(dinucleotide %in% c("YY/RR", "SS", "WW")) %>% 
+  mutate(dinucleotide = factor(dinucleotide, levels = c("YY/RR", "SS", "WW"))) %>% 
+  ggplot(aes(x=distance, y=value, color=curve, unit=sequence)) +
+  geom_line(alpha=.5) +
+  facet_grid(orientation~dinucleotide) +
+  xlim(0, 50)
+
+df_aav_s %>% 
+  gather(-c(distance, dinucleotide, sequence, orientation, organism), key="curve", value="value") %>% 
+  dplyr::filter(dinucleotide == "YY/RR") %>% 
+  ggplot(aes(x=distance, y=value, unit=sequence, color=curve)) +
+  geom_line(alpha=.4, linewidth=1) +
+  xlim(0, 50)
+
+df_aav_s %>% 
+  dplyr::filter(dinucleotide == "YY/RR") %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit = sequence), alpha=.8, color="grey") +
+  geom_smooth(method = "loess", span=.3, color="blue", linewidth=2) +
+  xlim(0, 50) +
+  theme_bw() +
+  theme(text = element_text(size=15))
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_joined.aav13.png", width=5, height=4)
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_joined.aav13.svg", width=5, height=4)
+
+
+df_aav_s %>% 
+  dplyr::filter(dinucleotide == "YY/RR") %>% 
+  ggplot(aes(x=distance, y=pred_alg)) +
+  geom_line(aes(unit = sequence), alpha=.8, color="grey") +
+  xlim(0, 50) +
+  ggtitle("smoothed best fit") +
+  theme(text = element_text(size=15)) +
+  theme_bw()
+```
+
+```{r}
+df.RC %>%
+  dplyr::filter(dinucleotide %in% c("YY/RR", "SS", "WW"), species != "yeast") %>% 
+  ggplot(aes(x=distance, y=norm_counts)) +
+  geom_line(aes(unit = sequence), alpha=.8, color="grey") +
+  geom_smooth(aes(color = species), method = "loess", span=.3, show.legend = F) +
+  xlim(0, 50) +
+  theme(text = element_text(size=15)) +
+  theme_bw() +
+  facet_grid(species~dinucleotide) +
+  scale_color_manual(values = c(
+    "AAV" = "blue",
+    "c. elegans" = "darkgreen",
+    "human" = "brown",
+    "yeast" = "darkgreen",
+    "random DNA" = "black"
+  ))
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_joined.comparison.png", width = 5, height = 6)
+ggsave("../results/dinucleotide_periodicity_AAVserotypes/aav13/plots/fwd_rev_joined.comparison.svg", width = 5, height = 6)
+```
+
+
+## GOF
+
+```{r}
+df_aav_curve_s <- read_csv("../results/dinucleotide_periodicity_AAVserotypes/aav13/curve_fit_single/dependo.SINGLE.CURVE.csv") %>% select(-...1) %>% 
+  dplyr::filter(dinucleotide != "RR") %>% 
+  mutate(
+    orientation = ifelse(str_detect(sequence, "RC"), "reverse", "forward"),
+    dinucleotide = ifelse(dinucleotide %in% c("RR", "YY"), "YY/RR", dinucleotide))
+
+df_aav_curve_s %>% 
+  dplyr::filter(period < 100, dinucleotide %in% c("YY/RR", "SS", "WW"), orientation == "forward") %>% 
+  ggplot(aes(x=period, y=1/nGOF, color=dinucleotide, label=sequence)) +
+  geom_point() +
+  geom_text(color="black", size=2)
+```
+
+
+
+
+
+
+
+
+
+

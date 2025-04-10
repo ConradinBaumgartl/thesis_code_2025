@@ -1,0 +1,148 @@
+# Experiment setup
+
+Mice from the longterm experiment of March 2024. They were injected with ss CMV-YFP-BGHpA either packaged in AAV2 or AAV9. Here I took DNA from whole liver DNA extractions and enriched for episomal DNA to sequence directly on nanopore.
+
+Used 32 µL of liver DNA, regardless of concentration
+
+| mouse    | DNA concentration (ng/µL) | total DNA input (µg) | BC |
+|----------|---------------------------|----------------------|----|
+| 221      | 114                       | 3.6                  | 1  |
+| 222      | 291                       | 9.3                  | 2  |
+| 223      | 102                       | 3.2                  | 3  |
+| 224      | 187                       | 6.0                  | 4  |
+| 921      | 221                       | 7.0                  | 5  |
+| 922      | 252                       | 8.1                  | 6  |
+| 923      | 244                       | 7.8                  | 7  |
+| 924      | 291                       | 9.3                  | 8  |
+| 261      | 411                       | 13.1                 | 9  |
+| 262      | 160                       | 5.1                  | 10 |
+| 263      | 218                       | 7.0                  | 11 |
+| 264      | 79                        | 2.5                  | 12 |
+| 961      | 85                        | 2.7                  | 13 |
+| 962      | 107                       | 3.4                  | 14 |
+| 963      | 245                       | 7.8                  | 15 |
+| 964      | 210                       | 6.7                  | 16 |
+| 2121     | 69                        | 2.2                  | 17 |
+| 2122     | 67                        | 2.1                  | 18 |
+| 2123     | 40                        | 1.3                  | 19 |
+| 2124     | 62                        | 1.9                  | 20 |
+| 9121(*)  | 99                        | 3.2                  | 21 |
+| 9122(*)  | 98                        | 2.8                  | 22 |
+| 9123     | 109                       | 3.5                  | 23 |
+| 9124     | 129                       | 4.1                  | 24 |
+
+
+* see library preparation
+
+
+## Protocol
+
+The general protocol follows the same steps as I had established in Summer of 2022. See episome_003. In the most recent experiments (episome005; december 2022) I had used the Transposase rapid protocol, not ligation.
+
+1. RecBCD digestion
+
+As before I also add a non-cutter to help RecBCD digest gDNA.
+
+* 32 µL DNA
+
+* 5 µL Cutsmart
+
+* 10 µL 10 mM ATP
+
+* 2 µL RecBCD (NEB)
+
+* 1µL EcoRI-HF (NEB)
+
+37°C for 1h (2h for all 6-week samples; middle number(s) in the mouse nr). Cleaned 1:1 with Ampure beads, eluted in 19 µL nuclease free water.
+
+
+2. Linearisation NotI-HF
+
+* 17 µL episome enriched DNA
+
+* 2 µL Cutsmart
+
+* 1 µL NotI-HF
+
+37°C for 20 minutes (1h for all 6-week samples). Cleaned 1:1 with Ampure beads, eluted in 15 µL nuclease free water.
+
+
+3. Library preparation
+
+During library preparation at one time accidentally pipetted sample 9121 and 9122 into the same container. Separated again, but now those 2 are a mix of each other.
+
+Used the SQK-NBD114-24 kit with the gDNA protocol to generate sequencing libraries. Loaded the entire 12 µL of the generated library on a new R10 flowcell.
+
+
+# Sequencing
+
+Sequenced overnight from 10.9.2024 - 11.9.2024.
+
+Pores quickly deteriorated. In the morning after the experiment only ~10 pores were left actively sequencing.
+
+# Rebasecalling
+
+Rebasecalling with the Super Accurate (sup) model while also looking for modifications using the latest dorado model.
+
+The base modification data is thus stored in the created bam file under its specific tag.
+
+```{bash}
+in=/var/lib/minknow/data/episome_006/
+out=~/sds-hd/sd21j005/conradin/raw_data/ONT/conradin_baumgartl/episome_006/reb/LTmouse.combined.test.bam
+sudo dorado basecaller --min-qscore 8 --emit-moves --kit-name SQK-NBD114-24 -r sup,5mCG_5hmCG $in > $out
+
+dorado summary $out > ${out/.bam/.SUMMARY.tsv}
+```
+
+
+# Rebasecalling Summary Plots
+
+```{r}
+library(tidyverse)
+seq_sum <- read_delim("~/sds-hd/sd21j005/conradin/raw_data/ONT/conradin_baumgartl/episome_006/reb/LTmouse.combined.SUMMARY.tsv")
+```
+
+## Quality
+
+```{r}
+seq_sum %>% 
+  dplyr::filter(barcode != "unclassified") %>% 
+  ggplot(aes(x=mean_qscore_template)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1) +
+  ggtitle("All reads")
+
+seq_sum %>% 
+  dplyr::filter(barcode != "unclassified", sequence_length_template > 3000, sequence_length_template < 5000) %>% 
+  ggplot(aes(x=mean_qscore_template)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1) +
+  ggtitle("Only transgene size")
+
+seq_sum %>% 
+  dplyr::filter(barcode != "unclassified", sequence_length_template > 3000, sequence_length_template < 5000) %>% 
+  ggplot(aes(x=mean_qscore_template)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1) +
+  facet_wrap(~barcode) +
+  ggtitle("Only transgene size - barcodes")
+```
+
+There are 2 distinct quality peaks for the episomally sized reads of all barcodes. Better select only reads above 17 mean Phred.
+
+## Length distribution
+
+```{r}
+seq_sum %>%
+  ggplot(aes(x=sequence_length_template)) +
+  geom_histogram(binwidth=10) +
+  facet_wrap(~barcode, scales = "free") +
+  xlim(0, 8000) +
+  ggtitle("All reads")
+
+seq_sum %>% dplyr::filter(sequence_length_template < 6000, sequence_length_template > 2000) %>% 
+  ggplot(aes(x=sequence_length_template)) +
+  geom_histogram(binwidth=10) +
+  facet_wrap(~barcode, scales = "free") +
+  xlim(2000, 6000) +
+  ggtitle("Only Large Reads")
+```
+
+There are very little reads a the size of the transgene for all AAV2 barcodes. The AAV9 barcodes work pretty well, there is always a distinct peak at 3.8 kb. This again points to AAV2 not efficiently forming episomal DNA, even in the liver.

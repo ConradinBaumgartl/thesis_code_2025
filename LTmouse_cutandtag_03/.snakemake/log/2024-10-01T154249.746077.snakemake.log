@@ -1,0 +1,565 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Job stats:
+job             count    min threads    max threads
+------------  -------  -------------  -------------
+all                 1              1              1
+bam_convert        24              1              1
+bowtie_align        9              1              1
+fastqc              1              1              1
+multiqc             1              1              1
+total              36              1              1
+
+Select jobs to execute...
+
+[Tue Oct  1 15:42:50 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-12-3_liver.unsorted.bam
+    jobid: 30
+    reason: Forced execution
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  1 15:42:50 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam
+    jobid: 39
+    reason: Forced execution
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  1 15:42:50 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-12-3_liver.unsorted.bam
+    jobid: 45
+    reason: Forced execution
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  1 15:42:50 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam
+    jobid: 18
+    reason: Forced execution
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 16:42:31 2024]
+Finished job 45.
+1 of 36 steps (3%) done
+Removing temporary output data/alignment/cmv/K27ac_9-12-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 16:42:32 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-12-2_liver.sam
+    output: data/alignment/cmv/K27ac_2-12-2_liver.unsorted.bam
+    jobid: 41
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-2_liver.unsorted.bam
+    wildcards: genome=cmv, sample=K27ac_2-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 17:25:31 2024]
+Finished job 39.
+2 of 36 steps (6%) done
+Removing temporary output data/alignment/cmv/K27ac_9-2-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 17:25:32 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-12-2_liver.sam
+    output: data/alignment/cmv/K27ac_9-12-2_liver.unsorted.bam
+    jobid: 44
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-2_liver.unsorted.bam
+    wildcards: genome=cmv, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 17:38:23 2024]
+Finished job 41.
+3 of 36 steps (8%) done
+Removing temporary output data/alignment/cmv/K27ac_2-12-2_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 17:38:24 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-12-1_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-1_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-12-1_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-12-1_liver.log, data/alignment/cmv/K27ac_9-12-1_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-12-1_liver.log
+    jobid: 27
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-1_liver.sam, data/alignment/cmv_mouse/K27ac_9-12-1_liver.sam
+    wildcards: sample=K27ac_9-12-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 17:51:02 2024]
+Finished job 30.
+4 of 36 steps (11%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 17:51:03 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-12-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-12-3_liver.log, data/alignment/cmv/K27ac_2-12-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-12-3_liver.log
+    jobid: 25
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam, data/alignment/cmv/K27ac_2-12-3_liver.sam
+    wildcards: sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 18:07:41 2024]
+Finished job 18.
+5 of 36 steps (14%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 18:07:42 2024]
+rule fastqc:
+    input: data/raw_data/K27ac_2-6-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-6-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-1_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-2_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-1_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-2_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-1_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-2_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-1_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-2_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-6-3_liver_R2.fastq.gz, data/raw_data/K27ac_9-6-3_liver_R2.fastq.gz, data/raw_data/K27ac_2-2-1_liver_R2.fastq.gz, data/raw_data/K27ac_2-2-2_liver_R2.fastq.gz, data/raw_data/K27ac_2-2-3_liver_R2.fastq.gz, data/raw_data/K27ac_9-2-1_liver_R2.fastq.gz, data/raw_data/K27ac_9-2-2_liver_R2.fastq.gz, data/raw_data/K27ac_9-2-3_liver_R2.fastq.gz, data/raw_data/K27ac_2-12-1_liver_R2.fastq.gz, data/raw_data/K27ac_2-12-2_liver_R2.fastq.gz, data/raw_data/K27ac_2-12-3_liver_R2.fastq.gz, data/raw_data/K27ac_9-12-1_liver_R2.fastq.gz, data/raw_data/K27ac_9-12-2_liver_R2.fastq.gz, data/raw_data/K27ac_9-12-3_liver_R2.fastq.gz
+    output: data/raw_data/QC/K27ac_2-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-3_liver_R2_fastqc.html
+    jobid: 2
+    benchmark: data/raw_data/QC/logs/fastqc_benchmark.txt
+    reason: Missing output files: data/raw_data/QC/K27ac_2-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R1_fastqc.html
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 18:15:28 2024]
+Finished job 44.
+6 of 36 steps (17%) done
+Removing temporary output data/alignment/cmv/K27ac_9-12-2_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 18:15:30 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-2-2_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-2_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-2-2_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-2-2_liver.log, data/alignment/cmv/K27ac_9-2-2_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-2-2_liver.log
+    jobid: 17
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-2_liver.sam, data/alignment/cmv_mouse/K27ac_9-2-2_liver.sam
+    wildcards: sample=K27ac_9-2-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 19:32:40 2024]
+Finished job 2.
+7 of 36 steps (19%) done
+Select jobs to execute...
+
+[Tue Oct  1 19:32:40 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-2-1_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-1_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-2-1_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-2-1_liver.log, data/alignment/cmv/K27ac_9-2-1_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-2-1_liver.log
+    jobid: 15
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-1_liver.sam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.sam
+    wildcards: sample=K27ac_9-2-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 21:29:40 2024]
+Finished job 27.
+8 of 36 steps (22%) done
+Select jobs to execute...
+
+[Tue Oct  1 21:29:42 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-12-1_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-12-1_liver.unsorted.bam
+    jobid: 26
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-1_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-12-1_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-1_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 21:47:37 2024]
+Finished job 25.
+9 of 36 steps (25%) done
+Select jobs to execute...
+
+[Tue Oct  1 21:47:41 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam
+    jobid: 24
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 22:20:21 2024]
+Finished job 17.
+10 of 36 steps (28%) done
+Select jobs to execute...
+
+[Tue Oct  1 22:20:23 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-2-2_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-2-2_liver.unsorted.bam
+    jobid: 16
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-2_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-2_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 22:45:11 2024]
+Finished job 15.
+11 of 36 steps (31%) done
+Select jobs to execute...
+
+[Tue Oct  1 22:45:12 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-2-1_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-2-1_liver.unsorted.bam
+    jobid: 14
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-1_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-1_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-1_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 00:51:16 2024]
+Finished job 26.
+12 of 36 steps (33%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-12-1_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 00:51:18 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-12-1_liver.sam
+    output: data/alignment/cmv/K27ac_9-12-1_liver.unsorted.bam
+    jobid: 43
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-1_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-12-1_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-12-1_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 00:51:49 2024]
+Finished job 24.
+13 of 36 steps (36%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-3_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 00:51:50 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-12-3_liver.sam
+    output: data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam
+    jobid: 42
+    reason: Missing output files: data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-12-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_2-12-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 01:04:53 2024]
+Finished job 16.
+14 of 36 steps (39%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-2_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 01:04:55 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-2-2_liver.sam
+    output: data/alignment/cmv/K27ac_9-2-2_liver.unsorted.bam
+    jobid: 38
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-2_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-2-2_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-2-2_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 01:14:27 2024]
+Finished job 14.
+15 of 36 steps (42%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-1_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 01:14:28 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-2-1_liver.sam
+    output: data/alignment/cmv/K27ac_9-2-1_liver.unsorted.bam
+    jobid: 37
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-1_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-2-1_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-2-1_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 02:36:52 2024]
+Finished job 42.
+16 of 36 steps (44%) done
+Removing temporary output data/alignment/cmv/K27ac_2-12-3_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 02:36:54 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-2-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-2-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-2-3_liver.log, data/alignment/cmv/K27ac_2-2-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-2-3_liver.log
+    jobid: 13
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-3_liver.sam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.sam
+    wildcards: sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 02:41:59 2024]
+Finished job 43.
+17 of 36 steps (47%) done
+Removing temporary output data/alignment/cmv/K27ac_9-12-1_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 02:42:01 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-2-2_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-2_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-2-2_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-2-2_liver.log, data/alignment/cmv/K27ac_2-2-2_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-2-2_liver.log
+    jobid: 11
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-2_liver.sam, data/alignment/cmv_mouse/K27ac_2-2-2_liver.sam
+    wildcards: sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 02:45:29 2024]
+Finished job 38.
+18 of 36 steps (50%) done
+Removing temporary output data/alignment/cmv/K27ac_9-2-2_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 02:45:30 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-2-1_liver_R1.fastq.gz, data/raw_data/K27ac_2-2-1_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-2-1_liver.log, data/alignment/cmv/K27ac_2-2-1_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-2-1_liver.log
+    jobid: 9
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam, data/alignment/cmv/K27ac_2-2-1_liver.sam
+    wildcards: sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 02:47:40 2024]
+Finished job 37.
+19 of 36 steps (53%) done
+Removing temporary output data/alignment/cmv/K27ac_9-2-1_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 02:47:41 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-6-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-6-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-6-3_liver.log, data/alignment/cmv/K27ac_9-6-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-6-3_liver.log
+    jobid: 7
+    reason: Missing output files: data/alignment/cmv/K27ac_9-6-3_liver.sam, data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam
+    wildcards: sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 04:53:48 2024]
+Finished job 7.
+20 of 36 steps (56%) done
+Select jobs to execute...
+
+[Wed Oct  2 04:53:48 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam
+    jobid: 6
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 05:42:52 2024]
+Finished job 11.
+21 of 36 steps (58%) done
+Select jobs to execute...
+
+[Wed Oct  2 05:42:56 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-2-2_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-2-2_liver.unsorted.bam
+    jobid: 10
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-2_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-2_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 06:16:23 2024]
+Finished job 13.
+22 of 36 steps (61%) done
+Select jobs to execute...
+
+[Wed Oct  2 06:16:27 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-2-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-2-3_liver.unsorted.bam
+    jobid: 12
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 06:33:01 2024]
+Finished job 9.
+23 of 36 steps (64%) done
+Select jobs to execute...
+
+[Wed Oct  2 06:33:02 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam
+    jobid: 8
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 07:09:49 2024]
+Finished job 6.
+24 of 36 steps (67%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-6-3_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 07:09:50 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-2-1_liver.sam
+    output: data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam
+    jobid: 34
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-2-1_liver.sam
+    wildcards: genome=cmv, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 08:11:30 2024]
+Finished job 10.
+25 of 36 steps (69%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-2_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 08:11:32 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-2-3_liver.sam
+    output: data/alignment/cmv/K27ac_2-2-3_liver.unsorted.bam
+    jobid: 36
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-2-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_2-2-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 08:57:01 2024]
+Finished job 12.
+26 of 36 steps (72%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-3_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 08:57:02 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-2-2_liver.sam
+    output: data/alignment/cmv/K27ac_2-2-2_liver.unsorted.bam
+    jobid: 35
+    reason: Missing output files: data/alignment/cmv/K27ac_2-2-2_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-2-2_liver.sam
+    wildcards: genome=cmv, sample=K27ac_2-2-2_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 09:11:15 2024]
+Finished job 34.
+27 of 36 steps (75%) done
+Removing temporary output data/alignment/cmv/K27ac_2-2-1_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 09:11:16 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-6-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam
+    jobid: 33
+    reason: Missing output files: data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-6-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-6-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 09:31:37 2024]
+Finished job 8.
+28 of 36 steps (78%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-1_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 09:31:39 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-6-3_liver_R1.fastq.gz, data/raw_data/K27ac_2-6-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-6-3_liver.log, data/alignment/cmv/K27ac_2-6-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-6-3_liver.log
+    jobid: 5
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam, data/alignment/cmv/K27ac_2-6-3_liver.sam
+    wildcards: sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 09:49:54 2024]
+Finished job 36.
+29 of 36 steps (81%) done
+Removing temporary output data/alignment/cmv/K27ac_2-2-3_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 09:49:56 2024]
+rule multiqc:
+    input: data/raw_data/QC/K27ac_2-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-3_liver_R2_fastqc.html, data/raw_data/stats
+    output: data/raw_data/QC/multiqc/multiqc_report.html
+    jobid: 1
+    benchmark: data/raw_data/QC/logs/multiqc_benchmark.log
+    reason: Missing output files: data/raw_data/QC/multiqc/multiqc_report.html; Input files updated by another job: data/raw_data/QC/K27ac_9-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-12-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-2-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-12-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-12-2_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-12-1_liver_R2_fastqc.html, data/raw_data/QC/K27ac_2-2-1_liver_R1_fastqc.html, data/raw_data/QC/K27ac_2-2-2_liver_R2_fastqc.html, data/raw_data/QC/K27ac_9-6-3_liver_R1_fastqc.html, data/raw_data/QC/K27ac_9-2-2_liver_R1_fastqc.html
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 09:57:40 2024]
+Finished job 1.
+30 of 36 steps (83%) done
+[Wed Oct  2 09:58:28 2024]
+Finished job 33.
+31 of 36 steps (86%) done
+Removing temporary output data/alignment/cmv/K27ac_9-6-3_liver.sam.
+[Wed Oct  2 10:01:02 2024]
+Finished job 35.
+32 of 36 steps (89%) done
+Removing temporary output data/alignment/cmv/K27ac_2-2-2_liver.sam.
+[Wed Oct  2 11:46:16 2024]
+Finished job 5.
+33 of 36 steps (92%) done
+Select jobs to execute...
+
+[Wed Oct  2 11:46:17 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam
+    jobid: 4
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+
+[Wed Oct  2 11:46:17 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_2-6-3_liver.sam
+    output: data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam
+    jobid: 32
+    reason: Missing output files: data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_2-6-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_2-6-3_liver
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 12:47:39 2024]
+Finished job 32.
+34 of 36 steps (94%) done
+Removing temporary output data/alignment/cmv/K27ac_2-6-3_liver.sam.
+[Wed Oct  2 13:00:34 2024]
+Finished job 4.
+35 of 36 steps (97%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-6-3_liver.sam.
+Select jobs to execute...
+
+[Wed Oct  2 13:00:36 2024]
+localrule all:
+    input: data/raw_data/QC/multiqc/multiqc_report.html, data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-2-2_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-2-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-2-2_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-12-1_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-12-2_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-12-1_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-12-2_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.unsorted.bam, data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam, data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam, data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam, data/alignment/cmv/K27ac_2-2-2_liver.unsorted.bam, data/alignment/cmv/K27ac_2-2-3_liver.unsorted.bam, data/alignment/cmv/K27ac_9-2-1_liver.unsorted.bam, data/alignment/cmv/K27ac_9-2-2_liver.unsorted.bam, data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam, data/alignment/cmv/K27ac_2-12-1_liver.unsorted.bam, data/alignment/cmv/K27ac_2-12-2_liver.unsorted.bam, data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam, data/alignment/cmv/K27ac_9-12-1_liver.unsorted.bam, data/alignment/cmv/K27ac_9-12-2_liver.unsorted.bam, data/alignment/cmv/K27ac_9-12-3_liver.unsorted.bam
+    jobid: 0
+    reason: Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-2-3_liver.unsorted.bam, data/alignment/cmv/K27ac_9-12-1_liver.unsorted.bam, data/alignment/cmv/K27ac_2-2-2_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-12-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-2-1_liver.unsorted.bam, data/raw_data/QC/multiqc/multiqc_report.html, data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam, data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-2-2_liver.unsorted.bam, data/alignment/cmv/K27ac_9-12-3_liver.unsorted.bam, data/alignment/cmv/K27ac_9-2-2_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam, data/alignment/cmv/K27ac_9-2-1_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-2-2_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_9-12-1_liver.unsorted.bam, data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam, data/alignment/cmv/K27ac_9-12-2_liver.unsorted.bam, data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam, data/alignment/cmv/K27ac_2-12-2_liver.unsorted.bam, data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam, data/alignment/cmv/K27ac_2-2-3_liver.unsorted.bam, data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam
+    resources: tmpdir=/tmp
+
+[Wed Oct  2 13:00:36 2024]
+Finished job 0.
+36 of 36 steps (100%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-6-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-6-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-2-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-12-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-12-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-12-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_2-6-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_9-6-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_2-2-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_2-2-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_2-2-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_9-2-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_9-2-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_2-12-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_2-12-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_2-12-3_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_9-12-1_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_9-12-2_liver.unsorted.bam.
+Removing temporary output data/alignment/cmv/K27ac_9-12-3_liver.unsorted.bam.
+Complete log: .snakemake/log/2024-10-01T154249.746077.snakemake.log

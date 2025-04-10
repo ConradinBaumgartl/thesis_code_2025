@@ -1,0 +1,90 @@
+# Mice
+
+Mice were injected with a single-stranded construct: CMV-eGFP-BGHpA_stuffer, packaged in either AAV2 or AAV9. 3 Groups of 9 mice each. In every group there are 4 mice each injected with 5e11 AAV2 and AAV9, as well as 1 mouse injected with PBS. Group 1 was sacrificed after 2 weeks, Group 2 after 6 weeks, and Group 3 12 weeks post injection.
+
+# Sample processing
+
+This is the second time of me doing this. The first time I had a problem with the Concanavalin A beads. The company providing the kit has sent a new vial of Concanavalin A beads with which the sample preparation has produced much better looking sequencing libraries already.
+
+## Samples 
+
+Used mice from the group sacrificed after 6 weeks. Samples from 2 mice each. E.g. 261 = AAV2, 6 weeks p.i., mouse nr 1
+
+* CT1: 261_liver
+* CT2: 262_liver
+* CT3_ 961_liver
+* CT4: 962_liver
+
+## Library preparation
+
+Followed the ActiveMotif Cut and Tag IT Tissue Kit to extract chromatin and perform the Cut and Tag method with the new ConA beads (see above).
+
+### Single nuclei
+
+Single nuclei suspensions were quantified with the Luna Cell Counter from the sc OPen lab and Denise/Pooja. Every sample of nuclei was diluted 1:10. Gating was set for Nuclei between 5 and 15µm. There was plenty of debris in the sample that might have been a side effect of the liver tissue. Used 2.5e5 nuclei in 375µL Buffer to bind to concanavalin beads and continue with the protocol.
+
+Additionally checked for nuclei binding: I counted nuclei after extraction and normalized to 250000 nuclei per reaction. I counted the supernatant again after binding to the ConA beads. The supernatant had drastically reduced levels of nuclei indicating efficient binding to the beads.
+
+| sample | volume | nuclei/mL | unbound | unbound percentage |
+|--------|--------|-----------|---------|--------------------|
+| 261    | 395 µL | 1.9e4     | 7500    | 3.0%               |
+| 262    | 395 µL | 2.1e4     | 8300    | 3.3%               |
+| 961    | 395 µL | 8.4e3     | 3300    | 1.3%               |
+| 962    | 395 µL | 3.5e4     | 13800   | 5.5%               |
+
+
+### PCR
+
+| sample      | i7 No | i7 sequence | i5 No | i5 sequence |
+|-------------|-------|-------------|-------|-------------|
+| CT1-261     | N701  | TAAGGCGA    | N501  | TAGATCGC    |
+| CT2-262     | N702  | CGTACTAG    | N502  | CTCTCTAT    |
+| CT3-961     | N703  | AGGCAGAA    | N503  | TATCCTCT    |
+| CT4-962     | N704  | TCCTGAGC    | N504  | AGAGTAGA    |
+
+14 instead of 12 cycles of amplification.
+
+Cleaned according to protocol.
+
+
+## Library QC
+
+Ran one bioanalyzer 1000 DNA Chip with the amplified and cleaned libraries. Good size distribution + concentration. The values were very similar in all samples therefor I pooled 10 µL each in a new tube and cleaned them 1:1 with 40µL AMPure beads. Final pool eluted in 20 µL and put again through a bioanalyzer 1000 DNA chip.
+
+
+| sample | ng/µL | mean size bp | fmol/µL |
+|--------|-------|--------------|---------|
+| 261    | 7.88  | 339          | 35.3    |
+| 262    | 7.70  | 342          | 34.1    |
+| 961    | 8.05  | 331          | 36.8    |
+| 962    | 7.98  | 330          | 36.6    |
+| pool   | 10.07 | 333          | 45.8    |
+
+The pool was handed to David Ibberson who diluted the sample according to the illumina workflow.
+
+# Sequencing
+
+Sequencing was performed on a NextSeq2000 with the NextSeq™ 1000/2000 P1 XLEAP-SBS™ Reagent Kit (100 Cycles).
+
+Sequencing run started on 02.08.2024
+
+## Raw data
+
+After demultiplexing I got 122 million reads in total, which is above the 100 million reads that are to be expected in the P1 kit.
+
+61bp paired end
+
+the seqkit stats file:
+
+| file                        | format | type | num_seqs   | sum_len       | min_len | avg_len | max_len |
+|-----------------------------|--------|------|------------|---------------|---------|---------|---------|
+| K27ac_261_liver_R1.fastq.gz | FASTQ  | DNA  | 28,968,589 | 1,767,083,929 | 61      | 61      | 61      |
+| K27ac_261_liver_R2.fastq.gz | FASTQ  | DNA  | 28,968,589 | 1,767,083,929 | 61      | 61      | 61      |
+| K27ac_262_liver_R1.fastq.gz | FASTQ  | DNA  | 26,389,482 | 1,609,758,402 | 61      | 61      | 61      |
+| K27ac_262_liver_R2.fastq.gz | FASTQ  | DNA  | 26,389,482 | 1,609,758,402 | 61      | 61      | 61      |
+| K27ac_961_liver_R1.fastq.gz | FASTQ  | DNA  | 33,387,019 | 2,036,608,159 | 61      | 61      | 61      |
+| K27ac_961_liver_R2.fastq.gz | FASTQ  | DNA  | 33,387,019 | 2,036,608,159 | 61      | 61      | 61      |
+| K27ac_962_liver_R1.fastq.gz | FASTQ  | DNA  | 33,940,084 | 2,070,345,124 | 61      | 61      | 61      |
+| K27ac_962_liver_R2.fastq.gz | FASTQ  | DNA  | 33,940,084 | 2,070,345,124 | 61      | 61      | 61      |
+
+

@@ -1,0 +1,14 @@
+# list of samples with name and relative path without "_R*.fastq.gz"
+samples: [
+  "K27ac_261_liver",
+  "K27ac_262_liver",
+  "K27ac_961_liver",
+  "K27ac_962_liver"
+  ]
+
+# maximum number of threads to be applied to the pipeline
+threads: 10
+
+genomes:
+  cmv_mouse: "~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04_mouse.bowtie2"
+  cmv: "~/sds-hd/sd21j005/conradin/projects/seq_runs/episome_bisulfite_001/genomes/pPl04/pPl04.bowtie2"

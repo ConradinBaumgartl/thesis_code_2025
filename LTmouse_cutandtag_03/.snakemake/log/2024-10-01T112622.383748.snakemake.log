@@ -1,0 +1,141 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Job stats:
+job             count    min threads    max threads
+------------  -------  -------------  -------------
+all                 1              1              1
+bam_convert        26              1              1
+bowtie_align       13              1              1
+fastqc              1              1              1
+multiqc             1              1              1
+total              42              1              1
+
+Select jobs to execute...
+
+[Tue Oct  1 11:26:24 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-12-2_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-2_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-12-2_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-12-2_liver.log, data/alignment/cmv/K27ac_9-12-2_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-12-2_liver.log
+    jobid: 29
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-2_liver.sam, data/alignment/cmv/K27ac_9-12-2_liver.sam
+    wildcards: sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  1 11:26:24 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-12-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-12-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-12-3_liver.log, data/alignment/cmv/K27ac_9-12-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-12-3_liver.log
+    jobid: 31
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam, data/alignment/cmv/K27ac_9-12-3_liver.sam
+    wildcards: sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  1 11:26:24 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_2-12-2_liver_R1.fastq.gz, data/raw_data/K27ac_2-12-2_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_2-12-2_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_2-12-2_liver.log, data/alignment/cmv/K27ac_2-12-2_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_2-12-2_liver.log
+    jobid: 23
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-2_liver.sam, data/alignment/cmv/K27ac_2-12-2_liver.sam
+    wildcards: sample=K27ac_2-12-2_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Oct  1 11:26:24 2024]
+rule bowtie_align:
+    input: data/raw_data/K27ac_9-2-3_liver_R1.fastq.gz, data/raw_data/K27ac_9-2-3_liver_R2.fastq.gz
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam, data/alignment/cmv_mouse/bowtie2_logs/K27ac_9-2-3_liver.log, data/alignment/cmv/K27ac_9-2-3_liver.sam, data/alignment/cmv/bowtie2_logs/K27ac_9-2-3_liver.log
+    jobid: 19
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam, data/alignment/cmv/K27ac_9-2-3_liver.sam
+    wildcards: sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 13:33:03 2024]
+Finished job 29.
+1 of 42 steps (2%) done
+Select jobs to execute...
+
+[Tue Oct  1 13:33:05 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-12-2_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-12-2_liver.unsorted.bam
+    jobid: 28
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-2_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-12-2_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 13:36:13 2024]
+Finished job 23.
+2 of 42 steps (5%) done
+Select jobs to execute...
+
+[Tue Oct  1 13:36:13 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_2-12-2_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_2-12-2_liver.unsorted.bam
+    jobid: 22
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_2-12-2_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_2-12-2_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_2-12-2_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 14:19:53 2024]
+Finished job 31.
+3 of 42 steps (7%) done
+Select jobs to execute...
+
+[Tue Oct  1 14:19:56 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-12-3_liver.unsorted.bam
+    jobid: 30
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-12-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-12-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 14:37:18 2024]
+Finished job 19.
+4 of 42 steps (10%) done
+Select jobs to execute...
+
+[Tue Oct  1 14:37:19 2024]
+rule bam_convert:
+    input: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam
+    output: data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam
+    jobid: 18
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_9-2-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv_mouse/K27ac_9-2-3_liver.sam
+    wildcards: genome=cmv_mouse, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 15:07:22 2024]
+Finished job 28.
+5 of 42 steps (12%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_9-12-2_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 15:07:23 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-2-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam
+    jobid: 39
+    reason: Missing output files: data/alignment/cmv/K27ac_9-2-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-2-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-2-3_liver
+    resources: tmpdir=/tmp
+
+[Tue Oct  1 15:14:12 2024]
+Finished job 22.
+6 of 42 steps (14%) done
+Removing temporary output data/alignment/cmv_mouse/K27ac_2-12-2_liver.sam.
+Select jobs to execute...
+
+[Tue Oct  1 15:14:14 2024]
+rule bam_convert:
+    input: data/alignment/cmv/K27ac_9-12-3_liver.sam
+    output: data/alignment/cmv/K27ac_9-12-3_liver.unsorted.bam
+    jobid: 45
+    reason: Missing output files: data/alignment/cmv/K27ac_9-12-3_liver.unsorted.bam; Input files updated by another job: data/alignment/cmv/K27ac_9-12-3_liver.sam
+    wildcards: genome=cmv, sample=K27ac_9-12-3_liver
+    resources: tmpdir=/tmp
+

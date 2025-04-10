@@ -1,0 +1,359 @@
+# Init functions
+
+```{r}
+library(tidyverse)
+
+get_metrics <- function(path){
+    
+  n <- basename(path) %>% str_split("\\.")
+  
+  # get the sample name from the filename
+  sample_name <- n[[1]][1]
+  
+  # add the filter type from the filename
+  if (length(n[[1]]) == 4){
+    filter_type <- paste0(n[[1]][2], n[[1]][3])
+  } else {
+    filter_type <- n[[1]][2]
+  }
+  
+  # read the nreads file that contains the number of reads against every chromosome
+  tmp <- read_delim(path, col_names = c("chr", "size", "reads", "umapped_reads"))
+  
+  # count reads that align to the main mouse chromosomes
+  mouse_genome_reads <- tmp %>% 
+    dplyr::filter(str_starts(chr, "NC")) %>% 
+    dplyr::filter(chr != "NC_005089.1") %>% # exclude mitochondrium genome
+    pull(reads) %>% sum()
+  
+  # count reads that align to the AAV genome
+  AAV_genome_reads <- tmp %>% 
+    dplyr::filter(chr == "pPl04") %>% 
+    pull(reads)
+  
+  # get the vg/dg number from the ddPCR measurements
+  vgdg <- read.table(paste0("data/vgdg/", str_replace(sample_name, "K27ac_", ""), ".vgdg")) %>% pull(V1)
+  
+  
+  return(tibble("mouse_genome_reads" = mouse_genome_reads, "AAV_genome_reads" = AAV_genome_reads, "vg_dg" = vgdg, "sample_name" = sample_name, "filter_type" = filter_type))
+}
+```
+
+
+# QC plots
+
+## read size histogram
+
+```{r}
+histogram_mouse <- lapply(list.files("data/alignment/cmv_mouse/", recursive=F, pattern = ".histogram"), function(x){
+
+  path <- paste0("data/alignment/cmv_mouse/", x)
+  x_list <- str_split(x, "\\.")
+  filt <- x_list[[1]][2]
+  if(x_list[[1]][3] != "histogram"){
+    filt <- "FILTSIZE"
+  }
+  
+  tmp <- read_delim(path, skip = 11, col_names = c("size", "n")) %>% 
+    mutate(filter = filt, sample_name = x_list[[1]][1])
+  return(tmp)
+}) %>% bind_rows()
+
+histogram_aav <- lapply(list.files("data/alignment/cmv/", recursive=F, pattern = ".histogram"), function(x){
+  
+  path <- paste0("data/alignment/cmv/", x)
+  x_list <- str_split(x, "\\.")
+  filt <- x_list[[1]][2]
+  if(x_list[[1]][3] != "histogram"){
+    filt <- "FILTSIZE"
+  }
+  
+  tmp <- read_delim(path, skip = 11, col_names = c("size", "n")) %>% 
+    mutate(filter = filt, sample_name = x_list[[1]][1])
+  return(tmp)
+}) %>% bind_rows()
+```
+
+```{r}
+histogram <- bind_rows(
+  histogram_mouse %>% 
+    mutate(
+      genome = "mouse",
+      nnorm = n / sum(n)),
+  histogram_aav %>% 
+    mutate(genome = "AAV",
+      nnorm = n / sum(n))
+)
+
+
+histogram %>% 
+  dplyr::filter(filter =="ALL", genome == "mouse") %>% 
+  separate(sample_name, c("mod", "mouseNr", "tissue")) %>%
+  ggplot(aes(x=size, y=n, color=mouseNr)) +
+  geom_line(linewidth=.5) +
+  #geom_smooth(method = "loess", span=.5, se=F) +
+  facet_wrap(~mouseNr, ncol=2) +
+  scale_color_manual(values = c("#1e81b0", "#154c79", "#e28743", "#eab676"))
+ggsave("results/read_size.histogram.ALL.png", width=6, height=6)
+ggsave("results/read_size.histogram.ALL.svg", width=6, height=6)
+```
+
+The sawtooth pattern is expected and characteristsic of a successful Cut&Tag experiment. It is most likely a product of the spatial tethering of the transposase. It is also seen in Cut&Run experiments. From https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5310842/:
+
+"Such 10 bp periodic cleavage preferences match the 10 bp/turn periodicity of B-form DNA, which suggests that the DNA on either side of these bound TFs is spatially oriented such that tethered MNase has preferential access to one face of the DNA double helix."
+
+# Compare the number of reads aligned to the mouse genome vs the AAV genome
+## read nreads file
+
+```{r}
+df <- lapply(list.files("data/alignment/cmv_mouse/", pattern = ".nreads", full.names = T), get_metrics) %>%
+  bind_rows() %>% mutate(
+    ratio = AAV_genome_reads / mouse_genome_reads,
+    ratio_n = AAV_genome_reads / (mouse_genome_reads * vg_dg)
+    ) %>% 
+  separate(sample_name, c("modification", "mouse", "tissue"))
+
+
+# change to a more descriptive name
+df <- df %>% 
+  mutate(
+    filter_type = str_replace(filter_type, "ALL", "all_reads"),
+    filter_type = str_replace(filter_type, "FILTSIZE", "no_dup+nuc_sized"),
+    filter_type = str_replace(filter_type, "FILT", "no_duplicates"),
+    filter_type = str_replace(filter_type, "SIZE", "nuc_sized"),
+    filter_type = factor(filter_type, levels = c("all_reads", "nuc_sized", "no_duplicates", "no_dup+nuc_sized"))
+    )
+
+df %>% dplyr::filter(filter_type == "all_reads")
+```
+
+## Plot just the ratio
+
+```{r}
+df %>% 
+ggplot(aes(x=mouse, y=ratio, fill=mouse)) +
+  geom_bar(stat="identity") +
+  facet_wrap(~filter_type, nrow = 1) +
+  scale_fill_manual(values = c("#1e81b0", "#154c79", "#e28743", "#eab676")) +
+  ggtitle("H3K27ac on AAV genome") +
+  ylab("reads gAAV/gMOUSE")
+```
+
+## Plot the ratio adjusted for vg/dg
+
+```{r}
+df %>% 
+ggplot(aes(x=vg_dg, y=ratio, color=mouse)) +
+  geom_point(size=3) +
+  facet_wrap(~filter_type, nrow = 1) +
+  scale_color_manual(values = c("#1e81b0", "#154c79", "#e28743", "#eab676")) +
+  ylab("reads gAAV/gMOUSE")
+ggsave("results/n_aligned_reads.CORR.VGDG-NORM.png", width=8, height=5)
+ggsave("results/n_aligned_reads.CORR.VGDG-NORM.svg", width=8, height=5)
+
+df %>% 
+ggplot(aes(x=mouse, y=ratio_n, fill=mouse)) +
+  geom_bar(stat="identity") +
+  facet_wrap(~filter_type, nrow=1) +
+  scale_fill_manual(values = c("#1e81b0", "#154c79", "#e28743", "#eab676")) +
+  ylab("reads (gAAV/gMOUSE) / vgdg") +
+  ggtitle("H3K27ac reads on AAV genome")
+ggsave("results/n_aligned_reads.VGDG-NORM.png", width=8, height=5)
+ggsave("results/n_aligned_reads.VGDG-NORM.svg", width=8, height=5)
+```
+
+Correcting for both the number of reads aligned to the mouse genome as well as the vg/dg number yields the clear result of the AAV9 delivered genomes being more populated with H3K27ac modified nucleosomes compared to AAV2 delivered genomes.
+
+This result however says nothing about the episomal state of the AAV genome and about the number of histones in general on either genome. rAAV2 previously has been shown to remain in a single stranded state for a long time post infection, possibly also still encapsidated. It is possible that the difference I see here is because of AAV2 genomes that have not yet formed an episome to begin with. Preferably I would need to run one more Cut and Tag against H3 in general to deny or confirm the episomal state.
+
+Felix has suggested a simple T5 exonuclease experiment: Quantifying the percentage of DNA that is sensitive to T5 exonuclease from total gDNA extracts. 2 vials, both with the same amount of gDNA; one being digested the other one not. Keep them both in the cycler for the same amount of time. Then run ddPCR on both vials and quantify the difference.
+
+
+# Multi bam summary
+
+```{bash}
+multiBigwigSummary bins -bs 10000 -p 12 --bwfiles data/alignment/cmv_mouse/*.ALL.bw -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.ALL.npz 
+plotCorrelation --removeOutliers --skipZeros --plotNumbers -in data/alignment/cmv_mouse/multiBamSummary/resultMatrix.ALL.npz -c spearman -p heatmap -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.ALL.heatmap.png
+plotCorrelation --removeOutliers --skipZeros --plotNumbers -in data/alignment/cmv_mouse/multiBamSummary/resultMatrix.ALL.npz -c spearman -p scatterplot -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.ALL.scatter.png
+plotPCA -in data/alignment/cmv_mouse/multiBamSummary/resultMatrix.ALL.npz -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.ALL.PCA.png
+
+multiBigwigSummary bins -bs 10000 -p 12 --bwfiles data/alignment/cmv_mouse/*.FILT.SIZE.bw -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.FILT.SIZE.npz 
+plotCorrelation --removeOutliers --skipZeros --plotNumbers -in data/alignment/cmv_mouse/multiBamSummary/resultMatrix.FILT.SIZE.npz -c spearman -p heatmap -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.FILT.SIZE.heatmap.png
+plotCorrelation --removeOutliers --skipZeros -in data/alignment/cmv_mouse/multiBamSummary/resultMatrix.FILT.SIZE.npz -c spearman -p scatterplot -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.FILT.SIZE.scatter.png
+plotPCA -in data/alignment/cmv_mouse/multiBamSummary/resultMatrix.FILT.SIZE.npz -o data/alignment/cmv_mouse/multiBamSummary/resultMatrix.FILT.SIZE.PCA.png
+
+```
+
+The coverage in large bins (10kb) is very correlated across all samples (~ 0.9). I expected a higher correlation. Because in this dataset I have a lot of reads, I also have quite some background reads in between "real" peaks, with very low number of reads. I believe that the relatively low correlation between all samples stems from such regions. Looking by eye at very well formed peaks in the bigwig coverage files, I deem all data to be very clearly correlated.
+
+The scatterplots for the filtered sets looks way cleaner, but the actual R value does not change much. There are quite a few outlier regions that are filtered out by filtering for size and PCR duplicates.
+
+From this analysis I can not tell a global difference in the K27ac profiles of AAV2 or AAV9 transduced mouse livers after 6 weeks. But maybe there are local differences.
+
+# Local differences with DEseq2
+
+This analysis is based on peaks called by SEACR (Peak calling by Sparse Enrichment Analysis for CUT&RUN chromatin profiling). This program has been created as a peak caller for Cut and Run data, with a low degree of background reads. Other peak callers like MACS and Homer were created for ChIP data, which has notoriously high background.
+
+Continuous non-zero data from paired end reads is defined as a signal block. Usually an IgG control is provided. Different total signal tresholds are applied and compared to the IgG control. The threshold that provides the greatest difference between IgG and sample is then chosen.
+
+In cases where there is no IgG control (my case), one can chose to output just the top n% of peaks based on total signal within the peaks. I played around and top 1% gave the best looking result for peak calling.
+
+
+DESeq2 analysis contains 3 steps:
+
+1. estimate Size factors - calculate normalization factors
+
+2. estimate dispersion
+
+Gene Variance decreases with the mean counts. A measure of the variance for a given mean is described by a metric called dispersion in the DESeq2 model. The DESeq2 model uses dispersion to assess the variability in expression when modeling the counts. Genes with inaccurately small estimates of variation could yield many false positives, or genes that are identified as DE, when they are really not. 
+
+To accurately model sequencing counts, we need to generate accurate estimates of within-group variation (variation between replicates of the same sample group) for each gene. With only a few (3-6) replicates per group, the estimates of variation for each gene are often unreliable (due to the large differences in dispersion for genes with similar means).
+
+To address this problem, DESeq2 shares information across genes to generate more accurate estimates of variation based on the mean expression level of the gene using a method called ‘shrinkage’. DESeq2 assumes that genes with similar expression levels have similar dispersion.
+
+3. negative binomial GLM fitting and Wald statistics
+
+Wald statistics and negative binomial fitting. The negative binomial is used because (i) we have count data, and (ii) in the modeled data the variance can be greater than the mean (Poisson model would be var=mean). It is not the best but it performs well.
+
+```{r}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(GenomicRanges)
+  library(DESeq2)
+  library(chromVAR)
+})
+```
+
+
+```{r}
+sample_names <- c("K27ac_261", "K27ac_262", "K27ac_961", "K27ac_962")
+
+# get the peaks from every SEACR bed file
+mPeak <- GRanges()
+for (name in sample_names){
+  peakRes <- read.table(paste0("data/alignment/cmv_mouse/", name, "_liver.ALL.SEACR.stringent.bed"), header=F, fill=T)
+  mPeak <- GRanges(seqnames = peakRes$V1, IRanges(start = peakRes$V2, end = peakRes$V3), strand = "*") %>% append(mPeak, .)
+}
+## I cheat by adding the AAV chromosome as a peak to be tested
+mPeak <- append(mPeak, makeGRangesFromDataFrame(data.frame(chr="pPl04", start=2190, end=5820)))
+
+# reduce here is pivotal, because it aligns the ranges and merges overlapping ones into a simplified set
+masterPeak <- GenomicRanges::reduce(mPeak)
+
+
+# read the bam file from every sample and count the reads in every peak from masterPeak
+countMat = matrix(NA, length(masterPeak), length(sample_names))
+i <- 1
+for (name in sample_names){
+  fragment_counts <- getCounts(paste0("data/alignment/cmv_mouse/", name, "_liver.ALL.bam"), masterPeak, paired = TRUE, by_rg = FALSE, format = "bam")
+  countMat[, i] = counts(fragment_counts)[,1]
+  i = i + 1
+}
+# set names
+colnames(countMat) <- sample_names
+
+
+# DESeq2
+## create condition for the replicates, first 2 are AAV2 and last 2 are AAV9. I am interested in their difference.
+condition <- factor(rep(c("AAV2_6weeks", "AAV9_6weeks"), each = 2)) 
+## create DEseq object
+dds = DESeqDataSetFromMatrix(countData = countMat,
+                              colData = DataFrame(condition),
+                              design = ~ condition)
+## perform differential analysis
+DDS = DESeq(dds)
+## get normalization with respect to the sequencing depth
+normDDS = counts(DDS, normalized = TRUE) 
+colnames(normDDS) = paste0(colnames(normDDS), "_norm")
+## get results from analysis
+res = results(DDS, independentFiltering = FALSE, altHypothesis = "greaterAbs")
+summary(res)
+
+# Combine results
+countMatDiff <- cbind(data.frame(masterPeak), countMat, normDDS, res) %>% 
+  as_tibble()
+
+countMatDiff %>% 
+  arrange(padj)
+
+countMatDiff %>% 
+  ggplot(aes(x=baseMean, y=log2FoldChange, color=padj)) +
+  geom_point(size= 1) +
+  scale_x_log10() +
+  geom_hline(yintercept = 0) +
+  xlab("Mean Counts on Peak")
+
+plotDispEsts(DDS)
+```
+
+The differential coverage analysis does not find any differential peaks that have a significant adjusted p-value. The most prominent peak however is interesting (NC_000075.7	48626659	48683123). The peak is enriched in AAV2 samples and it encodes for Zbtb16, a zinc-finger containing TF that is also known to interact with histone deacetylases (https://www.ncbi.nlm.nih.gov/gene/7704). If the AAV2 transduction actually leads to a changed expression of this TF, then it is weird that it does not lead to global changes in Histone acetylations. Most likely a false positive as the adjusted p-values suggests.
+
+However also the AAV genome is regarded as a false positive. It is by far the region with the highest log2FC: 3.1. All other values are between -1.6 and 1.5
+
+Maybe I sequenced the data too deep. Too much noise?
+
+Also likely that I have too few replicates, 2 each. _Not enough power._
+
+
+```{r}
+sample_names <- c("K27ac_261", "K27ac_262", "K27ac_961", "K27ac_962")
+
+# get the peaks from every SEACR bed file
+mPeak <- GRanges()
+for (name in sample_names){
+  peakRes <- read.table(paste0("data/alignment/cmv_mouse/", name, "_liver.FILT.SIZE.SEACR.stringent.bed"), header=F, fill=T)
+  mPeak <- GRanges(seqnames = peakRes$V1, IRanges(start = peakRes$V2, end = peakRes$V3), strand = "*") %>% append(mPeak, .)
+}
+## I cheat by adding the AAV chromosome as a peak to be tested
+mPeak <- append(mPeak, makeGRangesFromDataFrame(data.frame(chr="pPl04", start=2190, end=5820)))
+
+# reduce here is pivotal, because it aligns the ranges and merges overlapping ones into a simplified set
+masterPeak <- GenomicRanges::reduce(mPeak)
+
+
+# read the bam file from every sample and count the reads in every peak from masterPeak
+countMat = matrix(NA, length(masterPeak), length(sample_names))
+i <- 1
+for (name in sample_names){
+  fragment_counts <- getCounts(paste0("data/alignment/cmv_mouse/", name, "_liver.FILT.SIZE.bam"), masterPeak, paired = TRUE, by_rg = FALSE, format = "bam")
+  countMat[, i] = counts(fragment_counts)[,1]
+  i = i + 1
+}
+# set names
+colnames(countMat) <- sample_names
+
+
+# DESeq2
+## create condition for the replicates, first 2 are AAV2 and last 2 are AAV9. I am interested in their difference.
+condition <- factor(rep(c("AAV2_6weeks", "AAV9_6weeks"), each = 2)) 
+## create DEseq object
+dds = DESeqDataSetFromMatrix(countData = countMat,
+                              colData = DataFrame(condition),
+                              design = ~ condition)
+## perform differential analysis
+DDS = DESeq(dds)
+## get normalization with respect to the sequencing depth
+normDDS = counts(DDS, normalized = TRUE) 
+colnames(normDDS) = paste0(colnames(normDDS), "_norm")
+## get results from analysis
+res = results(DDS, independentFiltering = FALSE, altHypothesis = "greaterAbs")
+summary(res)
+
+# Combine results
+countMatDiff <- cbind(data.frame(masterPeak), countMat, normDDS, res) %>% 
+  as_tibble()
+
+countMatDiff %>% 
+  arrange(padj)
+
+countMatDiff %>% 
+  ggplot(aes(x=baseMean, y=log2FoldChange, color=padj)) +
+  geom_point(size= 1) +
+  scale_x_log10() +
+  geom_hline(yintercept = 0) +
+  xlab("Mean Counts on Peak")
+
+plotDispEsts(DDS)
+```
+
+

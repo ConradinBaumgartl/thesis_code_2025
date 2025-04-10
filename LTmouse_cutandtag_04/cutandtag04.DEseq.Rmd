@@ -1,0 +1,249 @@
+
+```{r}
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(GenomicRanges)
+  library(DESeq2)
+  library(chromVAR)
+})
+```
+
+# 2 weeks
+
+```{r}
+setClass(Class="deseq",
+         representation(
+            results="DESeqResults",
+            countMatDiff="tbl_df",
+            DDS="DESeqDataSet"
+          )
+)
+
+makeCountMatrix <- function(sample_names, cond){
+  # get the peaks from every SEACR bed file
+  mPeak <- GRanges()
+  for (name in sample_names){
+    peakRes <- read.table(paste0("data/alignment/cmv_mouse/", name, "_liver.ALL.SEACR.stringent.bed"), header=F, fill=T)
+    mPeak <- GRanges(seqnames = peakRes$V1, IRanges(start = peakRes$V2, end = peakRes$V3), strand = "*") %>% append(mPeak, .)
+  }
+  ## I cheat by adding the AAV chromosome as a peak to be tested
+  mPeak <- append(mPeak, makeGRangesFromDataFrame(data.frame(chr="pPl04", start=2190, end=5820)))
+  
+  # reduce here is pivotal, because it aligns the ranges and merges overlapping ones into a simplified set
+  masterPeak <- GenomicRanges::reduce(mPeak)
+  
+  # read the bam file from every sample and count the reads in every peak from masterPeak
+  countMat = matrix(NA, length(masterPeak), length(sample_names))
+  i <- 1
+  for (name in sample_names){
+    fragment_counts <- getCounts(paste0("data/alignment/cmv_mouse/", name, "_liver.ALL.bam"), masterPeak, paired = TRUE, by_rg = FALSE, format = "bam")
+    countMat[, i] = counts(fragment_counts)[,1]
+    i = i + 1
+  }
+  # set names
+  colnames(countMat) <- sample_names
+  
+  # DESeq2
+  ## create condition for the replicates, first 2 are AAV2 and last 2 are AAV9. I am interested in their difference.
+  condition <- cond
+  ## create DEseq object
+  dds = DESeqDataSetFromMatrix(countData = countMat,
+                                colData = DataFrame(condition),
+                                design = ~ condition)
+  ## perform differential analysis
+  DDS = DESeq(dds)
+  ## get normalization with respect to the sequencing depth
+  normDDS = counts(DDS, normalized = TRUE) 
+  colnames(normDDS) = paste0(colnames(normDDS), "_norm")
+  ## get results from analysis
+  res = results(DDS, independentFiltering = FALSE, altHypothesis = "greaterAbs")
+
+  # Combine results
+  countMatDiff <- cbind(data.frame(masterPeak), countMat, normDDS, res) %>% 
+    as_tibble()
+  
+
+  return(new("deseq",
+             results = res,
+             countMatDiff = countMatDiff,
+             DDS = DDS))
+}
+```
+
+
+```{r}
+count2weeks <- makeCountMatrix(
+  sample_names = c("K27me3_2-2-1", "K27me3_2-2-2", "K27me3_2-2-3", "K27me3_9-2-1", "K27me3_9-2-2", "K27me3_9-2-3"),
+  cond = factor(rep(c("AAV2_2weeks", "AAV9_2weeks"), each = 3)))
+
+count12weeks <- makeCountMatrix(
+  sample_names = c("K27me3_2-12-1", "K27me3_2-12-2", "K27me3_2-12-3", "K27me3_9-12-1", "K27me3_9-12-2", "K27me3_9-12-3"),
+  cond = factor(rep(c("AAV2_12weeks", "AAV9_12weeks"), each = 3)))
+```
+
+
+
+## 2 weeks
+
+```{r}
+
+summary(count2weeks@results)
+
+count2weeks@countMatDiff %>% 
+  arrange(padj)
+
+count2weeks@countMatDiff %>% 
+  dplyr::filter(seqnames != "NC_005089.1") %>% 
+  arrange(log2FoldChange)
+
+p2weeks <- count2weeks@countMatDiff %>% 
+  dplyr::filter(seqnames != "NC_005089.1") %>% 
+  ggplot(aes(x=baseMean, y=log2FoldChange, color=padj<0.01)) +
+  geom_point(size= 1) +
+  ylim(-4, 4) +
+  scale_x_log10(limits = c(10, 5e5)) +
+  geom_hline(yintercept = 0) +
+  xlab("Mean Counts on Peak") +
+  scale_colour_manual(name = 'padj<0.01', values = setNames(c('blue','grey'),c(T, F))) +
+  theme_bw()
+p2weeks
+
+plotDispEsts(count2weeks@DDS)
+```
+
+
+The AAV genome is off the rails again. The other 2 significant points are:
+
+* Phlda3, a gene that is involved in intrinsic apoptotic signaling pathway in response to DNA damage by p53 class mediator; negative regulation of protein kinase B signaling; and positive regulation of apoptotic process
+
+* gene-body of Trp53cor1; in humans a co-repressor of p53 pathway
+
+Both of these have a logFC towards AAV2 transduced livers. This means that they have more of the inactivating H3K27me3 compared to AAV9 transduced livers --> those genes are probably more active in AAV9 transduced mouse livers. This is confusing, because those genes are either a part of or a corepressor of the p53 pathway.
+
+
+
+```{r}
+summary(count12weeks@results)
+
+count12weeks@countMatDiff %>% 
+  arrange(padj)
+
+count12weeks@countMatDiff %>% 
+  dplyr::filter(
+    seqnames != "NC_005089.1",
+    padj < 0.01) %>% 
+  arrange(log2FoldChange)
+
+p12weeks <- count12weeks@countMatDiff %>% 
+  dplyr::filter(seqnames != "NC_005089.1") %>% 
+  drop_na() %>% 
+  ggplot(aes(x=baseMean, y=log2FoldChange, color=padj<0.01)) +
+  geom_point(size= 1) +
+  ylim(-4, 4) +
+  scale_x_log10(limits = c(10, 5e5)) +
+  geom_hline(yintercept = 0) +
+  xlab("Mean Counts on Peak") +
+  scale_colour_manual(name = 'padj<0.01', values = setNames(c('blue','grey'),c(T, F))) +
+  theme_bw()
+
+p12weeks
+
+  
+
+plotDispEsts(count12weeks@DDS)
+```
+
+
+```{r}
+df <- bind_rows(
+  count2weeks@countMatDiff %>% 
+    dplyr::filter(seqnames != "NC_005089.1") %>% 
+    mutate(timepoint = "2_weeks"),
+  count12weeks@countMatDiff %>% 
+    dplyr::filter(seqnames != "NC_005089.1") %>% 
+    mutate(timepoint = "12_weeks")) 
+
+df %>% write_csv("results/DESeq/master_df.csv")
+```
+
+
+
+```{r}
+
+df <- read_csv("results/DESeq/master_df.csv") %>% 
+  mutate(timepoint = factor(timepoint, levels = c("2_weeks", "12_weeks")))
+
+
+df %>% 
+  select(baseMean, log2FoldChange, padj, timepoint) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=baseMean, y=log2FoldChange, color=padj < 0.01)) +
+  geom_point(size= 1) +
+  ylim(-3, 4) +
+  scale_x_log10(limits = c(10, 5e5)) +
+  geom_hline(yintercept = 0) +
+  xlab("Mean Counts on Peak") +
+  scale_colour_manual(name = 'padj<0.01', values = setNames(c('blue','grey'),c(T, F))) +
+  theme_bw() +
+  facet_wrap(~timepoint)
+ggsave("results/DESeq/logFC_meanCounts.2weeksVS12weeks.png", width=7, height=4, dpi=120)
+ggsave("results/DESeq/logFC_meanCounts.2weeksVS12weeks.svg", width=7, height=4, dpi=120)
+
+```
+There are essentially no differential peaks in this dataset, so no Gene ontology enrichment analysis was done.
+
+# Plot together with H3K27ac data
+
+
+```{r}
+AC <- read_csv("../cutandtag_03/results/DESeq/master_df.csv") %>% 
+  mutate(
+    timepoint = str_replace(timepoint, "_weeks", " weeks p.i.")
+    ) %>% 
+  mutate(timepoint = factor(timepoint, levels = c("2 weeks p.i.", "12 weeks p.i.")))
+         
+ac_plot <- AC %>% 
+  select(baseMean, log2FoldChange, padj, timepoint) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=baseMean, y=log2FoldChange, color=padj < 0.01)) +
+  geom_point(size= 1) +
+  ylim(-3, 4) +
+  scale_x_log10(limits = c(10, 5e5)) +
+  geom_hline(yintercept = 0) +
+  xlab("Mean Counts on Peak") +
+  scale_colour_manual(name = 'padj<0.01', values = setNames(c('blue','grey'),c(T, F))) +
+  theme_bw() +
+  theme(text = element_text(size = 15)) +
+  facet_wrap(~timepoint) +
+  ggtitle("H3K27ac")
+
+
+me3_plot <- df %>% 
+  mutate(
+    timepoint = as.character(timepoint),
+    timepoint = str_replace(timepoint, "_weeks", " weeks p.i.")
+    ) %>% 
+  mutate(timepoint = factor(timepoint, levels = c("2 weeks p.i.", "12 weeks p.i."))) %>% 
+  select(baseMean, log2FoldChange, padj, timepoint) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=baseMean, y=log2FoldChange, color=padj < 0.01)) +
+  geom_point(size= 1) +
+  ylim(-3, 4) +
+  scale_x_log10(limits = c(10, 5e5)) +
+  geom_hline(yintercept = 0) +
+  xlab("Mean Counts on Peak") +
+  scale_colour_manual(name = 'padj<0.01', values = setNames(c('blue','grey'),c(T, F))) +
+  theme_bw() +
+  theme(text = element_text(size = 15)) +
+  facet_wrap(~timepoint) +
+  ggtitle("H3K27me3")
+
+
+library(ggpubr)
+
+ggarrange(ac_plot, me3_plot, nrow = 2)
+ggsave("results/DESeq/K27acVSK27me3.logFC_meanCounts.2weeksVS12weeks.png", width = 6, height = 6, dpi = 200)
+ggsave("results/DESeq/K27acVSK27me3.logFC_meanCounts.2weeksVS12weeks.svg", width = 6, height = 6, dpi = 200)
+
+```
+

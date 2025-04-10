@@ -1,0 +1,24 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Job stats:
+job          count    min threads    max threads
+---------  -------  -------------  -------------
+all              1              1              1
+bamqc_ALL        1              1              1
+total            2              1              1
+
+Select jobs to execute...
+
+[Mon Oct 14 10:44:10 2024]
+rule bamqc_ALL:
+    input: data/alignment/cmv_mouse/K27ac_2-2-1_liver.ALL.bam, data/alignment/cmv_mouse/K27ac_2-2-1_liver.FILT.bam, data/alignment/cmv_mouse/K27ac_2-2-1_liver.SIZE.bam, data/alignment/cmv_mouse/K27ac_2-2-1_liver.FILT.SIZE.bam
+    output: data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.ALL, data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.FILT, data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.SIZE, data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.FILT.SIZE, data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.ALL/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.FILT/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.SIZE/genome_results.txt, data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.FILT.SIZE/genome_results.txt
+    jobid: 19
+    reason: Missing output files: data/alignment/cmv_mouse/QC/K27ac_2-2-1_liver.ALL/genome_results.txt
+    wildcards: genome=cmv_mouse, sample=K27ac_2-2-1_liver
+    resources: tmpdir=/tmp
+
+Terminating processes on user request, this might take some time.
+Cancelling snakemake on user request.

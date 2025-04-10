@@ -1,0 +1,12 @@
+Building DAG of jobs...
+IncompleteFilesException:
+The files below seem to be incomplete. If you are sure that certain files are not incomplete, mark them as complete with
+
+    snakemake --cleanup-metadata <filenames>
+
+To re-generate the files rerun your command with the --rerun-incomplete flag.
+Incomplete files:
+data/alignment/cmv_mouse/K27ac_2-2-1_liver.fixmate.sorted.tmp
+data/alignment/cmv/K27ac_2-2-1_liver.ALL.bam
+data/alignment/cmv/K27ac_2-2-2_liver.ALL.bam
+data/alignment/cmv/K27ac_9-12-3_liver.ALL.bam

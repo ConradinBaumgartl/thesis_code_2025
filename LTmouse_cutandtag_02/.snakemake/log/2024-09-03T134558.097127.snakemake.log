@@ -1,0 +1,79 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Job stats:
+job      count    min threads    max threads
+-----  -------  -------------  -------------
+SEACR        4              1              1
+all          1              1              1
+total        5              1              1
+
+Select jobs to execute...
+
+[Tue Sep  3 13:46:00 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_261_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR, data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR.stringent.bed
+    jobid: 96
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv_mouse, sample=K27ac_261_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Sep  3 13:46:00 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_262_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR, data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR.stringent.bed
+    jobid: 98
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv_mouse, sample=K27ac_262_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Sep  3 13:46:00 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_961_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR, data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR.stringent.bed
+    jobid: 100
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv_mouse, sample=K27ac_961_liver
+    resources: tmpdir=/tmp
+
+
+[Tue Sep  3 13:46:00 2024]
+rule SEACR:
+    input: data/alignment/cmv_mouse/K27ac_962_liver.ALL.bedgraph
+    output: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR, data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR.stringent.bed
+    jobid: 102
+    reason: Missing output files: data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR.stringent.bed
+    wildcards: genome=cmv_mouse, sample=K27ac_962_liver
+    resources: tmpdir=/tmp
+
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule SEACR in file /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/snakemake_scripts/peaks.snakefile, line 10:
+Job 98  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR
+Removing output files of failed job SEACR since they might be corrupted:
+data/alignment/cmv_mouse/K27ac_262_liver.ALL.SEACR.stringent.bed
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule SEACR in file /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/snakemake_scripts/peaks.snakefile, line 10:
+Job 96  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR
+Removing output files of failed job SEACR since they might be corrupted:
+data/alignment/cmv_mouse/K27ac_261_liver.ALL.SEACR.stringent.bed
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule SEACR in file /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/snakemake_scripts/peaks.snakefile, line 10:
+Job 102  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR
+Removing output files of failed job SEACR since they might be corrupted:
+data/alignment/cmv_mouse/K27ac_962_liver.ALL.SEACR.stringent.bed
+Waiting at most 5 seconds for missing files.
+MissingOutputException in rule SEACR in file /home/conradin/sds-hd/sd21j005/conradin/projects/seq_runs/cutandtag_02/snakemake_scripts/peaks.snakefile, line 10:
+Job 100  completed successfully, but some output files are missing. Missing files after 5 seconds. This might be due to filesystem latency. If that is the case, consider to increase the wait time with --latency-wait:
+data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR
+Removing output files of failed job SEACR since they might be corrupted:
+data/alignment/cmv_mouse/K27ac_961_liver.ALL.SEACR.stringent.bed
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2024-09-03T134558.097127.snakemake.log

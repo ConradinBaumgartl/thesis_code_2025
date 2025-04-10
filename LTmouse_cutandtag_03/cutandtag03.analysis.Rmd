@@ -1,0 +1,374 @@
+# Init functions
+
+```{r}
+library(tidyverse)
+library(ggpubr)
+
+get_metrics <- function(path){
+    
+  n <- basename(path) %>% str_split("\\.")
+  
+  # get the sample name from the filename
+  sample_name <- n[[1]][1]
+  
+  # add the filter type from the filename
+  if (length(n[[1]]) == 4){
+    filter_type <- paste0(n[[1]][2], n[[1]][3])
+  } else {
+    filter_type <- n[[1]][2]
+  }
+  
+  # read the nreads file that contains the number of reads against every chromosome
+  tmp <- read_delim(path, col_names = c("chr", "size", "reads", "umapped_reads"))
+  
+  # count reads that align to the main mouse chromosomes
+  mouse_genome_reads <- tmp %>% 
+    dplyr::filter(str_starts(chr, "NC")) %>% 
+    dplyr::filter(chr != "NC_005089.1") %>% # exclude mitochondrium genome
+    pull(reads) %>% sum()
+  
+  # count reads that align to the AAV genome
+  AAV_genome_reads <- tmp %>% 
+    dplyr::filter(chr == "pPl04") %>% 
+    pull(reads)
+  
+  # get the vg/dg number from the ddPCR measurements
+  vgdg <- read.table(paste0("data/vgdg/", str_replace(sample_name, "K27ac_", ""), ".vgdg")) %>% pull(V1)
+  
+  
+  return(tibble("mouse_genome_reads" = mouse_genome_reads, "AAV_genome_reads" = AAV_genome_reads, "vg_dg" = vgdg, "sample_name" = sample_name, "filter_type" = filter_type))
+}
+```
+
+
+# Normalized epitopes on transgene
+
+## get data
+
+```{r}
+df <- lapply(list.files("data/alignment/cmv_mouse/", pattern = ".nreads", full.names = T), get_metrics) %>%
+  bind_rows() %>% mutate(
+    ratio = AAV_genome_reads / mouse_genome_reads,
+    ratio_n = AAV_genome_reads / (mouse_genome_reads * vg_dg)
+    ) %>% 
+  separate(sample_name, c("modification", "mouse", "tissue"), sep="_")
+
+
+# change to a more descriptive name
+df <- df %>% 
+  mutate(
+    filter_type = str_replace(filter_type, "ALL", "all_reads"),
+    filter_type = str_replace(filter_type, "FILTSIZE", "no_dup+nuc_sized"),
+    filter_type = str_replace(filter_type, "FILT", "no_duplicates"),
+    filter_type = str_replace(filter_type, "SIZE", "nuc_sized"),
+    filter_type = factor(filter_type, levels = c("all_reads", "nuc_sized", "no_duplicates", "no_dup+nuc_sized"))
+    ) %>% 
+  separate(mouse, c("capsid", "weeks", "mouse"), sep="-")
+
+df %>% dplyr::filter(filter_type == "all_reads")
+```
+
+## Plot
+
+```{r}
+x1 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=mouse, y=ratio, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads gAAV/gMOUSE") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+x2 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid)) +
+    geom_bar(stat="summary", fun=mean, position=position_dodge()) +
+    geom_point(position = position_dodge(.75)) +
+    ggtitle("H3K27ac on AAV genome | all reads") +
+    ylab("reads gAAV/gMOUSE") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+p1 <- ggarrange(x1, x2, ncol=1)
+annotate_figure(p1, top = "raw ratio")
+
+x1 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  ggplot(aes(x=mouse, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+x2 <- df %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i."))) %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="summary", position=position_dodge()) +
+    geom_point(position = position_dodge(.75)) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+p2 <- ggarrange(x1, x2, ncol=1)
+annotate_figure(p2, top = "normalized ratio")
+
+```
+
+
+## Combine with Cut and tag 2
+
+```{r}
+df_CT2 <- lapply(list.files("../cutandtag_02/data/alignment/cmv_mouse/", pattern = ".nreads", full.names = T), get_metrics) %>%
+  bind_rows() %>% mutate(
+    ratio = AAV_genome_reads / mouse_genome_reads,
+    ratio_n = AAV_genome_reads / (mouse_genome_reads * vg_dg)
+    ) %>% 
+  separate(sample_name, c("modification", "mouse", "tissue"), sep="_")
+
+
+# change to a more descriptive name
+df_CT2 <- df_CT2 %>% 
+  mutate(
+    filter_type = str_replace(filter_type, "ALL", "all_reads"),
+    filter_type = str_replace(filter_type, "FILTSIZE", "no_dup+nuc_sized"),
+    filter_type = str_replace(filter_type, "FILT", "no_duplicates"),
+    filter_type = str_replace(filter_type, "SIZE", "nuc_sized"),
+    filter_type = factor(filter_type, levels = c("all_reads", "nuc_sized", "no_duplicates", "no_dup+nuc_sized"))
+    ) %>% 
+  separate(mouse, c("x1", "capsid", "weeks", "mouse"), sep="") %>% 
+  select(-x1)
+
+df_CT2
+```
+
+```{r}
+df_comb <- bind_rows(df, df_CT2) %>% 
+  mutate(weeks = str_c(weeks, " weeks p.i."), weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")))
+
+df_comb %>% write_csv("h3k27ac.R.csv")
+```
+
+### Plot
+
+```{r}
+df_comb %>% 
+  ggplot(aes(x=mouse, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+df_comb %>% 
+  ggplot(aes(x=capsid, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="summary", position=position_dodge(), fun = mean) +
+    geom_point() +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+ggsave("results/H3k27ac.vgdg.filteroptions.png", width=6, height=5, dpi=200)
+ggsave("results/H3k27ac.vgdg.filteroptions.svg", width=6, height=5, dpi=200)
+```
+
+```{r}
+x1 <- df_comb %>% 
+  ggplot(aes(x=mouse, y=ratio, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads gAAV/gMOUSE") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+x2 <- df_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=ratio, fill=capsid)) +
+    geom_bar(stat="summary", fun=mean, position=position_dodge()) +
+    geom_point(position = position_dodge(.75)) +
+    ggtitle("H3K27ac on AAV genome | all reads") +
+    ylab("reads gAAV/gMOUSE") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+p1 <- ggarrange(x1, x2, ncol=1)
+annotate_figure(p1, top = "raw ratio")
+
+x1 <- df_comb %>% 
+  ggplot(aes(x=mouse, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    facet_grid(weeks~filter_type) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+
+x2 <- df_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=ratio_n, fill=capsid)) +
+    geom_bar(stat="summary", position=position_dodge()) +
+    geom_point(position = position_dodge(.75)) +
+    ggtitle("H3K27ac on AAV genome") +
+    ylab("reads (gAAV/gMOUSE) / vgdg") +
+    scale_fill_manual(values = c("#1e81b0", "#e28743", "grey"))
+ggsave("results/H3k27ac.vgdg.allreads.png", width=5, height=4, dpi=100)
+ggsave("results/H3k27ac.vgdg.allreads.svg", width=5, height=4, dpi=100)
+
+
+p2 <- ggarrange(x1, x2, ncol=1)
+annotate_figure(p2, top = "normalized ratio")
+
+```
+
+### H3K27ac over time master plot
+
+```{r}
+h3k27 <- df_comb %>%
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y = ratio_n, fill=capsid)) +
+  geom_boxplot() +
+  geom_point(position=position_dodge(.75)) +
+  ylab("H3K27ac on transgene") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("H3K27ac over time")
+h3k27
+
+df_comb %>%
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y = ratio_n, fill=capsid, label = mouse)) +
+  geom_boxplot() +
+  geom_point() +
+  geom_text(hjust=-.5) +
+  ylab("H3K27ac on transgene") +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  facet_wrap(~capsid, scales = "free")
+```
+
+This data is corrected for experiment_efficiencey/sequencing depth (mouse genome reads) and also for the amount of viral DNA (vg/dg). We can appreciate in general more H3K27ac epitopes on the AAV9 delivered transgenes compared to AAV2 delivered ones. However, there is a difference in the kinetics over time. Whereas AAV9 slowly depletes in transgenes, AAV2 increases slightly over time.
+
+The increase for AAV2 is easier to explain. AAV2 has reportedly a very slow unpacking rate, where even after 6 weeks in mouse liver one can still discover linear, single-stranded, and even packaged AAV2. This could not be confirmed for AAV8 (a relative of AAV9), which seems to unpack much faster. I also see a slow decrease in AAV2 delivered DNA over time, but an increase in expression. This paints the following picture: AAV2 arrives in the nucleus but is very slowly processed. There is vector genome loss occuring over time due to the vector DNA being recognized as foreign (either because of the viral shell or because of being linear/single-stranded) and thusly being degraded. The AAV2 genomes that do unpack are chromatinized including activating PTMs of H3, which leads to increased expression over time. There is a small dip in H3K27ac after 12 weeks, so the number of H3K27ac epitopes might have peaked after 6 weeks and might now go down similar to AAV9?
+
+The pattern for AAV9 delivered DNA is more difficult to explain. It starts off being highly associated with H3K27ac but loses them again to find sort of an equilibrium that is maintained from 6 to 12 weeks. The H3k27ac level of this equilibrium is still higher than any point of AAV2. This is in line with the observation of AAV9 delivered transcription also deteriorating over time. This would mean that AAV9 is highly chromatinized very quickly, but some process leads it to lose the methylation marks over time. Does it generally lose Histone association over time? Another strange phenomenon is the incrase in vg/dg over time. We were not the first ones to discover this, it had also been shown with AAV8 vg/dg across 6 weeks. Is the DNA being replicated? Is there a pool of AAV9 capsids inside the body that is slowly being released? Nevertheless, the decrease in H3K27ac epitopes is independent to the increase of vg/dg, because it is also evident in the raw ratios that are not normalized to vg/dg.
+
+
+### Correlate with ddPCR orthogonal information
+
+```{r}
+library(ggpubr)
+
+msdf <- read_delim("~/projects/meth_proj/mouse_experiments/AAV2_AAV9/master_info.csv", delim="\t") %>% 
+  dplyr::filter(tissue == "liver") %>% 
+  select(label, `vg/dg`, `vt/hkt`) %>% 
+  separate(label, c("capsid", "weeks", "mouse")) %>% 
+  mutate(
+    weeks = str_c(weeks, " weeks p.i."),
+    weeks = factor(weeks, levels = c("2 weeks p.i.", "6 weeks p.i.", "12 weeks p.i.")),
+    activity = `vt/hkt` / `vg/dg`)
+
+
+df_comb_comb <- left_join(df_comb, msdf) 
+
+act <- df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=activity, fill=capsid, label = mouse)) +
+  geom_boxplot() +
+  geom_text(position = position_dodge(.75), hjust=-.5) +
+  geom_point(position=position_dodge(.75)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("DNA activity")
+act
+
+
+
+trans <- df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=weeks, y=`vt/hkt`, fill=capsid, label = mouse)) +
+  geom_boxplot() +
+  geom_text(position = position_dodge(.75), hjust=-.5) +
+  geom_point(position=position_dodge(.75)) +
+  scale_fill_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("Transcription")
+
+
+
+```
+
+
+
+### Correlation plots
+
+```{r}
+ggarrange(h3k27, act, trans, nrow=1, ncol=3) %>% 
+  annotate_figure(top="Similarity of H3K27ac and transcription/activity")
+
+df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=`vt/hkt`, y = ratio_n, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks)) +
+  geom_smooth(data=subset(df_comb_comb), method = "lm") +
+  stat_cor(data=subset(df_comb_comb), method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("Correlation: H3K27ac | transcription")
+ggsave("results/correlation.ration.transcription.png", width=5, height=4, dpi=100)
+ggsave("results/correlation.ration.transcription.svg", width=5, height=4, dpi=100)
+
+
+df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=`vt/hkt`, y = ratio_n, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks)) +
+  geom_smooth(data=subset(df_comb_comb, ratio_n < 3e-06), method = "lm") +
+  stat_cor(data=subset(df_comb_comb, ratio_n < 3e-06), method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("Correlation: H3K27ac | transcription", subtitle = "outlier removed")
+
+
+df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=activity, y = ratio_n, color=capsid)) +
+  geom_point(aes(shape=weeks)) +
+  geom_smooth(data = subset(df_comb_comb), method = "lm") +
+  stat_cor(data = subset(df_comb_comb), method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("Correlation: H3K27ac | DNA activity")
+
+df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=activity, y = ratio_n, color=capsid)) +
+  geom_point(aes(shape=weeks)) +
+  geom_smooth(data = subset(df_comb_comb, activity < 0.3), method = "lm") +
+  stat_cor(data = subset(df_comb_comb, activity < 0.3), method = "spearman") +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("Correlation: H3K27ac | DNA activity", subtitle = "outlier removed")
+```
+
+The change over time for H3K27ac on the transgene looks similar to the DNA activity and the transcriptional activity over time. This implies a causal relation. The Correlation however is not so good. Great correlation with AAV2, but not AAV9.
+
+Might be the confounding effect of second strand synthesis though. Once there is dsDNA to be assemble histones on, it will happen. Cut and Tag with only H3?
+
+
+### Correlation with non-normalized ratio
+
+```{r}
+df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=`vt/hkt`, y = ratio, color=capsid)) +
+  geom_point(aes(color=capsid, shape=weeks)) +
+  geom_smooth(data=subset(df_comb_comb), method = "lm") +
+  stat_cor(data=subset(df_comb_comb)) +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("Correlation: H3K27ac | transcription")
+
+
+df_comb_comb %>% 
+  dplyr::filter(filter_type == "all_reads") %>% 
+  ggplot(aes(x=activity, y = ratio, color=capsid)) +
+  geom_point(aes(shape=weeks)) +
+  geom_smooth(data = subset(df_comb_comb), method = "lm") +
+  stat_cor(data = subset(df_comb_comb)) +
+  scale_color_manual(values = c("#1e81b0", "#e28743", "grey")) +
+  ggtitle("Correlation: H3K27ac | DNA activity")
+
+```
+
+
